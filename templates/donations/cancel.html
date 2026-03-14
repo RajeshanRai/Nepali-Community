@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Donation Cancelled - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'donations/cancel.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="cancel-container">
+    <div class="cancel-box">
+        <div class="cancel-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+
+        <h1 class="cancel-title">Donation Cancelled</h1>
+
+        <p class="cancel-message">
+            Your donation process was cancelled. No charges have been made to your account.
+        </p>
+
+        <!-- Reasons Section -->
+        <div class="reason-section">
+            <h3><i class="fas fa-question-circle"></i> Why Donate?</h3>
+            <p>Your donation directly supports:</p>
+            <ul style="text-align: left; margin: 1rem 0; padding-left: 1.5rem;">
+                <li>Community cultural programs and events</li>
+                <li>Youth scholarships and education initiatives</li>
+                <li>Social support and community services</li>
+                <li>Language and heritage preservation</li>
+                <li>Community infrastructure and facilities</li>
+            </ul>
+        </div>
+
+        <!-- Help Section -->
+        <div class="info-box">
+            <p>
+                <i class="fas fa-headset"></i> <strong>Need Help?</strong><br>
+                If you encountered any issues or have questions about our Interact e-Transfer process, please contact us
+                at:
+            </p>
+            <p style="font-size: 1.1rem;">
+                <span class="contact-email">donations@nepalicommunityvancouver.ca</span>
+            </p>
+        </div>
+
+        <!-- Alternative Methods -->
+        <div class="reason-section">
+            <h3><i class="fas fa-exchange-alt"></i> Payment Issues?</h3>
+            <p>We only accept <strong>Interact e-Transfer</strong> for donations. If you don't have access to Interact
+                or prefer alternative arrangements, please reach out to us directly. We're here to help!</p>
+        </div>
+
+        <!-- Thank You Message -->
+        <div
+            style="background: rgba(255, 107, 53, 0.05); padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0; border-left: 4px solid var(--color-orange);">
+            <p style="color: var(--color-black); margin: 0;">
+                <i class="fas fa-heart" style="color: var(--color-orange);"></i>
+                Even if you're unable to donate right now, we appreciate your support in other ways.
+                Consider sharing our community programs with friends and family!
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="buttons">
+            <a href="{% url 'donation' %}" class="btn-primary">
+                <i class="fas fa-redo"></i> Try Again
+            </a>
+            <a href="{% url 'home' %}" class="btn-secondary">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+        </div>
+
+        <!-- Contact Section -->
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
+            <p style="color: #666;">
+                Have questions about our community or programs?<br>
+                <a href="{% url 'contacts' %}"
+                    style="color: var(--color-orange); font-weight: 600; text-decoration: none;">
+                    Contact us <i class="fas fa-arrow-right"></i>
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

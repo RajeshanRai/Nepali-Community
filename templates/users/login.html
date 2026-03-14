@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Login - Nepali Community of Vancouver{% endblock %}
+{% block body_class %}auth-page login-page{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'users/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+    <section class="auth-card" aria-labelledby="login-title">
+        <aside class="auth-visual">
+            <div class="auth-brand" aria-label="Nepali Community of Vancouver">
+                <span class="auth-brand-mark" aria-hidden="true">
+                    <i class="fa-solid fa-seedling"></i>
+                </span>
+                <span class="auth-brand-copy">
+                    <strong>Nepali Community</strong>
+                    <span>Vancouver, Canada</span>
+                </span>
+            </div>
+
+            <div class="auth-hero">
+                <div class="auth-kicker">
+                    <span class="auth-kicker-dot" aria-hidden="true"></span>
+                    Member Login
+                </div>
+                <h1 class="auth-display">A calm place to return to your <em>community account</em>.</h1>
+                <p class="auth-copy">Sign in to manage program registrations, see community updates, and stay connected with events happening in Vancouver.</p>
+
+                <div class="auth-highlight-grid" aria-label="Community benefits">
+                    <article class="auth-highlight-card">
+                        <span class="auth-highlight-icon" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span>
+                        <div>
+                            <strong>Programs and events</strong>
+                            <span>Track registrations and upcoming activities in one place.</span>
+                        </div>
+                    </article>
+                    <article class="auth-highlight-card">
+                        <span class="auth-highlight-icon" aria-hidden="true"><i class="fa-solid fa-users"></i></span>
+                        <div>
+                            <strong>Community connection</strong>
+                            <span>Stay close to cultural programs, announcements, and people.</span>
+                        </div>
+                    </article>
+                    <article class="auth-highlight-card">
+                        <span class="auth-highlight-icon" aria-hidden="true"><i class="fa-solid fa-handshake"></i></span>
+                        <div>
+                            <strong>Volunteer opportunities</strong>
+                            <span>Find ways to support and participate in local initiatives.</span>
+                        </div>
+                    </article>
+                    <article class="auth-highlight-card">
+                        <span class="auth-highlight-icon" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></span>
+                        <div>
+                            <strong>Secure access</strong>
+                            <span>Your account is protected by the existing Django authentication system.</span>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="auth-side-note">
+                    <span>New here?</span>
+                    <a href="{% url 'register' %}"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Create an account</a>
+                </div>
+            </div>
+        </aside>
+
+        <div class="auth-form-panel">
+            <div class="auth-form-header">
+                <h2 id="login-title">Welcome back</h2>
+                <p>Enter your credentials to continue.</p>
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="auth-alert" role="alert" aria-live="assertive">
+                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                <div>
+                    {% for error in form.non_field_errors %}
+                    <div>{{ error|linebreaksbr }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="auth-alert {% if 'success' in message.tags %}auth-alert-success{% endif %}" role="status" aria-live="polite">
+                <i class="fas {% if 'success' in message.tags %}fa-check-circle{% else %}fa-info-circle{% endif %}" aria-hidden="true"></i>
+                <div>{{ message }}</div>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" class="auth-form" novalidate data-auth-form aria-labelledby="login-title">
+                {% csrf_token %}
+
+                <div class="auth-field">
+                    <div class="auth-control{% if form.username.errors %} is-invalid{% endif %}" data-field>
+                        <span class="auth-input-icon" aria-hidden="true"><i class="fas fa-user"></i></span>
+                        <input
+                            id="id_username"
+                            type="text"
+                            name="username"
+                            value="{{ form.username.value|default:'' }}"
+                            autocomplete="username"
+                            required
+                            aria-required="true"
+                            placeholder=" "
+                            class="auth-input{% if form.username.errors %} input-error{% endif %}"
+                        >
+                        <label class="auth-floating-label" for="id_username">Username</label>
+                    </div>
+                    {% if form.username.errors %}
+                    <div class="auth-field-error">
+                        <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                        {{ form.username.errors|striptags }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="auth-field">
+                    <div class="auth-control{% if form.password.errors %} is-invalid{% endif %}" data-field>
+                        <span class="auth-input-icon" aria-hidden="true"><i class="fas fa-lock"></i></span>
+                        <input
+                            id="id_password"
+                            type="password"
+                            name="password"
+                            autocomplete="current-password"
+                            required
+                            aria-required="true"
+                            placeholder=" "
+                            class="auth-input{% if form.password.errors %} input-error{% endif %}"
+                        >
+                        <label class="auth-floating-label" for="id_password">Password</label>
+                    </div>
+                    {% if form.password.errors %}
+                    <div class="auth-field-error">
+                        <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                        {{ form.password.errors|striptags }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="auth-meta-row">
+                    <label class="auth-check">
+                        <input type="checkbox" name="remember_me" {% if form.remember_me.value %}checked{% endif %}>
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="auth-link-inline" data-placeholder-link>Forgot password?</a>
+                </div>
+
+                <button type="submit" class="auth-submit" data-submit-btn>
+                    <span class="btn-text">Sign in</span>
+                    <span class="btn-icon" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                    <span class="btn-spinner" aria-hidden="true"></span>
+                </button>
+
+                <div class="auth-divider" aria-hidden="true">
+                    <span>or continue with</span>
+                </div>
+
+                <div class="auth-social-grid">
+                    <button type="button" class="auth-social-btn" data-provider="google" aria-label="Google login placeholder">
+                        <i class="fab fa-google" aria-hidden="true"></i>
+                        <span>Google</span>
+                    </button>
+                    <button type="button" class="auth-social-btn" data-provider="facebook" aria-label="Facebook login placeholder">
+                        <i class="fab fa-facebook-f" aria-hidden="true"></i>
+                        <span>Facebook</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="auth-form-footer">
+                Need an account? <a href="{% url 'register' %}">Register here</a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'users/auth.js' %}"></script>
+{% endblock %}

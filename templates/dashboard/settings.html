@@ -1,0 +1,34 @@
+{% extends 'dashboard/admin_base.html' %}
+{% block title %}Settings{% endblock %}
+{% block breadcrumb_items %}<li class="breadcrumb-item active">Settings</li>{% endblock %}
+{% block page_header %}<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-cog"></i> System Settings</h1>
+        <p>Configure platform settings and preferences</p>
+    </div>
+</div>{% endblock %}
+{% block content %}<div class="content-card">
+    <div class="content-card-header">
+        <h3>General Settings</h3>
+    </div>
+    <div class="content-card-body">
+        <form class="form-max-600">
+            <div class="form-group">
+                <label for="site-name">Site Name</label>
+                <input id="site-name" class="form-control" type="text" value="Nepali Community of Vancouver">
+            </div>
+            <div class="form-group">
+                <label for="admin-email">Admin Email</label>
+                <input id="admin-email" class="form-control" type="email" value="admin@nepalicommunity.ca">
+            </div>
+            <div class="form-group">
+                <label class="checkbox-inline-label">
+                    <input type="checkbox" checked>
+                    <span>Enable email notifications</span>
+                </label>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="showToast('Settings saved', 'success')">Save
+                Settings</button>
+        </form>
+    </div>
+</div>{% endblock %}

@@ -1,0 +1,101 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}All Projects{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/projects-all.css' %}">
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">Projects</li>
+<li class="breadcrumb-item active">All Projects</li>
+{% endblock %}
+
+{% block page_header %}
+{% url 'dashboard:event_create' as create_project_url %}
+{% include 'dashboard/includes/page_header.html' with title='All Projects' subtitle='Manage and overview all projects' icon_class='fas fa-folder' action_url=create_project_url action_label='Create Project' action_icon='fas fa-plus' %}
+{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="content-card-header">
+        <div class="search-filter-section">
+            <div class="search-box-inline">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchProjects" placeholder="Search projects...">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="cultural">Cultural</button>
+                <button class="filter-btn" data-filter="workshop">Workshop</button>
+                <button class="filter-btn" data-filter="meeting">Meeting</button>
+            </div>
+        </div>
+    </div>
+    <div class="content-card-body">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="bulkSelectAll"></th>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for project in projects %}
+                    <tr data-category="{{ project.event_type }}">
+                        <td><input type="checkbox" class="bulk-checkbox" value="{{ project.id }}"></td>
+                        <td>#{{ project.id }}</td>
+                        <td>
+                            <strong>{{ project.title }}</strong>
+                            <br><small class="text-muted">{{ project.description|truncatewords:10 }}</small>
+                        </td>
+                        <td><span class="badge badge-info">{{ project.get_event_type_display }}</span></td>
+                        <td>{{ project.date|date:"M d, Y" }}</td>
+                        <td>{{ project.location|truncatewords:5 }}</td>
+                        <td>
+                            {% if project.date < today %} <span class="status-badge status-completed">Completed</span>
+                                {% else %}
+                                <span class="status-badge status-approved">Active</span>
+                                {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button type="button" class="btn-icon btn-view" title="View" disabled>
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <a class="btn-icon btn-edit" title="Edit" href="{% url 'dashboard:event_edit' project.id %}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn-icon btn-delete" title="Delete"
+                                    data-dashboard-delete-url="{% url 'dashboard:event_delete' project.id %}"
+                                    data-item-name="{{ project.title|escape }}"
+                                    data-item-type="project">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">No projects found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'dashboard/js/pages/projects-all.js' %}"></script>
+{% endblock %}

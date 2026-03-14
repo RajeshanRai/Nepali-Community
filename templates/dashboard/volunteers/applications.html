@@ -1,0 +1,277 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}Volunteer Applications{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/volunteer-applications.css' %}">
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">Volunteers</li>
+<li class="breadcrumb-item active">Applications</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header volunteer-apps-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-hands-helping"></i> Volunteer Requests Center</h1>
+        <p>Manage opportunity applications and general volunteer requests in one place.</p>
+    </div>
+    <div class="volunteer-apps-stats">
+        <div class="stat-pill">
+            <span class="label">Applications</span>
+            <strong>{{ applications|length }}</strong>
+        </div>
+        <div class="stat-pill">
+            <span class="label">Requests</span>
+            <strong>{{ volunteer_requests|length }}</strong>
+        </div>
+        <div class="stat-pill stat-pill-accent">
+            <span class="label">Pending Total</span>
+            <strong>{{ pending_applications_count }}</strong>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="content-card volunteer-section-card">
+    <div class="content-card-header section-header">
+        <div>
+            <h3><i class="fas fa-file-signature"></i> Opportunity Applications</h3>
+            <p>Applications submitted for specific volunteer opportunities.</p>
+        </div>
+        <div class="header-tools">
+            <div class="filter-buttons" id="application-status-filters">
+                <button class="filter-btn active" data-status="all">All</button>
+                <button class="filter-btn" data-status="pending">Pending</button>
+                <button class="filter-btn" data-status="approved">Approved</button>
+                <button class="filter-btn" data-status="rejected">Rejected</button>
+            </div>
+            <div class="search-mini">
+                <i class="fas fa-search"></i>
+                <input type="text" id="application-search" placeholder="Search applicant or email...">
+            </div>
+        </div>
+    </div>
+    <div class="content-card-body">
+        <div class="table-responsive">
+            <table class="data-table volunteer-table" id="applications-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Volunteer</th>
+                        <th>Opportunity</th>
+                        <th>Applied Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for application in applications %}
+                    <tr data-status="{{ application.status }}" data-kind="application"
+                        data-name="{{ application.name|escape }}"
+                        data-email="{{ application.email|escape }}"
+                        data-phone="{{ application.phone|default:'-'|escape }}"
+                        data-opportunity="{{ application.opportunity.title|escape }}"
+                        data-applied="{{ application.applied_at|date:'M d, Y'|escape }}"
+                        data-status-text="{{ application.get_status_display|escape }}"
+                        data-motivation="{{ application.motivation|default:'-'|escape }}"
+                        data-experience="{{ application.experience|default:'-'|escape }}"
+                        data-availability="{{ application.availability|default:'-'|escape }}">
+                        <td>#{{ application.id }}</td>
+                        <td>
+                            <strong>{{ application.name }}</strong>
+                            <br><small class="text-muted">{{ application.email }}</small>
+                        </td>
+                        <td>{{ application.opportunity.title }}</td>
+                        <td>{{ application.applied_at|date:"M d, Y" }}</td>
+                        <td>
+                            {% if application.status == 'pending' %}
+                            <span class="status-badge status-pending">Pending</span>
+                            {% elif application.status == 'approved' %}
+                            <span class="status-badge status-approved">Approved</span>
+                            {% else %}
+                            <span class="status-badge status-rejected">Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon btn-view action-application" data-id="{{ application.id }}"
+                                    data-action="view" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                {% if application.status == 'pending' %}
+                                <button class="btn-icon btn-approve action-application" data-id="{{ application.id }}"
+                                    data-action="approve" title="Approve">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn-icon btn-reject action-application" data-id="{{ application.id }}"
+                                    data-action="reject" title="Reject">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                {% elif application.status == 'approved' %}
+                                <button class="btn-icon btn-assign volunteer-assign-btn" data-id="{{ application.id }}" 
+                                    data-name="{{ application.name }}" title="Assign to Event">
+                                    <i class="fas fa-tasks"></i>
+                                </button>
+                                {% endif %}
+                                <button class="btn-icon btn-delete action-application" data-id="{{ application.id }}"
+                                    data-action="delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No opportunity applications found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="content-card volunteer-section-card mt-24">
+    <div class="content-card-header section-header">
+        <div>
+            <h3><i class="fas fa-paper-plane"></i> General Volunteer Requests</h3>
+            <p>Requests submitted from the public volunteer form.</p>
+        </div>
+        <div class="header-tools">
+            <div class="filter-buttons" id="request-status-filters">
+                <button class="filter-btn active" data-status="all">All</button>
+                <button class="filter-btn" data-status="new">New</button>
+                <button class="filter-btn" data-status="contacted">Contacted</button>
+                <button class="filter-btn" data-status="closed">Closed</button>
+            </div>
+            <div class="search-mini">
+                <i class="fas fa-search"></i>
+                <input type="text" id="request-search" placeholder="Search by name, phone, email...">
+            </div>
+        </div>
+    </div>
+    <div class="content-card-body">
+        <div class="table-responsive">
+            <table class="data-table volunteer-table" id="requests-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Address</th>
+                        <th>Type</th>
+                        <th>Expertise</th>
+                        <th>Schedule</th>
+                        <th>Purpose</th>
+                        <th>Status</th>
+                        <th>Assign Program</th>
+                        <th>Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in volunteer_requests %}
+                    <tr data-status="{{ request.status }}" data-kind="request"
+                        data-name="{{ request.name|escape }}"
+                        data-phone="{{ request.phone|escape }}"
+                        data-email="{{ request.email|escape }}"
+                        data-address="{{ request.address|escape }}"
+                        data-type="{{ request.get_volunteer_type_display|escape }}"
+                        data-expertise="{{ request.expertise|default:'-'|escape }}"
+                        data-schedule="{{ request.schedule_availability|escape }}"
+                        data-purpose="{{ request.purpose|default:'-'|escape }}"
+                        data-submitted="{{ request.created_at|date:'M d, Y'|escape }}"
+                        data-status-text="{{ request.get_status_display|escape }}">
+                        <td>#{{ request.id }}</td>
+                        <td><strong>{{ request.name }}</strong></td>
+                        <td>{{ request.phone }}</td>
+                        <td>{{ request.email }}</td>
+                        <td>{{ request.address }}</td>
+                        <td>{{ request.get_volunteer_type_display }}</td>
+                        <td>{{ request.expertise|default:"-" }}</td>
+                        <td>{{ request.schedule_availability }}</td>
+                        <td title="{{ request.purpose|escape }}">{{ request.purpose|truncatechars:80 }}</td>
+                        <td>
+                            {% if request.status == 'new' %}
+                            <span class="status-badge status-pending">New</span>
+                            {% elif request.status == 'contacted' %}
+                            <span class="status-badge status-approved">Contacted</span>
+                            {% elif request.status == 'closed' %}
+                            <span class="status-badge status-rejected">Closed</span>
+                            {% else %}
+                            <span class="status-badge">{{ request.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <select class="assignment-select request-opportunity-select" data-request-id="{{ request.id }}">
+                                <option value="">Select</option>
+                                {% for opportunity in available_opportunities %}
+                                <option value="{{ opportunity.id }}" title="{{ opportunity.title }}">{{ opportunity.title|truncatechars:42 }}</option>
+                                {% empty %}
+                                <option value="" disabled>No open programs</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>{{ request.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon btn-view action-request" data-id="{{ request.id }}"
+                                    data-action="view" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                {% if request.status == 'new' or request.status == 'reviewed' %}
+                                <button class="btn-icon btn-approve action-request" data-id="{{ request.id }}"
+                                    data-action="approve" title="Approve">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn-icon btn-reject action-request" data-id="{{ request.id }}"
+                                    data-action="reject" title="Reject">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                {% endif %}
+                                <button class="btn-icon btn-delete action-request" data-id="{{ request.id }}"
+                                    data-action="delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="13" class="text-center text-muted">No volunteer requests found yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<div id="volunteerDetailsModal" class="details-modal" aria-hidden="true">
+    <div class="details-modal-backdrop" data-close-volunteer-modal></div>
+    <div class="details-modal-content">
+        <div class="details-modal-header">
+            <h3><i class="fas fa-eye"></i> Details</h3>
+            <button class="modal-close" type="button" data-close-volunteer-modal>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="details-modal-body">
+            <div class="details-grid" id="volunteerDetailsGrid"></div>
+        </div>
+    </div>
+</div>
+
+{% csrf_token %}
+<input type="hidden" id="csrfTokenValue" value="{{ csrf_token }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'dashboard/js/volunteer-applications.js' %}"></script>
+<script src="{% static 'dashboard/js/volunteer-assignment.js' %}"></script>
+{% endblock %}

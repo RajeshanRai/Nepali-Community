@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Communities - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'communities/css/communities.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="communities-hero">
+    <div class="communities-container">
+        <div class="communities-hero-content communities-hero-grid">
+            <div>
+                <span class="communities-badge">
+                    <i class="fas fa-users"></i>
+                    Our Communities
+                </span>
+                <h1 class="communities-title">Diverse Communities, Shared Heritage</h1>
+                <p class="communities-subtitle">
+                    Discover the vibrant Nepali communities in Vancouver and explore the culture, people, and
+                    year-round events that keep traditions alive.
+                </p>
+                <div class="hero-actions">
+                    <a href="#communities-feed" class="hero-action-btn hero-action-primary">
+                        <i class="fas fa-compass"></i> Explore Communities
+                    </a>
+                    <a href="{% url 'contact' %}" class="hero-action-btn hero-action-secondary">
+                        <i class="fas fa-handshake"></i> Join the Network
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero-showcase" aria-hidden="true">
+                <div class="showcase-orb orb-one"></div>
+                <div class="showcase-orb orb-two"></div>
+                <div class="showcase-card">
+                    <strong>{{ communities|length }}</strong>
+                    <span>Active Communities</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="communities-list-section">
+    <div class="communities-container">
+        <div class="communities-section-head" id="communities-feed">
+            <h2><i class="fas fa-globe-asia"></i> Community Directory</h2>
+            <p>Click any card to view details, activities, and participation info.</p>
+        </div>
+
+        {% if communities %}
+        <div class="communities-grid">
+            {% for community in communities %}
+            <article class="community-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:'100' }}">
+                <a href="{% url 'community_detail' community.pk %}" class="community-card-link"
+                    aria-label="Open {{ community.name }} details"></a>
+                <div class="community-card-header">
+                    {% if community.icon %}
+                    <div class="community-icon">
+                        <img src="{{ community.icon.url }}" alt="{{ community.name }}" loading="lazy">
+                    </div>
+                    {% else %}
+
+                    {% endif %}
+                    <div class="community-meta">
+                        <h2 class="community-name">{{ community.name }}</h2>
+                        <div class="community-stats">
+                            <span class="stat">
+                                <i class="fas fa-user-friends"></i>
+                                {{ community.member_count }} members
+                            </span>
+                            <span class="stat">
+                                <i class="fas fa-calendar-check"></i>
+                                {{ community.events_per_year }} events/year
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="community-card-body">
+                    <p class="community-intro">
+                        {{ community.introduction|truncatewords:30 }}
+                    </p>
+                </div>
+
+                <div class="community-card-footer">
+                    <a href="{% url 'community_detail' community.pk %}" class="community-btn">
+                        View Profile
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="communities-empty">
+            <div class="empty-icon">
+                <i class="fas fa-users-slash"></i>
+            </div>
+            <h3>No Communities Yet</h3>
+            <p>Communities will be displayed here once they are added.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+    });
+</script>
+{% endblock %}

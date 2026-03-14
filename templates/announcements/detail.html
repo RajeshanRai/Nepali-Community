@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ announcement.title }} - Announcement{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container announcement-detail-page">
+    <a href="{% url 'announcement_list' %}" class="detail-back-link">
+        <i class="fas fa-arrow-left"></i> Back to Announcements
+    </a>
+
+    <article class="announcement-detail-card priority-{{ announcement.priority }}">
+        <div class="detail-top-accent"></div>
+
+        <div class="announcement-header">
+            <div class="badge-stack">
+                {% if announcement.is_pinned %}
+                <span class="pinned-badge"><i class="fas fa-thumbtack"></i> Pinned</span>
+                {% endif %}
+            </div>
+            <h1 class="detail-title">{{ announcement.title }}</h1>
+            <div class="detail-meta-row">
+                <span><i class="fas fa-calendar-alt"></i> {{ announcement.publish_date|date:"M d, Y" }}</span>
+                {% if announcement.expire_date %}
+                <span><i class="fas fa-clock"></i> Expires {{ announcement.expire_date|date:"M d, Y" }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="announcement-content detail-content">
+            {{ announcement.content|linebreaks }}
+        </div>
+
+        {% if announcement.link_url %}
+        <div class="announcement-action detail-action">
+            <a href="{{ announcement.link_url }}" target="_blank" rel="noopener" class="detail-link-btn">
+                <i class="fas fa-external-link-alt"></i>
+                {{ announcement.link_text|default:"Open Related Link" }}
+            </a>
+        </div>
+        {% endif %}
+    </article>
+</div>
+{% endblock %}

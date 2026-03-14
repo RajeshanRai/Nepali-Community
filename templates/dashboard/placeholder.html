@@ -1,0 +1,29 @@
+{% extends 'dashboard/admin_base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">{{ breadcrumb|default:'Dashboard' }}</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas {{ icon|default:'fa-cog' }}"></i> {{ title }}</h1>
+        <p>{{ description }}</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="content-card-body empty-state-card">
+        <i class="fas {{ icon|default:'fa-tools' }}"></i>
+        <h3>{{ title }}</h3>
+        <p>
+            {{ message|default:"This section is under construction and will be available soon with advanced features."
+            }}
+        </p>
+    </div>
+</div>
+{% endblock %}

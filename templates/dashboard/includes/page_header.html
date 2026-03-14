@@ -1,0 +1,15 @@
+<div class="page-header{% if header_classes %} {{ header_classes }}{% endif %}">
+    <div class="page-header-content">
+        <h1>{% if icon_class %}<i class="{{ icon_class }}"></i> {% endif %}{{ title }}</h1>
+        {% if subtitle %}
+        <p>{{ subtitle }}</p>
+        {% endif %}
+    </div>
+    {% if action_url and action_label %}
+    <div class="page-header-actions">
+        <a href="{{ action_url }}" class="btn {{ action_variant|default:'btn-primary' }}">
+            {% if action_icon %}<i class="{{ action_icon }}"></i> {% endif %}{{ action_label }}
+        </a>
+    </div>
+    {% endif %}
+</div>

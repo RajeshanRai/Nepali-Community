@@ -1,0 +1,330 @@
+/* =====================================================
+   TYPOGRAPHY SYSTEM
+   Consistent typography across the application
+   ===================================================== */
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-family-heading);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-md);
+}
+
+h1 {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-extrabold);
+}
+
+h2 {
+    font-size: var(--font-size-3xl);
+}
+
+h3 {
+    font-size: var(--font-size-2xl);
+}
+
+h4 {
+    font-size: var(--font-size-xl);
+}
+
+h5 {
+    font-size: var(--font-size-lg);
+}
+
+h6 {
+    font-size: var(--font-size-base);
+}
+
+/* Responsive Headings */
+@media (max-width: 768px) {
+    h1 {
+        font-size: var(--font-size-3xl);
+    }
+
+    h2 {
+        font-size: var(--font-size-2xl);
+    }
+
+    h3 {
+        font-size: var(--font-size-xl);
+    }
+}
+
+/* Paragraphs */
+p {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text);
+}
+
+p:last-child {
+    margin-bottom: 0;
+}
+
+/* Lead Text */
+.text-lead {
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-text-muted);
+}
+
+/* Small Text */
+.text-sm {
+    font-size: var(--font-size-sm);
+}
+
+.text-xs {
+    font-size: var(--font-size-xs);
+}
+
+/* Large Text */
+.text-lg {
+    font-size: var(--font-size-lg);
+}
+
+.text-xl {
+    font-size: var(--font-size-xl);
+}
+
+/* Text Weights */
+.font-normal {
+    font-weight: var(--font-weight-normal);
+}
+
+.font-medium {
+    font-weight: var(--font-weight-medium);
+}
+
+.font-semibold {
+    font-weight: var(--font-weight-semibold);
+}
+
+.font-bold {
+    font-weight: var(--font-weight-bold);
+}
+
+/* Text Colors */
+.text-primary {
+    color: var(--color-primary);
+}
+
+.text-secondary {
+    color: var(--color-secondary);
+}
+
+.text-muted {
+    color: var(--color-text-muted);
+}
+
+.text-light {
+    color: var(--color-text-light);
+}
+
+.text-accent {
+    color: var(--color-accent);
+}
+
+.text-success {
+    color: var(--color-success);
+}
+
+.text-warning {
+    color: var(--color-warning);
+}
+
+.text-error {
+    color: var(--color-error);
+}
+
+.text-white {
+    color: white;
+}
+
+/* Text Alignment */
+.text-left {
+    text-align: left;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-justify {
+    text-align: justify;
+}
+
+/* Text Transform */
+.text-uppercase {
+    text-transform: uppercase;
+}
+
+.text-lowercase {
+    text-transform: lowercase;
+}
+
+.text-capitalize {
+    text-transform: capitalize;
+}
+
+/* Text Decoration */
+.text-underline {
+    text-decoration: underline;
+}
+
+.text-no-underline {
+    text-decoration: none;
+}
+
+/* Text Truncation */
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.text-truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Links */
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition-base);
+}
+
+a:hover {
+    color: var(--color-accent);
+}
+
+a:focus-visible {
+    outline: 3px solid rgba(255, 107, 53, 0.5);
+    outline-offset: 2px;
+}
+
+/* Link Variants */
+.link-accent {
+    color: var(--color-accent);
+}
+
+.link-accent:hover {
+    color: var(--color-primary);
+}
+
+.link-underline {
+    text-decoration: underline;
+}
+
+.link-underline:hover {
+    text-decoration: none;
+}
+
+/* Lists */
+.list-disc {
+    list-style-type: disc;
+    padding-left: var(--spacing-lg);
+}
+
+.list-decimal {
+    list-style-type: decimal;
+    padding-left: var(--spacing-lg);
+}
+
+.list-none {
+    list-style: none;
+    padding-left: 0;
+}
+
+ul.list-disc li,
+ol.list-decimal li {
+    margin-bottom: var(--spacing-sm);
+    line-height: var(--line-height-relaxed);
+}
+
+/* Blockquotes */
+blockquote {
+    padding: var(--spacing-lg);
+    margin: var(--spacing-xl) 0;
+    border-left: 4px solid var(--color-accent);
+    background-color: var(--color-bg-light);
+    font-style: italic;
+    color: var(--color-text-muted);
+}
+
+blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+/* Code */
+code {
+    padding: 0.2em 0.4em;
+    font-size: 0.875em;
+    background-color: var(--color-bg-gray);
+    border-radius: var(--radius-sm);
+    font-family: 'Courier New', Courier, monospace;
+}
+
+pre {
+    padding: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
+    overflow: auto;
+    background-color: var(--color-bg-gray);
+    border-radius: var(--radius-md);
+}
+
+pre code {
+    padding: 0;
+    background-color: transparent;
+}
+
+/* Horizontal Rule */
+hr {
+    margin: var(--spacing-xl) 0;
+    border: 0;
+    border-top: 1px solid var(--color-border);
+}
+
+/* Strong & Emphasis */
+strong,
+b {
+    font-weight: var(--font-weight-bold);
+}
+
+em,
+i {
+    font-style: italic;
+}
+
+/* Mark/Highlight */
+mark {
+    background-color: #FEF3C7;
+    color: var(--color-text);
+    padding: 0.1em 0.2em;
+}
+
+/* Small */
+small {
+    font-size: var(--font-size-sm);
+}

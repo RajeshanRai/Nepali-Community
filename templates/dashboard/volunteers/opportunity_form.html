@@ -1,0 +1,314 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}
+{% if opportunity %}Edit Volunteer Opportunity{% else %}Create Volunteer Opportunity{% endif %}
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard:volunteer_opportunities_list' %}">Volunteer Opportunities</a>
+</li>
+<li class="breadcrumb-item active">
+    {% if opportunity %}Edit Opportunity{% else %}Create Opportunity{% endif %}
+</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>
+            <i class="fas fa-hands-helping"></i>
+            {% if opportunity %}Edit Volunteer Opportunity{% else %}Create New Volunteer Opportunity{% endif %}
+        </h1>
+        {% if opportunity %}
+        <p>Update details, availability, and contact information for this opportunity.</p>
+        {% else %}
+        <p>Create a new volunteer opportunity and publish it for applicants.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        {% if message.tags == 'error' %}<i class="fas fa-exclamation-circle"></i>{% endif %}
+        {% if message.tags == 'success' %}<i class="fas fa-check-circle"></i>{% endif %}
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="content-card opportunity-card">
+    <div class="content-card-body">
+        <form method="POST" class="opportunity-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <div class="form-section">
+                <h3 class="section-title"><i class="fas fa-align-left"></i> Opportunity Details</h3>
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}" class="field-label required">
+                        {{ form.title.label}}</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                    <div class="field-error">{{ form.title.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}" class="field-label required">
+                        {{form.description.label }}</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <div class="field-error">{{ form.description.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title"><i class="fas fa-map-marked-alt"></i> Location & Type</h3>
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label for="{{ form.category.id_for_label }}" class="field-label">
+                            {{ form.category.label}}</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                        <div class="field-error">{{ form.category.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.location.id_for_label }}" class="field-label">
+                            {{ form.location.label}}</label>
+                        {{ form.location }}
+                        {% if form.location.errors %}
+                        <div class="field-error">{{ form.location.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="checkbox-wrap">
+                    <label class="checkbox-label" for="{{ form.is_remote.id_for_label }}">
+                        {{ form.is_remote }}
+                        <span>{{ form.is_remote.label }}</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title"><i class="fas fa-calendar-week"></i> Schedule & Capacity</h3>
+                <div class="form-grid three-col">
+                    <div class="form-group">
+                        <label for="{{ form.start_date.id_for_label }}" class="field-label">
+                            {{ form.start_date.label}}</label>
+                        {{ form.start_date }}
+                        {% if form.start_date.errors %}
+                        <div class="field-error">{{ form.start_date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.end_date.id_for_label }}" class="field-label">
+                            {{ form.end_date.label}}</label>
+                        {{ form.end_date }}
+                        {% if form.end_date.errors %}
+                        <div class="field-error">{{ form.end_date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.positions_needed.id_for_label }}" class="field-label required">
+                            {{form.positions_needed.label }}</label>
+                        {{ form.positions_needed }}
+                        {% if form.positions_needed.errors %}
+                        <div class="field-error">{{ form.positions_needed.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.time_commitment.id_for_label }}" class="field-label">
+                        {{form.time_commitment.label }}</label>
+                    {{ form.time_commitment }}
+                    {% if form.time_commitment.errors %}
+                    <div class="field-error">{{ form.time_commitment.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title"><i class="fas fa-address-card"></i> Contact & Status</h3>
+                <div class="form-grid two-col">
+                    <div class="form-group">
+                        <label for="{{ form.contact_email.id_for_label }}" class="field-label">
+                            {{form.contact_email.label }}</label>
+                        {{ form.contact_email }}
+                        {% if form.contact_email.errors %}
+                        <div class="field-error">{{ form.contact_email.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.contact_phone.id_for_label }}" class="field-label">
+                            {{form.contact_phone.label }}</label>
+                        {{ form.contact_phone }}
+                        {% if form.contact_phone.errors %}
+                        <div class="field-error">{{ form.contact_phone.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.status.id_for_label }}" class="field-label">{{ form.status.label }}</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                    <div class="field-error">{{ form.status.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'dashboard:volunteer_opportunities_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    {% if opportunity %}Update Opportunity{% else %}Create Opportunity{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .opportunity-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+    }
+
+    .opportunity-form {
+        display: grid;
+        gap: 22px;
+    }
+
+    .form-section {
+        background: #fff;
+        border: 1px solid #edf2f7;
+        border-radius: 12px;
+        padding: 18px;
+    }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .section-title i {
+        color: #2563eb;
+    }
+
+    .form-grid {
+        display: grid;
+        gap: 14px;
+    }
+
+    .two-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .three-col {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .field-label {
+        display: block;
+        margin-bottom: 6px;
+        color: #374151;
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .field-label.required::after {
+        content: ' *';
+        color: #dc2626;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group input[type="email"],
+    .form-group input[type="date"],
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    }
+
+    .field-error {
+        color: #dc2626;
+        margin-top: 5px;
+        font-size: 12px;
+    }
+
+    .checkbox-wrap {
+        background: #f8fafc;
+        border: 1px dashed #bfdbfe;
+        border-radius: 10px;
+        padding: 10px 12px;
+    }
+
+    .checkbox-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+        color: #1f2937;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 6px;
+    }
+
+    @media (max-width: 900px) {
+
+        .two-col,
+        .three-col {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/homepage-redesign.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="home-v2">
+    <section class="home-v2-hero">
+        <div class="home-v2-hero-slideshow" aria-hidden="true">
+            <div class="hero-slide active" style="background-image: url('https://images.pexels.com/photos/3155666/pexels-photo-3155666.jpeg?auto=compress&cs=tinysrgb&w=1920')"></div>
+            <div class="hero-slide" style="background-image: url('https://images.pexels.com/photos/1619317/pexels-photo-1619317.jpeg?auto=compress&cs=tinysrgb&w=1920')"></div>
+            <div class="hero-slide" style="background-image: url('https://images.pexels.com/photos/2559941/pexels-photo-2559941.jpeg?auto=compress&cs=tinysrgb&w=1920')"></div>
+            <div class="hero-slide" style="background-image: url('https://images.pexels.com/photos/2159065/pexels-photo-2159065.jpeg?auto=compress&cs=tinysrgb&w=1920')"></div>
+            <div class="home-v2-hero-overlay"></div>
+        </div>
+        <div class="home-v2-hero-content container">
+            <div class="home-v2-hero-left">
+                <span class="home-v2-kicker">Nepali Community in Vancouver</span>
+                <h1>Where Culture Feels Like Home</h1>
+                <p>
+                    Celebrate festivals, join meaningful programs, and build lifelong connections across Nepali
+                    communities in Vancouver.
+                </p>
+                <div class="home-v2-hero-actions">
+                    <a href="{% url 'program_list' %}" class="btn btn-primary">Explore Programs</a>
+                    <a href="{% url 'community_list' %}" class="btn btn-secondary">Discover Communities</a>
+                </div>
+                <div class="home-v2-hero-tags">
+                    <span><i class="fas fa-calendar-alt"></i> Events</span>
+                    <span><i class="fas fa-users"></i> Community</span>
+                    <span><i class="fas fa-hands-helping"></i> Volunteering</span>
+                </div>
+            </div>
+            <div class="home-v2-hero-right">
+                <div class="home-v2-glass-card">
+                    <h3>This Week</h3>
+                    <p>{{ upcoming_programs|length }} upcoming program{{ upcoming_programs|length|pluralize }}</p>
+                    <a href="{% url 'program_list' %}">View Calendar</a>
+                </div>
+                <div class="home-v2-glass-card">
+                    <h3>Get Involved</h3>
+                    <p>Volunteer, donate, or partner to grow impact together.</p>
+                    <a href="{% url 'volunteer_list' %}">Join as Volunteer</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-v2-metrics container" aria-label="Community Highlights">
+        <article class="home-v2-metric-card reveal-up">
+            <i class="fas fa-calendar-check"></i>
+            <div>
+                <h4>{{ upcoming_programs|length }}</h4>
+                <p>Upcoming Programs</p>
+            </div>
+        </article>
+        <article class="home-v2-metric-card reveal-up">
+            <i class="fas fa-layer-group"></i>
+            <div>
+                <h4>10+</h4>
+                <p>Ethnic Communities</p>
+            </div>
+        </article>
+        <article class="home-v2-metric-card reveal-up">
+            <i class="fas fa-hands-helping"></i>
+            <div>
+                <h4>100+</h4>
+                <p>Active Volunteers</p>
+            </div>
+        </article>
+        <article class="home-v2-metric-card reveal-up">
+            <i class="fas fa-map-marker-alt"></i>
+            <div>
+                <h4>Vancouver</h4>
+                <p>Serving Local Families</p>
+            </div>
+        </article>
+    </section>
+
+    <section class="home-v2-communities container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>Communities That Keep Traditions Alive</h2>
+            <a href="{% url 'community_list' %}">See all communities <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="home-v2-community-grid">
+            <article class="home-v2-community-card">
+                <div class="icon"><i class="fas fa-users"></i></div>
+                <h3>Rai Community</h3>
+                <p>Preserving Sakela rhythms, stories, and Kirati heritage through shared celebration.</p>
+            </article>
+            <article class="home-v2-community-card">
+                <div class="icon"><i class="fas fa-user-friends"></i></div>
+                <h3>Magar Community</h3>
+                <p>Bringing vibrant western Nepal traditions to Vancouver through festivals and gatherings.</p>
+            </article>
+            <article class="home-v2-community-card">
+                <div class="icon"><i class="fas fa-music"></i></div>
+                <h3>Tamang Community</h3>
+                <p>Celebrating Lhosar, language, and music while strengthening intergenerational identity.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="home-v2-programs container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>Upcoming Programs</h2>
+            <a href="{% url 'program_list' %}">Browse all events <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <div class="home-v2-program-list">
+            {% for program in upcoming_programs %}
+            <article class="home-v2-program-card">
+                <div class="home-v2-date-chip">
+                    <span>{{ program.date|date:"M" }}</span>
+                    <strong>{{ program.date|date:"d" }}</strong>
+                </div>
+                <div class="home-v2-program-info">
+                    <h3>{{ program.title }}</h3>
+                    <p>{{ program.description|truncatechars:120 }}</p>
+                    <div class="home-v2-meta">
+                        <span><i class="fas fa-tag"></i> {{ program.get_event_type_display }}</span>
+                        <span><i class="fas fa-map-marker-alt"></i> {{ program.location|default:"Location TBA" }}</span>
+                        <span><i class="fas fa-user-check"></i> {{ program.registered_count }} attending</span>
+                    </div>
+                </div>
+                <div class="home-v2-program-action">
+                    {% if user.is_authenticated and program.id in user_upcoming_registrations %}
+                    <button class="btn-unregister btn btn-secondary"
+                        data-program-id="{{ program.id }}">Unregister</button>
+                    {% else %}
+                    <button class="btn-register btn btn-primary" data-program-id="{{ program.id }}">Register</button>
+                    {% endif %}
+                </div>
+            </article>
+            {% empty %}
+            <div class="home-v2-empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <p>No upcoming programs right now. Check back soon!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="home-v2-announcements container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>Latest Announcements</h2>
+            <a href="{% url 'announcement_list' %}">View all announcements <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        {% if latest_announcements %}
+        <div class="home-v2-announcement-grid">
+            {% for item in latest_announcements %}
+            <article class="home-v2-announcement-card priority-{{ item.priority }}">
+                <div class="home-v2-announcement-top">
+                    <span class="category">{{ item.get_category_display }}</span>
+                    <span class="date">{{ item.publish_date|date:"M d, Y" }}</span>
+                </div>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.content|truncatechars:120 }}</p>
+                <div class="home-v2-announcement-bottom">
+                    <span class="priority">{{ item.get_priority_display }} priority</span>
+                    {% if item.link_url %}
+                    <a href="{{ item.link_url }}" target="_blank" rel="noopener noreferrer">
+                        {{ item.link_text|default:"Read more" }}
+                    </a>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="home-v2-empty-state">
+            <i class="fas fa-bullhorn"></i>
+            <p>No announcements published yet.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="home-v2-testimonials container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>Voices from Our Community</h2>
+            <a href="{% url 'contact' %}">Share your story <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="home-v2-testimonial-strip">
+            <article class="home-v2-testimonial-card">
+                <p>"Our family felt welcomed from day one. The events helped our kids reconnect with their roots."</p>
+                <div class="author">
+                    <strong>Pratima R.</strong>
+                    <span>Community Member</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"Volunteering here gave me purpose and friendships. It truly feels like one big extended family."</p>
+                <div class="author">
+                    <strong>Bikash T.</strong>
+                    <span>Volunteer Lead</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"The cultural classes are beautifully organized. My children now proudly speak and sing in Nepali."
+                </p>
+                <div class="author">
+                    <strong>Mina G.</strong>
+                    <span>Parent</span>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="home-v2-pathways container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>How You Can Participate</h2>
+        </div>
+        <article class="home-v2-path-card">
+            <i class="fas fa-language"></i>
+            <h3>Language & Heritage Classes</h3>
+            <p>Learn and preserve Nepali languages through family-friendly sessions.</p>
+            <a href="{% url 'program_list' %}">Join classes</a>
+        </article>
+        <article class="home-v2-path-card">
+            <i class="fas fa-handshake"></i>
+            <h3>Community Support Network</h3>
+            <p>Get help with settlement, networking, and local guidance for newcomers.</p>
+            <a href="{% url 'contact' %}">Get support</a>
+        </article>
+        <article class="home-v2-path-card">
+            <i class="fas fa-donate"></i>
+            <h3>Support Community Projects</h3>
+            <p>Contribute to cultural and social initiatives that impact local families.</p>
+            <a href="{% url 'donation' %}">Donate now</a>
+        </article>
+    </section>
+</div>
+
+{% if user.is_authenticated and user_latest_warning_message %}
+<button
+    id="homeWarningTrigger"
+    class="home-warning-trigger"
+    type="button"
+    title="Account warning"
+    aria-label="Open account warning"
+    data-warning-message="{{ user_latest_warning_message|escape }}"
+    data-warning-time="{{ user_latest_warning_time|date:'M d, Y h:i A' }}">
+    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+</button>
+{% endif %}
+
+<div id="notification-overlay" class="notification-overlay">
+    <div id="notification-modal" class="notification-modal info">
+        <button class="notification-close-auto" onclick="closeNotification()">&times;</button>
+        <div class="notification-icon">
+            <span id="notification-icon-content">ℹ️</span>
+        </div>
+        <h2 class="notification-title" id="notification-title">Notification</h2>
+        <p class="notification-message" id="notification-message">Message goes here</p>
+        <div class="notification-actions">
+            <button class="notification-btn notification-btn-close" onclick="closeNotification()">Close</button>
+            <button class="notification-btn notification-btn-confirm" onclick="closeNotification()">OK</button>
+        </div>
+        <div class="progress-bar"></div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/homepage-redesign.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,299 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}Admin Overview{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/admin-overview.css' %}">
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">Overview</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header admin-overview-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-gauge-high"></i> Admin Command Center</h1>
+        <p>Clean operational control over project-wide operations and CRUD workflows.</p>
+    </div>
+    <div class="page-header-actions">
+        <a class="btn btn-primary" href="{% url 'dashboard:event_create' %}">
+            <i class="fas fa-plus"></i> New Program
+        </a>
+        <a class="btn btn-secondary" href="{% url 'dashboard:admin_analytics' %}">
+            <i class="fas fa-chart-line"></i> Analytics
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="overview-shell">
+    <section class="stats-grid">
+        <article class="stat-card">
+            <span class="stat-label">Programs</span>
+            <h3>{{ total_projects }}</h3>
+            <p>All published and scheduled community programs</p>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Pending Requests</span>
+            <h3>{{ pending_projects }}</h3>
+            <p>Needs review and approval from staff</p>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Volunteers</span>
+            <h3>{{ total_volunteers }}</h3>
+            <p>Open opportunities and support coverage</p>
+        </article>
+        <article class="stat-card">
+            <span class="stat-label">Users</span>
+            <h3>{{ total_users }}</h3>
+            <p>Registered members under management</p>
+        </article>
+    </section>
+
+    <section class="overview-panels">
+        <article class="panel-card panel-chart">
+            <div class="panel-header">
+                <h3>Project Status Distribution</h3>
+            </div>
+            <div class="panel-body chart-body">
+                <canvas id="projectStatusChart"></canvas>
+            </div>
+        </article>
+
+        <article class="panel-card panel-chart">
+            <div class="panel-header">
+                <h3>Top Categories</h3>
+            </div>
+            <div class="panel-body chart-body">
+                <canvas id="categoriesChart"></canvas>
+            </div>
+        </article>
+    </section>
+
+    <section class="overview-panels single-panel">
+        <article class="panel-card panel-chart-wide">
+            <div class="panel-header">
+                <h3>Monthly Volunteer Growth</h3>
+            </div>
+            <div class="panel-body chart-body-wide">
+                <canvas id="volunteerGrowthChart"></canvas>
+            </div>
+        </article>
+    </section>
+
+    <section class="overview-panels single-panel">
+        <article class="panel-card panel-chart-wide">
+            <div class="panel-header">
+                <h3>Programs Created Per Month</h3>
+            </div>
+            <div class="panel-body chart-body-wide">
+                <canvas id="projectsMonthlyChart"></canvas>
+            </div>
+        </article>
+    </section>
+
+    <section class="crud-section panel-card">
+        <div class="panel-header">
+            <h3>Project CRUD Responsibility Matrix</h3>
+            <span class="panel-subtitle">All major modules in one operational surface</span>
+        </div>
+        <div class="panel-body">
+            <div class="crud-grid">
+                {% for module in module_crud_cards %}
+                <article class="crud-card">
+                    <div class="crud-card-head">
+                        <div class="crud-icon"><i class="{{ module.icon }}"></i></div>
+                        <div>
+                            <h4>{{ module.title }}</h4>
+                            <span class="crud-count">{{ module.count }} records</span>
+                        </div>
+                    </div>
+                    <p>{{ module.description }}</p>
+                    <div class="crud-actions">
+                        {% for link in module.links %}
+                        <a href="{{ link.url }}">{{ link.label }}</a>
+                        {% endfor %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="panel-card">
+        <div class="panel-header">
+            <h3>Recent Activity</h3>
+            <a href="{% url 'dashboard:admin_activity' %}" class="view-all-link">View full timeline</a>
+        </div>
+        <div class="panel-body table-wrap">
+            <table class="data-table activity-table">
+                <thead>
+                    <tr>
+                        <th>Actor</th>
+                        <th>Action</th>
+                        <th>Timestamp</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if recent_activities %}
+                    {% for activity in recent_activities %}
+                    <tr>
+                        <td>{{ activity.actor }}</td>
+                        <td>{{ activity.action }}</td>
+                        <td>{{ activity.created_at|date:"M d, Y H:i" }}</td>
+                        <td><span class="status-badge status-{{ activity.status_class }}">{{ activity.status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-muted">No recent activity found.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const colors = {
+        orange: '#f97316',
+        amber: '#f59e0b',
+        red: '#ef4444',
+        slate: '#334155',
+        steel: '#64748b',
+        mint: '#10b981'
+    };
+
+    const baseChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#111111',
+                    usePointStyle: true,
+                    padding: 16,
+                    font: { family: 'Inter', size: 11 }
+                }
+            }
+        }
+    };
+
+    const projectStatusCtx = document.getElementById('projectStatusChart').getContext('2d');
+    new Chart(projectStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Approved', 'Pending', 'Rejected', 'Completed'],
+            datasets: [{
+                data: [{{ approved_projects }}, {{ pending_projects }}, {{ rejected_projects }}, {{ completed_projects }}],
+        backgroundColor: [colors.mint, colors.amber, colors.red, colors.orange],
+        borderColor: '#ffffff',
+        borderWidth: 3
+            }]
+        },
+        options: {
+        ...baseChartOptions,
+        cutout: '62%'
+    }
+    });
+
+    const categoriesCtx = document.getElementById('categoriesChart').getContext('2d');
+    new Chart(categoriesCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ category_labels| safe }},
+        datasets: [{
+            data: {{ category_data| safe }},
+        backgroundColor: [colors.orange, colors.steel, colors.amber, '#94a3b8', '#fca5a5'],
+        borderColor: '#ffffff',
+        borderWidth: 3
+            }]
+        },
+        options: baseChartOptions
+    });
+
+    const volunteerGrowthCtx = document.getElementById('volunteerGrowthChart').getContext('2d');
+    new Chart(volunteerGrowthCtx, {
+        type: 'line',
+        data: {
+            labels: {{ volunteer_months| safe }},
+        datasets: [
+        {
+            label: 'New Volunteers',
+            data: {{ volunteer_new_data| safe }},
+        borderColor: colors.orange,
+        backgroundColor: 'rgba(249, 115, 22, 0.15)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4
+                },
+        {
+            label: 'Active Volunteers',
+            data: {{ volunteer_active_data| safe }},
+        borderColor: colors.mint,
+        backgroundColor: 'rgba(16, 185, 129, 0.12)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4
+                }
+    ]
+        },
+        options: {
+        ...baseChartOptions,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { color: '#111111' },
+                grid: { color: 'rgba(0, 0, 0, 0.08)' }
+            },
+            x: {
+                ticks: { color: '#111111' },
+                grid: { color: 'rgba(0, 0, 0, 0.05)' }
+            }
+        }
+    }
+    });
+
+    const projectsMonthlyCtx = document.getElementById('projectsMonthlyChart').getContext('2d');
+    new Chart(projectsMonthlyCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ project_months| safe }},
+        datasets: [{
+            label: 'Programs',
+            data: {{ project_monthly_data| safe }},
+        backgroundColor: 'rgba(249, 115, 22, 0.72)',
+        borderColor: '#f97316',
+        borderWidth: 1,
+        borderRadius: 8,
+        maxBarThickness: 42
+            }]
+        },
+        options: {
+        ...baseChartOptions,
+        plugins: {
+            ...baseChartOptions.plugins,
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { color: '#111111' },
+                grid: { color: 'rgba(0, 0, 0, 0.08)' }
+            },
+            x: {
+                ticks: { color: '#111111' },
+                grid: { color: 'rgba(0, 0, 0, 0.05)' }
+            }
+        }
+    }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'dashboard/admin_base.html' %}
+
+{% block title %}Rejected Projects{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">Projects</li>
+<li class="breadcrumb-item active">Rejected</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-times-circle"></i> Rejected Projects</h1>
+        <p>All rejected project requests</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="content-card-body">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Requester</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in projects %}
+                    <tr>
+                        <td>#{{ request.id }}</td>
+                        <td><strong>{{ request.title }}</strong></td>
+                        <td>{{ request.requester_name }}</td>
+                        <td>{{ request.submitted_at|date:"M d, Y" }}</td>
+                        <td><span class="status-badge status-rejected">Rejected</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No rejected projects</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

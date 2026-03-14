@@ -1,0 +1,488 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Terms of Use - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<style>
+    .policy-page {
+        background: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
+        min-height: 100vh;
+    }
+
+    .policy-hero {
+        background: linear-gradient(135deg, var(--color-black) 0%, #2d2d2d 100%);
+        color: white;
+        padding: 4rem 1.5rem 3rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .policy-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .policy-hero h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+        color: white;
+    }
+
+    .policy-hero p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        max-width: 700px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .policy-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem;
+    }
+
+    .policy-updated {
+        background: linear-gradient(135deg, #fff5f0 0%, #ffe8dc 100%);
+        border-left: 4px solid var(--color-accent);
+        padding: 1.2rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2.5rem;
+        font-size: 0.95rem;
+        color: #333;
+    }
+
+    .policy-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e5e7eb;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .policy-section:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .policy-section h2 {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: -2rem -2rem 1.5rem -2rem;
+        padding: 1.2rem 2rem;
+        background: linear-gradient(135deg, var(--color-black) 0%, #2d2d2d 100%);
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .policy-section h2::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(135deg, var(--color-accent), var(--color-orange));
+        border-radius: 2px;
+    }
+
+    .policy-section h3 {
+        color: #374151;
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin: 1.5rem 0 0.75rem;
+    }
+
+    .policy-section p {
+        color: #4b5563;
+        line-height: 1.8;
+        margin-bottom: 1rem;
+    }
+
+    .policy-section ul,
+    .policy-section ol {
+        color: #4b5563;
+        line-height: 1.8;
+        margin: 1rem 0 1rem 1.5rem;
+    }
+
+    .policy-section li {
+        margin-bottom: 0.5rem;
+    }
+
+    .policy-section strong {
+        color: var(--color-black);
+        font-weight: 600;
+    }
+
+    .contact-box {
+        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-orange) 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        margin-top: 3rem;
+    }
+
+    .contact-box h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .contact-box p {
+        margin-bottom: 1rem;
+        opacity: 0.95;
+    }
+
+    .contact-box a {
+        color: white;
+        text-decoration: underline;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .policy-hero h1 {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .policy-hero p {
+            font-size: 1rem;
+        }
+
+        .policy-container {
+            padding: 2rem 1rem;
+        }
+
+        .policy-section {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="policy-page">
+    <div class="policy-hero">
+        <h1>Terms of Use</h1>
+        <p>Please read these terms carefully before using our services and participating in our community.</p>
+    </div>
+
+    <div class="policy-container">
+        <div class="policy-updated">
+            <strong>Last Updated:</strong> March 8, 2026
+        </div>
+
+        <div class="policy-section">
+            <h2>Acceptance of Terms</h2>
+            <p>
+                Welcome to the Nepali Community of Vancouver. By accessing our website, participating in our programs,
+                or using any of our services, you agree to be bound by these Terms of Use ("Terms"). If you do not agree
+                with any part of these Terms, you may not use our services.
+            </p>
+            <p>
+                These Terms constitute a legally binding agreement between you and the Nepali Community of Vancouver. We
+                reserve the right to modify these Terms at any time, and your continued use of our services constitutes
+                acceptance of any changes.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Eligibility</h2>
+            <p>
+                Our services are available to individuals who:
+            </p>
+            <ul>
+                <li>Are at least 13 years of age (minors aged 13-18 require parental/guardian consent)</li>
+                <li>Have the legal capacity to enter into a binding agreement</li>
+                <li>Agree to comply with all applicable laws and these Terms</li>
+                <li>Provide accurate and truthful information when creating an account or registering for events</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>User Accounts</h2>
+
+            <h3>Account Creation</h3>
+            <p>To access certain features of our services, you may be required to create an account. You agree to:</p>
+            <ul>
+                <li>Provide accurate, current, and complete information during registration</li>
+                <li>Maintain and promptly update your account information</li>
+                <li>Keep your password secure and confidential</li>
+                <li>Notify us immediately of any unauthorized use of your account</li>
+                <li>Accept responsibility for all activities that occur under your account</li>
+            </ul>
+
+            <h3>Account Termination</h3>
+            <p>
+                We reserve the right to suspend or terminate your account at any time, with or without notice, if we
+                believe you have violated these Terms or engaged in conduct that we deem inappropriate or harmful to our
+                community.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Use of Services</h2>
+
+            <h3>Permitted Uses</h3>
+            <p>You may use our services to:</p>
+            <ul>
+                <li>Access information about our community, programs, and events</li>
+                <li>Register for and participate in community events and programs</li>
+                <li>Connect with other community members</li>
+                <li>Make donations to support our mission</li>
+                <li>Volunteer for community initiatives</li>
+                <li>Access educational and cultural resources</li>
+            </ul>
+
+            <h3>Prohibited Uses</h3>
+            <p>You agree NOT to:</p>
+            <ul>
+                <li>Use our services for any illegal, harmful, or fraudulent purpose</li>
+                <li>Harass, abuse, threaten, or discriminate against other community members</li>
+                <li>Post or transmit any content that is offensive, hateful, or inappropriate</li>
+                <li>Impersonate another person or entity</li>
+                <li>Collect or harvest personal information of other users without consent</li>
+                <li>Attempt to gain unauthorized access to our systems or networks</li>
+                <li>Distribute spam, viruses, or malicious code</li>
+                <li>Use automated tools (bots, scrapers) to access our services without permission</li>
+                <li>Interfere with the proper functioning of our website or services</li>
+                <li>Violate any applicable laws, regulations, or third-party rights</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>Event Registration and Participation</h2>
+
+            <h3>Registration</h3>
+            <p>When you register for an event or program:</p>
+            <ul>
+                <li>You commit to attending or provide advance notice if you cannot attend</li>
+                <li>You agree to provide accurate information, including emergency contacts</li>
+                <li>You understand that some events may have capacity limits</li>
+                <li>You may be required to pay registration fees (non-refundable unless otherwise stated)</li>
+            </ul>
+
+            <h3>Cancellation and Refunds</h3>
+            <p>
+                Event cancellations by the organization will result in full refunds. Participant cancellations must be
+                made at least 48 hours in advance for a refund (minus any processing fees). Late cancellations or
+                no-shows are not eligible for refunds.
+            </p>
+
+            <h3>Conduct at Events</h3>
+            <p>Participants must:</p>
+            <ul>
+                <li>Treat all attendees, volunteers, and staff with respect</li>
+                <li>Follow all event rules, safety guidelines, and instructions from organizers</li>
+                <li>Refrain from disruptive, inappropriate, or unsafe behavior</li>
+                <li>Respect the venue and community property</li>
+            </ul>
+            <p>
+                We reserve the right to remove participants who violate event conduct standards without refund.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Donations and Payments</h2>
+            <p>
+                All donations made to the Nepali Community of Vancouver are voluntary and non-refundable. By making a
+                donation, you:
+            </p>
+            <ul>
+                <li>Confirm that you are authorized to use the payment method provided</li>
+                <li>Understand that donations are used to support our community programs and operations</li>
+                <li>Acknowledge that donations may be tax-deductible (consult your tax advisor)</li>
+                <li>Will receive a receipt for tax purposes (if applicable)</li>
+            </ul>
+            <p>
+                Payment processing is handled securely through third-party payment processors. We do not store your full
+                credit card information.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Content and Intellectual Property</h2>
+
+            <h3>Our Content</h3>
+            <p>
+                All content on our website, including text, graphics, logos, images, videos, software, and design, is
+                the property of the Nepali Community of Vancouver or our licensors and is protected by copyright,
+                trademark, and other intellectual property laws.
+            </p>
+            <p>
+                You may view and download content for personal, non-commercial use only. You may not reproduce,
+                distribute, modify, or create derivative works without our prior written permission.
+            </p>
+
+            <h3>User-Generated Content</h3>
+            <p>
+                If you submit content to our website (comments, photos, testimonials), you grant us a non-exclusive,
+                royalty-free, worldwide license to use, reproduce, modify, and display such content in connection with
+                our services.
+            </p>
+            <p>You represent that:</p>
+            <ul>
+                <li>You own or have the right to submit the content</li>
+                <li>The content does not violate any third-party rights</li>
+                <li>The content complies with these Terms</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>Photography and Video</h2>
+            <p>
+                By attending our events, you consent to being photographed or recorded. We may use photos, videos, and
+                testimonials featuring participants in promotional materials, on our website, and on social media.
+            </p>
+            <p>
+                If you do not wish to be photographed or filmed, please notify event organizers in advance. We will make
+                reasonable efforts to accommodate your request.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Disclaimer of Warranties</h2>
+            <p>
+                Our services are provided "as is" and "as available" without warranties of any kind, either express or
+                implied. We do not warrant that:
+            </p>
+            <ul>
+                <li>Our services will be uninterrupted, secure, or error-free</li>
+                <li>The information provided is accurate, complete, or current</li>
+                <li>Defects will be corrected</li>
+                <li>Our website or servers are free of viruses or harmful components</li>
+            </ul>
+            <p>
+                You use our services at your own risk. We recommend maintaining appropriate insurance coverage and
+                taking personal safety precautions when participating in events.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Limitation of Liability</h2>
+            <p>
+                To the maximum extent permitted by law, the Nepali Community of Vancouver, its directors, officers,
+                volunteers, and partners shall not be liable for any indirect, incidental, special, consequential, or
+                punitive damages arising from:
+            </p>
+            <ul>
+                <li>Your use or inability to use our services</li>
+                <li>Any conduct or content of third parties</li>
+                <li>Unauthorized access to or use of our servers</li>
+                <li>Errors, viruses, or other harmful components</li>
+                <li>Personal injury or property damage during events</li>
+            </ul>
+            <p>
+                Our total liability for any claim arising from these Terms or your use of our services shall not exceed
+                the amount you paid to us in the twelve months preceding the claim.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Indemnification</h2>
+            <p>
+                You agree to indemnify, defend, and hold harmless the Nepali Community of Vancouver and its
+                representatives from any claims, damages, losses, liabilities, and expenses (including legal fees)
+                arising from:
+            </p>
+            <ul>
+                <li>Your violation of these Terms</li>
+                <li>Your violation of any third-party rights</li>
+                <li>Your use of our services</li>
+                <li>Your conduct at events</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>Third-Party Links and Services</h2>
+            <p>
+                Our website may contain links to third-party websites and services. We are not responsible for the
+                content, privacy practices, or terms of use of these external sites. Your interactions with third
+                parties are solely between you and the third party.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Dispute Resolution</h2>
+            <p>
+                Any disputes arising from these Terms or your use of our services shall be resolved through:
+            </p>
+            <ol>
+                <li><strong>Informal Resolution:</strong> Contact us to attempt to resolve the issue amicably</li>
+                <li><strong>Mediation:</strong> If informal resolution fails, disputes may be submitted to mediation
+                </li>
+                <li><strong>Governing Law:</strong> These Terms are governed by the laws of British Columbia, Canada
+                </li>
+            </ol>
+        </div>
+
+        <div class="policy-section">
+            <h2>Changes to Terms</h2>
+            <p>
+                We reserve the right to modify these Terms at any time. Material changes will be communicated through:
+            </p>
+            <ul>
+                <li>Posting the updated Terms on our website with a new "Last Updated" date</li>
+                <li>Email notification to registered users</li>
+                <li>Prominent notice on our homepage</li>
+            </ul>
+            <p>
+                Your continued use of our services after changes become effective constitutes acceptance of the revised
+                Terms.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Severability and Waiver</h2>
+            <p>
+                If any provision of these Terms is found to be unenforceable or invalid, that provision shall be limited
+                or eliminated to the minimum extent necessary, and the remaining provisions shall remain in full force
+                and effect.
+            </p>
+            <p>
+                Our failure to enforce any right or provision of these Terms shall not be deemed a waiver of such right
+                or provision.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Contact Information</h2>
+            <p>
+                These Terms constitute the entire agreement between you and the Nepali Community of Vancouver regarding
+                the use of our services.
+            </p>
+        </div>
+
+        <div class="contact-box">
+            <h3>Questions About These Terms?</h3>
+            <p>
+                If you have any questions or concerns about these Terms of Use, please contact us:
+            </p>
+            <p>
+                <strong>Email:</strong> <a href="mailto:info@nepalivc.ca">info@nepalivc.ca</a><br>
+                <strong>Phone:</strong> +1 (604) 123-4567<br>
+                <strong>Address:</strong> Nepali Community of Vancouver, Vancouver, BC, Canada
+            </p>
+            <p style="margin-bottom: 0;">
+                By using our services, you acknowledge that you have read, understood, and agree to be bound by these
+                Terms of Use.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

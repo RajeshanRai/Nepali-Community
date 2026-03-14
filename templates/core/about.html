@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Us - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-background"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content container">
+            <div class="hero-text">
+                <span class="hero-kicker">Our Story</span>
+                <h1 class="hero-title">Preserving Heritage, Building Community</h1>
+                <p class="hero-subtitle">
+                    Since 1995, the Nepali Community of Vancouver has been a vibrant hub where culture, tradition,
+                    and modern life converge to create meaningful connections and celebrate shared identity.
+                </p>
+                <div class="hero-cta">
+                    <a href="#mission" class="btn btn-primary">Learn More</a>
+                    <a href="{% url 'volunteer_list' %}" class="btn btn-secondary">Join Us</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="floating-shape shape-1"></div>
+                <div class="floating-shape shape-2"></div>
+                <div class="floating-shape shape-3"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission & Vision Section -->
+    <section id="mission" class="mission-section">
+        <div class="container">
+            <div class="mission-grid">
+                <div class="mission-content">
+                    <div class="section-label">Who We Are</div>
+                    <h2 class="section-title">Our Mission & Vision</h2>
+                    <div class="mission-highlights" aria-label="Mission highlights">
+                        <span class="mission-chip"><i class="fas fa-seedling"></i> New Beginnings</span>
+                        <span class="mission-chip"><i class="fas fa-hands-helping"></i> Community Support</span>
+                        <span class="mission-chip"><i class="fas fa-globe-asia"></i> Cultural Pride</span>
+                        <span class="mission-chip"><i class="fas fa-bolt"></i> Youth Empowerment</span>
+                    </div>
+                    <div class="mission-cards">
+                        <div class="mission-card">
+                            <div class="mission-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <h3>Our Mission</h3>
+                            <p>To foster a thriving Nepali community that celebrates cultural heritage, supports
+                                newcomers,
+                                and creates meaningful opportunities for connection, growth, and mutual support across
+                                generations.</p>
+                        </div>
+                        <div class="mission-card">
+                            <div class="mission-icon">
+                                <i class="fas fa-compass"></i>
+                            </div>
+                            <h3>Our Vision</h3>
+                            <p>To build an inclusive, empowered community where Nepali traditions flourish, where every
+                                member
+                                feels at home, and where cultural pride becomes a bridge to understanding and unity.</p>
+                        </div>
+                    </div>
+                    <div class="core-values">
+                        <h3>Core Values</h3>
+                        <ul class="values-list">
+                            <li><span class="value-icon">✓</span> <strong>Cultural Preservation:</strong> Honoring
+                                traditions while embracing modern life</li>
+                            <li><span class="value-icon">✓</span> <strong>Community First:</strong> Supporting each
+                                other through every life season</li>
+                            <li><span class="value-icon">✓</span> <strong>Inclusivity:</strong> Welcoming all with open
+                                hearts</li>
+                            <li><span class="value-icon">✓</span> <strong>Excellence:</strong> Creating quality programs
+                                and meaningful experiences</li>
+                            <li><span class="value-icon">✓</span> <strong>Empowerment:</strong> Building leadership and
+                                opportunity</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Community Insights</div>
+                <h2 class="section-title section-title-center">By The Numbers</h2>
+                <p class="section-description">A quick snapshot of our growing impact and engagement.</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" data-target="{{ total_users }}">0</div>
+                    <div class="stat-label">Community Members</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" data-target="{{ total_events }}">0</div>
+                    <div class="stat-label">Total Events</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-party-horn"></i>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" data-target="{{ total_communities }}">0</div>
+                    <div class="stat-label">Active Communities</div>
+                    <div class="stat-icon">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Leadership Team Section -->
+    <section class="team-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Meet The People</div>
+                <h2 class="section-title">Leadership Team</h2>
+                <p class="section-description">Dedicated volunteers and leaders driving our community forward</p>
+            </div>
+
+            <div class="team-grid">
+                <div class="team-member-card">
+                    <div class="member-image-wrapper">
+                        <div class="member-image"
+                            style="background-image: url('https://randomuser.me/api/portraits/men/1.jpg')"></div>
+                        <div class="member-overlay"></div>
+                    </div>
+                    <div class="member-content">
+                        <h3 class="member-name">Rajesh Sharma</h3>
+                        <p class="member-role">Founder & Community Director</p>
+                        <p class="member-bio">Visionary leader passionate about preserving Nepali heritage and fostering
+                            community bonds.</p>
+                        <div class="member-socials">
+                            <a href="#" class="social-link" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="social-link" title="Email"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="team-member-card">
+                    <div class="member-image-wrapper">
+                        <div class="member-image"
+                            style="background-image: url('https://randomuser.me/api/portraits/women/2.jpg')"></div>
+                        <div class="member-overlay"></div>
+                    </div>
+                    <div class="member-content">
+                        <h3 class="member-name">Priya Poudel</h3>
+                        <p class="member-role">Cultural Programs Lead</p>
+                        <p class="member-bio">Expert in cultural education, bringing festivals and traditions to life
+                            for all ages.</p>
+                        <div class="member-socials">
+                            <a href="#" class="social-link" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="social-link" title="Email"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="team-member-card">
+                    <div class="member-image-wrapper">
+                        <div class="member-image"
+                            style="background-image: url('https://randomuser.me/api/portraits/men/3.jpg')"></div>
+                        <div class="member-overlay"></div>
+                    </div>
+                    <div class="member-content">
+                        <h3 class="member-name">Bikash Thapa</h3>
+                        <p class="member-role">Community Outreach Coordinator</p>
+                        <p class="member-bio">Building bridges between different communities and fostering meaningful
+                            connections.</p>
+                        <div class="member-socials">
+                            <a href="#" class="social-link" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="social-link" title="Email"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="team-member-card">
+                    <div class="member-image-wrapper">
+                        <div class="member-image"
+                            style="background-image: url('https://randomuser.me/api/portraits/women/4.jpg')"></div>
+                        <div class="member-overlay"></div>
+                    </div>
+                    <div class="member-content">
+                        <h3 class="member-name">Mina Sharma</h3>
+                        <p class="member-role">Volunteer Program Manager</p>
+                        <p class="member-bio">Empowering volunteers and creating opportunities for community members to
+                            give back.</p>
+                        <div class="member-socials">
+                            <a href="#" class="social-link" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="social-link" title="Email"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impact Section -->
+    <section class="impact-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">What We Deliver</div>
+                <h2 class="section-title">Community Impact Areas</h2>
+                <p class="section-description">Focused initiatives designed to create meaningful, long-term value.</p>
+            </div>
+            <div class="impact-grid">
+                <div class="impact-card impact-card-1">
+                    <div class="impact-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3>Educational Programs</h3>
+                    <p>Empowering minds through language classes, cultural workshops, and skill development initiatives.
+                    </p>
+                    <a href="{% url 'program_list' %}" class="impact-link">Explore <i
+                            class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="impact-card impact-card-2">
+                    <div class="impact-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Community Support</h3>
+                    <p>Supporting newcomers and families through mentorship, guidance, and collaborative initiatives.
+                    </p>
+                    <a href="{% url 'contact' %}" class="impact-link">Get Help <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="impact-card impact-card-3">
+                    <div class="impact-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Cultural Celebration</h3>
+                    <p>Organizing vibrant festivals and events that bring our community together and celebrate shared
+                        heritage.</p>
+                    <a href="{% url 'announcement_list' %}" class="impact-link">Discover <i
+                            class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/about.js' %}"></script>
+{% endblock %}

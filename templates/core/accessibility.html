@@ -1,0 +1,492 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Accessibility Statement - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<style>
+    .policy-page {
+        background: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
+        min-height: 100vh;
+    }
+
+    .policy-hero {
+        background: linear-gradient(135deg, var(--color-black) 0%, #2d2d2d 100%);
+        color: white;
+        padding: 4rem 1.5rem 3rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .policy-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .policy-hero h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+        color: white;
+    }
+
+    .policy-hero p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        max-width: 700px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .policy-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem;
+    }
+
+    .policy-updated {
+        background: linear-gradient(135deg, #fff5f0 0%, #ffe8dc 100%);
+        border-left: 4px solid var(--color-accent);
+        padding: 1.2rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2.5rem;
+        font-size: 0.95rem;
+        color: #333;
+    }
+
+    .policy-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e5e7eb;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .policy-section:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .policy-section h2 {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: -2rem -2rem 1.5rem -2rem;
+        padding: 1.2rem 2rem;
+        background: linear-gradient(135deg, var(--color-black) 0%, #2d2d2d 100%);
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .policy-section h2::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(135deg, var(--color-accent), var(--color-orange));
+        border-radius: 2px;
+    }
+
+    .policy-section h3 {
+        color: #374151;
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin: 1.5rem 0 0.75rem;
+    }
+
+    .policy-section p {
+        color: #4b5563;
+        line-height: 1.8;
+        margin-bottom: 1rem;
+    }
+
+    .policy-section ul,
+    .policy-section ol {
+        color: #4b5563;
+        line-height: 1.8;
+        margin: 1rem 0 1rem 1.5rem;
+    }
+
+    .policy-section li {
+        margin-bottom: 0.5rem;
+    }
+
+    .policy-section strong {
+        color: var(--color-black);
+        font-weight: 600;
+    }
+
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .feature-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 16px rgba(255, 107, 53, 0.15);
+        border-color: var(--color-accent);
+    }
+
+    .feature-card .icon {
+        font-size: 2.5rem;
+        color: var(--color-accent);
+        margin-bottom: 1rem;
+    }
+
+    .feature-card h4 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--color-black);
+        margin-bottom: 0.5rem;
+    }
+
+    .feature-card p {
+        font-size: 0.9rem;
+        color: #6b7280;
+        margin: 0;
+    }
+
+    .contact-box {
+        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-orange) 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        margin-top: 3rem;
+    }
+
+    .contact-box h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .contact-box p {
+        margin-bottom: 1rem;
+        opacity: 0.95;
+    }
+
+    .contact-box a {
+        color: white;
+        text-decoration: underline;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .policy-hero h1 {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .policy-hero p {
+            font-size: 1rem;
+        }
+
+        .policy-container {
+            padding: 2rem 1rem;
+        }
+
+        .policy-section {
+            padding: 1.5rem;
+        }
+
+        .feature-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="policy-page">
+    <div class="policy-hero">
+        <h1>Accessibility Statement</h1>
+        <p>We are committed to ensuring digital accessibility for all community members, regardless of ability.</p>
+    </div>
+
+    <div class="policy-container">
+        <div class="policy-updated">
+            <strong>Last Updated:</strong> March 8, 2026
+        </div>
+
+        <div class="policy-section">
+            <h2>Our Commitment</h2>
+            <p>
+                The Nepali Community of Vancouver is dedicated to making our website, programs, and services accessible
+                to everyone, including individuals with disabilities. We believe that accessibility is a fundamental
+                right and strive to provide an inclusive experience for all community members.
+            </p>
+            <p>
+                We are committed to conforming with the <strong>Web Content Accessibility Guidelines (WCAG) 2.1</strong>
+                at Level AA, as well as following best practices in web accessibility and inclusive design.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Accessibility Features</h2>
+            <p>
+                Our website and services incorporate numerous features to enhance accessibility:
+            </p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-keyboard"></i></div>
+                    <h4>Keyboard Navigation</h4>
+                    <p>Full keyboard accessibility for all interactive elements</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-universal-access"></i></div>
+                    <h4>Screen Reader Support</h4>
+                    <p>Optimized for JAWS, NVDA, and VoiceOver</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-text-height"></i></div>
+                    <h4>Responsive Text</h4>
+                    <p>Text can be resized up to 200% without loss of functionality</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-palette"></i></div>
+                    <h4>Color Contrast</h4>
+                    <p>WCAG AA compliant color contrast ratios</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-image"></i></div>
+                    <h4>Alt Text</h4>
+                    <p>Descriptive alternative text for all images</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-closed-captioning"></i></div>
+                    <h4>Media Captions</h4>
+                    <p>Captions and transcripts for video content</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="policy-section">
+            <h2>Website Accessibility Features</h2>
+
+            <h3>Navigation and Structure</h3>
+            <ul>
+                <li><strong>Semantic HTML:</strong> Proper use of headings, landmarks, and ARIA labels</li>
+                <li><strong>Skip Links:</strong> Quick navigation to main content areas</li>
+                <li><strong>Consistent Layout:</strong> Predictable navigation and page structure</li>
+                <li><strong>Breadcrumbs:</strong> Clear indication of page location within site hierarchy</li>
+                <li><strong>Focus Indicators:</strong> Visible focus states for all interactive elements</li>
+            </ul>
+
+            <h3>Content and Readability</h3>
+            <ul>
+                <li><strong>Clear Language:</strong> Plain language and simple sentence structures</li>
+                <li><strong>Readable Fonts:</strong> Sans-serif fonts optimized for screen reading</li>
+                <li><strong>Sufficient Spacing:</strong> Adequate line height and paragraph spacing</li>
+                <li><strong>Responsive Design:</strong> Mobile-friendly layouts that adapt to different screen sizes
+                </li>
+                <li><strong>No Auto-Play:</strong> Media does not play automatically</li>
+            </ul>
+
+            <h3>Forms and Interactive Elements</h3>
+            <ul>
+                <li><strong>Labeled Inputs:</strong> All form fields have descriptive labels</li>
+                <li><strong>Error Messages:</strong> Clear, specific error messages with guidance for correction</li>
+                <li><strong>Required Fields:</strong> Clear indication of required form fields</li>
+                <li><strong>Time Limits:</strong> Sufficient time to complete forms, with options to extend</li>
+                <li><strong>Confirmation Steps:</strong> Review and confirm before submitting important forms</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>Physical Event Accessibility</h2>
+            <p>
+                We strive to make our in-person events and programs accessible to all participants:
+            </p>
+            <ul>
+                <li><strong>Venue Selection:</strong> Events held in wheelchair-accessible locations whenever possible
+                </li>
+                <li><strong>Accessibility Information:</strong> Event listings include detailed accessibility
+                    information</li>
+                <li><strong>Transportation:</strong> Information about accessible parking and public transit options
+                </li>
+                <li><strong>Dietary Accommodations:</strong> Options for various dietary restrictions and allergies</li>
+                <li><strong>Communication Support:</strong> Advance notice allows us to arrange interpreters or
+                    assistive services</li>
+                <li><strong>Seating:</strong> Priority seating for individuals with mobility challenges</li>
+                <li><strong>Service Animals:</strong> Service animals are welcome at all events</li>
+                <li><strong>Sensory Considerations:</strong> Information about noise levels, lighting, and crowd sizes
+                </li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>Alternative Formats</h2>
+            <p>
+                We are committed to providing information in formats that work for everyone:
+            </p>
+            <ul>
+                <li><strong>Documents:</strong> Available in HTML, PDF (accessible), and upon request in large print or
+                    Braille</li>
+                <li><strong>Videos:</strong> Closed captions and transcripts provided</li>
+                <li><strong>Audio:</strong> Transcripts available for audio-only content</li>
+                <li><strong>Email Communications:</strong> Plain text options available</li>
+                <li><strong>Printed Materials:</strong> Large print versions available upon request</li>
+            </ul>
+            <p>
+                If you need content in a specific format, please contact us at least 3 business days in advance, and we
+                will do our best to accommodate your request.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Assistive Technologies</h2>
+            <p>
+                Our website is designed to be compatible with the following assistive technologies:
+            </p>
+            <ul>
+                <li><strong>Screen Readers:</strong> JAWS, NVDA, VoiceOver, TalkBack</li>
+                <li><strong>Screen Magnification:</strong> ZoomText, MAGic</li>
+                <li><strong>Speech Recognition:</strong> Dragon NaturallySpeaking</li>
+                <li><strong>Alternative Input Devices:</strong> Switch controls, eye-tracking systems</li>
+                <li><strong>Browser Accessibility Features:</strong> High contrast modes, text-to-speech</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>Ongoing Efforts</h2>
+            <p>
+                Accessibility is an ongoing journey, not a destination. We continually work to improve:
+            </p>
+            <ul>
+                <li><strong>Regular Audits:</strong> Annual accessibility audits using automated and manual testing</li>
+                <li><strong>User Testing:</strong> Feedback from users with disabilities guides our improvements</li>
+                <li><strong>Staff Training:</strong> Team members receive accessibility training</li>
+                <li><strong>Code Reviews:</strong> Accessibility checks integrated into development workflow</li>
+                <li><strong>Third-Party Tools:</strong> Evaluation with WAVE, axe, Lighthouse, and other tools</li>
+                <li><strong>Community Input:</strong> Active solicitation of feedback from community members</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>Known Limitations</h2>
+            <p>
+                Despite our best efforts, some limitations may exist:
+            </p>
+            <ul>
+                <li>Older PDF documents may not be fully accessible (we are working to remediate these)</li>
+                <li>Some third-party embedded content (maps, social media feeds) may have accessibility barriers</li>
+                <li>User-generated content may not always meet accessibility standards</li>
+                <li>Certain historical event photos may lack detailed alt text</li>
+            </ul>
+            <p>
+                We are actively working to address these limitations. If you encounter any accessibility barriers,
+                please let us know so we can prioritize improvements.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Accommodations and Support</h2>
+            <p>
+                We want everyone to fully participate in our community. If you need accommodations to:
+            </p>
+            <ul>
+                <li>Access our website or digital content</li>
+                <li>Participate in events or programs</li>
+                <li>Communicate with our team</li>
+                <li>Volunteer or become a member</li>
+            </ul>
+            <p>
+                Please contact us as early as possible, and we will work with you to find suitable solutions. We do not
+                charge fees for providing accessibility accommodations.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Feedback and Reporting</h2>
+            <p>
+                Your feedback helps us improve. If you:
+            </p>
+            <ul>
+                <li>Encounter an accessibility barrier on our website</li>
+                <li>Have difficulty accessing content or features</li>
+                <li>Have suggestions for improving accessibility</li>
+                <li>Would like to request an accommodation</li>
+            </ul>
+            <p>
+                Please contact our accessibility coordinator. We aim to respond to all accessibility feedback within 2
+                business days and resolve issues as quickly as possible.
+            </p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Compliance and Standards</h2>
+            <p>
+                Our accessibility efforts align with:
+            </p>
+            <ul>
+                <li><strong>WCAG 2.1 Level AA:</strong> Web Content Accessibility Guidelines</li>
+                <li><strong>AODA:</strong> Accessibility for Ontarians with Disabilities Act (where applicable)</li>
+                <li><strong>Section 508:</strong> U.S. Rehabilitation Act standards</li>
+                <li><strong>EN 301 549:</strong> European accessibility standard</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>Accessibility Resources</h2>
+            <p>
+                For more information about web accessibility and assistive technologies:
+            </p>
+            <ul>
+                <li><strong>W3C Web Accessibility Initiative:</strong> <a href="https://www.w3.org/WAI/" target="_blank"
+                        rel="noopener">w3.org/WAI</a></li>
+                <li><strong>WebAIM:</strong> <a href="https://webaim.org/" target="_blank" rel="noopener">webaim.org</a>
+                </li>
+                <li><strong>NVDA Screen Reader:</strong> <a href="https://www.nvaccess.org/" target="_blank"
+                        rel="noopener">nvaccess.org</a></li>
+                <li><strong>Canadian Accessibility Network:</strong> Resources for accessibility in Canada</li>
+            </ul>
+        </div>
+
+        <div class="contact-box">
+            <h3>Accessibility Coordinator</h3>
+            <p>
+                For accessibility questions, concerns, accommodation requests, or to report barriers:
+            </p>
+            <p>
+                <strong>Email:</strong> <a href="mailto:accessibility@nepalivc.ca">accessibility@nepalivc.ca</a><br>
+                <strong>Phone:</strong> +1 (604) 123-4567<br>
+                <strong>TTY:</strong> Available upon request<br>
+                <strong>Mail:</strong> Nepali Community of Vancouver, Vancouver, BC, Canada
+            </p>
+            <p style="margin-bottom: 0;">
+                We welcome your feedback and are committed to continuous improvement in accessibility.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

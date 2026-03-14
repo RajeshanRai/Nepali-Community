@@ -1,0 +1,174 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}Volunteer Opportunities{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/volunteer-opportunities-list.css' %}">
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">Volunteer Opportunities</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-hands-helping"></i> Volunteer Opportunities</h1>
+        <p>Create and manage volunteer opportunities for the community</p>
+    </div>
+    <div class="page-header-actions">
+        <a href="{% url 'dashboard:volunteer_opportunity_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Opportunity
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="content-card-header">
+        <div class="search-filter-bar">
+            <form method="GET" class="search-form">
+                <div class="search-input-group">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" placeholder="Search opportunities..." value="{{ search }}">
+                </div>
+                <select name="status" class="form-control form-control-max-300">
+                    <option value="">All Status</option>
+                    {% for option in status_options %}
+                    <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>{{ option.label }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                {% if search or selected_status %}
+                <a href="{% url 'dashboard:volunteer_opportunities_list' %}" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-redo"></i> Reset
+                </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <div class="content-card-body">
+        {% if opportunities %}
+        <div class="opportunities-grid">
+            {% for opportunity in opportunities %}
+            <div class="opportunity-card">
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title">{{ opportunity.title }}</h3>
+                        <p class="card-subtitle">{{ opportunity.get_category_display }}</p>
+                    </div>
+                    <span
+                        class="badge badge-{% if opportunity.status == 'open' %}success{% elif opportunity.status == 'filled' %}warning{% else %}danger{% endif %}">
+                        {{ opportunity.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="card-body">
+                    <p>{{ opportunity.description|truncatewords:30 }}</p>
+
+                    <div class="opportunity-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>
+                                {% if opportunity.is_remote %}
+                                <strong>Remote</strong>
+                                {% else %}
+                                {{ opportunity.location }}
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ opportunity.time_commitment }}</span>
+                        </div>
+
+                        <div class="meta-item">
+                            <i class="fas fa-users"></i>
+                            <span>{{ opportunity.positions_remaining }} / {{ opportunity.positions_needed }}
+                                positions</span>
+                        </div>
+
+                        {% if opportunity.start_date %}
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>
+                                {{ opportunity.start_date|date:"M d, Y" }}
+                                {% if opportunity.end_date %}
+                                - {{ opportunity.end_date|date:"M d, Y" }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="progress-bar">
+                        <div class="progress-fill"
+                            data-progress="{% widthratio opportunity.positions_filled opportunity.positions_needed 100 %}">
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        {{ opportunity.positions_filled }} of {{ opportunity.positions_needed }} positions filled
+                    </small>
+                </div>
+
+                <div class="card-footer">
+                    <a href="{% url 'dashboard:volunteer_opportunity_edit' opportunity.pk %}"
+                        class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'dashboard:volunteer_applications_list' %}?opportunity={{ opportunity.pk }}"
+                        class="btn btn-sm btn-info">
+                        <i class="fas fa-users"></i> Applications
+                    </a>
+                    <button onclick="deleteOpportunity({{ opportunity.pk }}, '{{ opportunity.title|escapejs }}')"
+                        class="btn btn-sm btn-danger">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-briefcase"></i>
+            <h3>No Opportunities Yet</h3>
+            <p>
+                {% if search %}
+                No opportunities match your search criteria.
+                {% else %}
+                Create the first volunteer opportunity for your community!
+                {% endif %}
+            </p>
+            <a href="{% url 'dashboard:volunteer_opportunity_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Opportunity
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function deleteOpportunity(id, title) {
+        confirmDelete({
+            url: `/dashboard/volunteers/opportunities/${id}/delete/`,
+            itemName: title,
+            itemType: 'volunteer opportunity'
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.progress-fill[data-progress]').forEach(function (bar) {
+            const raw = Number(bar.dataset.progress || 0);
+            const bounded = Math.max(0, Math.min(100, raw));
+            bar.style.width = `${bounded}%`;
+        });
+    });
+</script>
+{% endblock %}

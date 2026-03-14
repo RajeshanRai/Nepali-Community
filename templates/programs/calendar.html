@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Community Calendar - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/programs.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container programs-page-shell calendar-page fade-in">
+    <section class="calendar-hero-professional slide-up" data-aos="fade-up">
+        <div>
+            <h1>Community Calendar</h1>
+            <p>Plan ahead with a clear monthly view of all community events.</p>
+        </div>
+        <div class="calendar-summary-cards" id="calendar-summary">
+            <div class="summary-card">
+                <span class="summary-value" id="summary-total-events">0</span>
+                <span class="summary-label">Total Events</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-value" id="summary-active-days">0</span>
+                <span class="summary-label">Active Days</span>
+            </div>
+        </div>
+    </section>
+
+    <nav class="programs-nav programs-nav-professional" data-aos="fade-up" data-aos-delay="80">
+        <a href="{% url 'program_list' %}" class="programs-nav-item" data-section="all-events">
+            <i class="fas fa-calendar-check"></i> All Events
+        </a>
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'my_registrations' %}" class="programs-nav-item" data-section="my-registrations">
+            <i class="fas fa-bookmark"></i> My Registrations
+        </a>
+        {% endif %}
+        <a href="{% url 'calendar' %}" class="programs-nav-item active" data-section="community-calendar">
+            <i class="fas fa-calendar-alt"></i> Community Calendar
+        </a>
+    </nav>
+
+    <section class="calendar-section-full" data-aos="fade-up" data-aos-delay="120">
+        <div class="calendar-container-full slide-up">
+            <div class="calendar-nav">
+                <button id="prev-month" class="calendar-btn"><i class="fas fa-chevron-left"></i></button>
+                <h2 id="month-year" class="calendar-title"></h2>
+                <button id="next-month" class="calendar-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar-weekdays">
+                <div>Sun</div>
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
+            </div>
+            <div id="calendar-grid" class="calendar-grid"></div>
+            <div class="calendar-legend">
+                <div class="legend-item">
+                    <div class="legend-dot has-event"></div>
+                    <span>Events scheduled</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot today"></div>
+                    <span>Today</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="calendar-day-panel slide-up" id="calendar-day-panel" data-aos="fade-up" data-aos-delay="170">
+            <div class="day-panel-header">
+                <div>
+                    <h3 id="selected-date-label">Select a date</h3>
+                    <p id="selected-date-count">Choose any day to view scheduled events.</p>
+                </div>
+                <i class="fas fa-calendar-day"></i>
+            </div>
+
+            <div id="day-events-list" class="day-events-list"></div>
+
+            <div id="day-events-empty" class="day-events-empty">
+                <i class="fas fa-info-circle"></i>
+                <span>No events for this date.</span>
+            </div>
+        </div>
+
+        <div class="nepali-dates-panel slide-up" data-aos="fade-up" data-aos-delay="220">
+            <div class="nepali-dates-header">
+                <div>
+                    <h3>Nepali Dates, Festivals & Public Holidays</h3>
+                    <p>Key annual observances with Nepali date references for religious, cultural, and public events.
+                    </p>
+                </div>
+                <span class="nepali-dates-count" id="nepali-dates-count">{{ nepali_observances|length }} items</span>
+            </div>
+
+            <div class="nepali-filters" id="nepali-filters">
+                <div class="nepali-filter-group">
+                    <label for="nepali-month-filter">Month</label>
+                    <select id="nepali-month-filter" class="nepali-filter-select">
+                        <option value="all">All Months</option>
+                        {% for month in nepali_observance_months %}
+                        <option value="{{ month }}">{{ month }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="nepali-filter-group nepali-category-filter" role="group" aria-label="Filter by category">
+                    <button type="button" class="nepali-filter-btn active" data-category="all">All</button>
+                    <button type="button" class="nepali-filter-btn" data-category="festival">Festival</button>
+                    <button type="button" class="nepali-filter-btn" data-category="religious">Religious</button>
+                    <button type="button" class="nepali-filter-btn" data-category="holiday">Public Holiday</button>
+                    <button type="button" class="nepali-filter-btn" data-category="cultural">Cultural</button>
+                </div>
+            </div>
+
+            <div class="nepali-events-grid">
+                {% for observance in nepali_observances %}
+                <article class="nepali-event-card {{ observance.category_slug }}"
+                    data-category="{{ observance.category_slug }}" data-months="{{ observance.month_tags_csv }}">
+                    <div class="nepali-event-top">
+                        <h4>{{ observance.title }}</h4>
+                        <span class="nepali-event-category">{{ observance.category }}</span>
+                    </div>
+                    <div class="nepali-event-dates">
+                        <span><i class="fas fa-calendar-day"></i> {{ observance.nepali_date }}</span>
+                        <span><i class="fas fa-clock"></i> {{ observance.period }}</span>
+                    </div>
+                    <p>{{ observance.details }}</p>
+                </article>
+                {% endfor %}
+            </div>
+
+            <div class="nepali-events-empty" id="nepali-events-empty">
+                <i class="fas fa-info-circle"></i>
+                <span>No observances match this filter.</span>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="{% static 'js/events.js' %}"></script>
+
+<script>
+    // Pass event calendar data to JavaScript
+    window.allPrograms = {{ events_json | safe }} || {};
+
+    (function () {
+        const allPrograms = window.allPrograms || {};
+        let totalEvents = 0;
+        let activeDays = 0;
+
+        Object.keys(allPrograms).forEach((dateKey) => {
+            const dayInfo = allPrograms[dateKey];
+            if (dayInfo && dayInfo.count) {
+                activeDays += 1;
+                totalEvents += dayInfo.count;
+            }
+        });
+
+        const totalEventsEl = document.getElementById('summary-total-events');
+        const activeDaysEl = document.getElementById('summary-active-days');
+
+        if (totalEventsEl) totalEventsEl.textContent = totalEvents;
+        if (activeDaysEl) activeDaysEl.textContent = activeDays;
+    })();
+</script>
+
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Contact - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/programs.css' %}">
+<link rel="stylesheet" href="{% static 'css/contacts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="program-hero">
+        <h1>Get in Touch</h1>
+        <p style="margin-top:0.5rem;">We'd love to hear from you. We reply within 24 hours.</p>
+    </section>
+
+    <div class="contact-cards">
+        <div class="contact-card card-location">
+            <div class="card-illustration">
+                <span class="illustration-ring"></span>
+                <i class="fas fa-map-marked-alt"></i>
+            </div>
+            <h3>Community Center</h3>
+            <p>123 Main Street, Vancouver, BC V6A 1A1</p>
+            <p>Near Kingsway and Main</p>
+            <button class="btn">Get Directions</button>
+        </div>
+        <div class="contact-card card-phone">
+            <div class="card-illustration">
+                <span class="illustration-ring"></span>
+                <i class="fas fa-phone"></i>
+            </div>
+            <h3>Call Us</h3>
+            <p>Main: +1 (604) 555-0123</p>
+            <p>Emergency: +1 (604) 555-0199</p>
+            <button class="btn">Click to Call</button>
+        </div>
+        <div class="contact-card card-email">
+            <div class="card-illustration">
+                <span class="illustration-ring"></span>
+                <i class="fas fa-envelope"></i>
+            </div>
+            <h3>Email Us</h3>
+            <p>info@nepalicommunityvancouver.ca</p>
+            <button class="btn">Send Email</button>
+        </div>
+        <div class="contact-card card-social">
+            <div class="card-illustration">
+                <span class="illustration-ring"></span>
+                <i class="fas fa-share-alt"></i>
+            </div>
+            <h3>Follow Us</h3>
+            <div class="social-links">
+                <a href="#" aria-label="Facebook" data-name="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="#" aria-label="Instagram" data-name="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" aria-label="Twitter" data-name="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" aria-label="YouTube" data-name="YouTube"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <h2>Send a Message</h2>
+    <form method="post" enctype="multipart/form-data" class="contact-form">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group animated-group">
+                <label for="id_name" class="form-label">
+                    <i class="fas fa-user"></i> Your Name <span class="required">*</span>
+                </label>
+                {{ form.name }}
+                <div class="input-hint">What should we call you?</div>
+            </div>
+
+            <div class="form-group animated-group">
+                <label for="id_email" class="form-label">
+                    <i class="fas fa-envelope"></i> Email <span class="required">*</span>
+                </label>
+                {{ form.email }}
+                <div class="input-hint">We'll reply to this address</div>
+            </div>
+
+            <div class="form-group animated-group">
+                <label for="id_phone" class="form-label">
+                    <i class="fas fa-phone"></i> Phone
+                </label>
+                {{ form.phone }}
+                <div class="input-hint">Optional - we might call for follow-up</div>
+            </div>
+        </div>
+
+        <div class="form-group animated-group">
+            <label for="id_subject" class="form-label">
+                <i class="fas fa-comment-alt"></i> Subject <span class="required">*</span>
+            </label>
+            {{ form.subject }}
+            <div class="input-hint">What is your message about?</div>
+        </div>
+
+        <div class="form-group animated-group">
+            <label for="id_message" class="form-label">
+                <i class="fas fa-pen-fancy"></i> Message <span class="required">*</span>
+            </label>
+            {{ form.message }}
+            <div class="input-hint">Tell us what's on your mind</div>
+        </div>
+
+        <div class="form-group animated-group">
+            <label for="id_attachment" class="form-label">
+                <i class="fas fa-paperclip"></i> Attachment
+            </label>
+            {{ form.attachment }}
+            <div class="input-hint">Optional - attach a file if needed</div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-large submit-btn">
+                <i class="fas fa-paper-plane"></i> Send Message
+            </button>
+        </div>
+    </form>
+
+    <section style="margin:2rem 0;">
+        <h2>Our Location</h2>
+        <p style="margin: 0 0 0.75rem 0;">Hindu Buddhist Foundation, Surrey, BC, Canada</p>
+        <iframe src="https://www.google.com/maps?q=Hindu%20Buddhist%20Foundation%20Surrey%20BC%20Canada&output=embed"
+            width="100%" height="300" frameborder="0" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    </section>
+</div>
+{% endblock %}

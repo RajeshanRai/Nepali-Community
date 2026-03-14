@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Apply - {{ opportunity.title }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'volunteers/css/volunteers.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container volunteer-apply-page">
+    <div class="breadcrumb">
+        <a href="{% url 'volunteer_detail' opportunity.pk %}"><i class="fas fa-arrow-left"></i> Back to Opportunity</a>
+    </div>
+
+    <div class="apply-container">
+        <div class="apply-header">
+            <h1><i class="fas fa-paper-plane"></i> Apply to Volunteer</h1>
+            <h2>{{ opportunity.title }}</h2>
+        </div>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" class="volunteer-application-form">
+            {% csrf_token %}
+
+            <div class="form-section">
+                <h3><i class="fas fa-user"></i> Your Information</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.name.id_for_label }}">{{ form.name.label }} <span
+                                class="required">*</span></label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <span class="error">{{ form.name.errors }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row two-columns">
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}">{{ form.email.label }} <span
+                                class="required">*</span></label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <span class="error">{{ form.email.errors }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                        <span class="error">{{ form.phone.errors }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-heart"></i> Tell Us About Yourself</h3>
+
+                <div class="form-group">
+                    <label for="{{ form.motivation.id_for_label }}">{{ form.motivation.label }} <span
+                            class="required">*</span></label>
+                    {{ form.motivation }}
+                    {% if form.motivation.errors %}
+                    <span class="error">{{ form.motivation.errors }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.experience.id_for_label }}">{{ form.experience.label }}</label>
+                    {{ form.experience }}
+                    {% if form.experience.errors %}
+                    <span class="error">{{ form.experience.errors }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.availability.id_for_label }}">{{ form.availability.label }}</label>
+                    {{ form.availability }}
+                    {% if form.availability.errors %}
+                    <span class="error">{{ form.availability.errors }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-large">
+                    <i class="fas fa-paper-plane"></i> Submit Application
+                </button>
+                <a href="{% url 'volunteer_detail' opportunity.pk %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

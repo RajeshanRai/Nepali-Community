@@ -1,0 +1,907 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}Pending Approval{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/projects-pending.css' %}">
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">Projects</li>
+<li class="breadcrumb-item active">Pending Approval</li>
+{% endblock %}
+
+{% block page_header %}
+{% url 'dashboard:projects_all' as projects_all_url %}
+{% include 'dashboard/includes/page_header.html' with title='Pending Project Approvals' subtitle='Review, approve, or reject incoming event requests with full context.' icon_class='fas fa-hourglass-half' action_url=projects_all_url action_label='View All Projects' action_icon='fas fa-folder-open' action_variant='btn btn-outline' %}
+{% endblock %}
+
+{% block content %}
+<div class="pending-stats-grid">
+    <div class="pending-stat-card accent-warning">
+        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+        <div class="stat-info">
+            <h3>{{ projects|length }}</h3>
+            <p>Pending Requests</p>
+        </div>
+    </div>
+    <div class="pending-stat-card accent-info">
+        <div class="stat-icon"><i class="fas fa-users"></i></div>
+        <div class="stat-info">
+            <h3 id="visibleRowsCount">{{ projects|length }}</h3>
+            <p>Visible in Table</p>
+        </div>
+    </div>
+    <div class="pending-stat-card accent-primary">
+        <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+        <div class="stat-info">
+            <h3>Quick Actions</h3>
+            <p>Approve or reject instantly</p>
+        </div>
+    </div>
+</div>
+
+<div class="content-card pending-card">
+    <div class="content-card-header pending-toolbar">
+        <div class="toolbar-left">
+            <div class="search-box-inline">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchRequests" placeholder="Search title, requester, location...">
+            </div>
+        </div>
+        <div class="toolbar-right">
+            <select id="typeFilter" class="toolbar-select">
+                <option value="all">All Types</option>
+                <option value="festival">Festival</option>
+                <option value="workshop">Workshop</option>
+                <option value="meeting">Meeting</option>
+                <option value="cultural">Cultural</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="content-card-body">
+        <div class="table-responsive pending-table-wrap table-mobile-friendly">
+            <table class="data-table pending-table sticky-header">
+                <thead>
+                    <tr>
+                        <th>#ID</th>
+                        <th>Project Request</th>
+                        <th>Type</th>
+                        <th>Requester</th>
+                        <th>Requested Event Date</th>
+                        <th>Submitted</th>
+                        <th>Target Attendees</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in projects %}
+                    <tr data-type="{{ request.event_type|default:'other' }}">
+                        <td>#{{ request.id }}</td>
+                        <td>
+                            <div class="project-title-cell">
+                                <strong>{{ request.title }}</strong>
+                                <small class="text-muted">{{ request.description|truncatewords:16 }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="type-pill type-{{ request.event_type|default:'other' }}">
+                                {{ request.get_event_type_display|default:'Other' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if request.requester %}
+                            <div class="requester-cell">
+                                <strong>
+                                    {{ request.requester.get_full_name|default:request.requester.username}}</strong>
+                                <small>{{ request.requester_email|default:request.requester.email }}</small>
+                            </div>
+                            {% else %}
+                            <div class="requester-cell">
+                                <strong>{{ request.requester_name|default:'Guest User' }}</strong>
+                                <small>{{ request.requester_email|default:'No email provided' }}</small>
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>{{ request.date|date:"M d, Y"|default:"Not specified" }}</td>
+                        <td>{{ request.submitted_at|date:"M d, Y" }}</td>
+                        <td>
+                            {% if request.target_attendees %}
+                            <span class="attendees-pill">{{ request.target_attendees }}</span>
+                            {% else %}
+                            <span class="attendees-pill muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="status-badge status-pending">{{ request.get_status_display }}</span></td>
+                        <td>
+                            <div class="action-buttons enhanced-actions">
+                                <button class="btn-icon btn-view" title="View Details"
+                                    onclick="viewDetails({{ request.id }}, '{{ request.title|escapejs }}', '{{ request.get_event_type_display|default:'Other'|escapejs }}', '{{ request.requester_name|default:'Guest'|escapejs }}', '{{ request.requester_email|default:'No email'|escapejs }}', '{{ request.location|default:'No location'|escapejs }}', '{{ request.description|default:'No description'|escapejs }}', '{{ request.date|date:'M d, Y'|default:'Not specified'|escapejs }}', '{{ request.target_attendees|default:'N/A'|escapejs }}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn-icon btn-approve" title="Approve Request"
+                                    onclick="approveRequest({{ request.id }})">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn-icon btn-reject" title="Reject Request"
+                                    onclick="rejectRequest({{ request.id }})">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted">No pending requests at the moment.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="detailsModal" class="details-modal" aria-hidden="true">
+    <div class="details-modal-backdrop" onclick="closeDetailsModal()"></div>
+    <div class="details-modal-content">
+        <div class="details-modal-header">
+            <h3><i class="fas fa-file-alt"></i> Request Details</h3>
+            <button class="modal-close" onclick="closeDetailsModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="details-modal-body">
+            <div class="details-grid">
+                <div><label>Title</label>
+                    <p id="detailTitle"></p>
+                </div>
+                <div><label>Type</label>
+                    <p id="detailType"></p>
+                </div>
+                <div><label>Requester</label>
+                    <p id="detailRequester"></p>
+                </div>
+                <div><label>Email</label>
+                    <p id="detailEmail"></p>
+                </div>
+                <div><label>Event Date</label>
+                    <p id="detailDate"></p>
+                </div>
+                <div><label>Target Attendees</label>
+                    <p id="detailAttendees"></p>
+                </div>
+                <div class="details-full"><label>Location</label>
+                    <p id="detailLocation"></p>
+                </div>
+                <div class="details-full"><label>Description</label>
+                    <p id="detailDescription"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Decision Modal -->
+<div id="decisionModal" class="decision-modal" style="display: none;">
+    <div class="decision-modal-backdrop" onclick="closeDecisionModal()"></div>
+    <div class="decision-modal-content">
+        <div class="decision-modal-body">
+            <h2 id="modalTitle"><i class="fas fa-question-circle"></i> Confirm Action?</h2>
+            <p>This action cannot be undone.</p>
+        </div>
+        <div class="decision-modal-footer">
+            <button class="btn btn-secondary" onclick="closeDecisionModal()">Cancel</button>
+            <button id="confirmActionBtn" class="btn btn-success" onclick="">Yes, Approve</button>
+        </div>
+    </div>
+</div>
+
+<!-- CSRF Token for AJAX requests -->
+{% csrf_token %}
+
+<script>
+    // Get CSRF token from hidden input field in the page
+    function getCSRFToken() {
+        const tokenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (tokenInput) {
+            return tokenInput.value;
+        }
+        // Fallback: try to get from cookie
+        const name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Async handler for AJAX requests
+    if (!window.DashboardUI) window.DashboardUI = {};
+    if (!DashboardUI.AsyncHandler) {
+        DashboardUI.AsyncHandler = {
+            execute: async function(asyncFunction, options = {}) {
+                const { button, successMessage, onSuccess, onError } = options;
+                
+                try {
+                    console.log('AsyncHandler.execute called');
+                    const result = await asyncFunction();
+                    console.log('Async function completed successfully:', result);
+                    
+                    if (successMessage) {
+                        showToast(successMessage, 'success');
+                    }
+                    
+                    if (typeof onSuccess === 'function') {
+                        onSuccess(result);
+                    }
+                } catch (error) {
+                    console.error('AsyncHandler error:', error);
+                    
+                    let errorMessage = 'An error occurred';
+                    if (error.message) {
+                        errorMessage = error.message;
+                    }
+                    
+                    showToast(errorMessage, 'error');
+                    
+                    if (typeof onError === 'function') {
+                        onError(error);
+                    }
+                } finally {
+                    // Reset button state
+                    if (button && DashboardUI.ButtonManager) {
+                        DashboardUI.ButtonManager.setLoading(button, false);
+                    }
+                }
+            }
+        };
+    }
+
+    // Button manager for loading states
+    if (!DashboardUI.ButtonManager) {
+        DashboardUI.ButtonManager = {
+            setLoading: function(button, isLoading = true) {
+                if (!button) return;
+                
+                const originalText = button.innerHTML;
+                
+                if (isLoading) {
+                    button.classList.add('loading');
+                    button.disabled = true;
+                    button.dataset.originalText = originalText;
+                    button.innerHTML = '<span class="spinner"></span> ' + (button.dataset.loadingText || 'Loading...');
+                } else {
+                    button.classList.remove('loading');
+                    button.disabled = false;
+                    button.innerHTML = button.dataset.originalText || originalText;
+                }
+            }
+        };
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+        const container = document.querySelector('.toast-container');
+        if (!container) {
+            console.log(`[${type.toUpperCase()}]:`, message);
+            return;
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    const searchInput = document.getElementById('searchRequests');
+    const typeFilter = document.getElementById('typeFilter');
+    const rows = document.querySelectorAll('.pending-table tbody tr[data-type]');
+    const visibleRowsCount = document.getElementById('visibleRowsCount');
+
+    // Store approval/rejection request ID for modal
+    let pendingActionId = null;
+
+    // Custom modal for decision
+    function showDecisionModal(id, action) {
+        console.log('showDecisionModal called with id:', id, 'action:', action);
+        pendingActionId = id;
+        const modal = document.getElementById('decisionModal');
+        const titleEl = document.getElementById('modalTitle');
+        const confirmBtn = document.getElementById('confirmActionBtn');
+        
+        console.log('Modal element:', modal);
+        console.log('Title element:', titleEl);
+        console.log('Confirm button:', confirmBtn);
+        
+        if (action === 'approve') {
+            titleEl.innerHTML = '<i class="fas fa-check-circle" style="color: #4caf50;"></i> Approve Request?';
+            confirmBtn.textContent = 'Yes, Approve';
+            confirmBtn.className = 'btn btn-success';
+            confirmBtn.onclick = executeApprove;
+        } else {
+            titleEl.innerHTML = '<i class="fas fa-times-circle" style="color: #f44336;"></i> Reject Request?';
+            confirmBtn.textContent = 'Yes, Reject';
+            confirmBtn.className = 'btn btn-danger';
+            confirmBtn.onclick = executeReject;
+        }
+        
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        console.log('Modal should now be visible');
+    }
+
+    function closeDecisionModal() {
+        const modal = document.getElementById('decisionModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        pendingActionId = null;
+    }
+
+    function executeApprove() {
+        console.log('executeApprove called with pendingActionId:', pendingActionId);
+        if (!pendingActionId) {
+            console.log('No pendingActionId, returning');
+            return;
+        }
+        
+        const requestId = pendingActionId;
+        const confirmBtn = document.getElementById('confirmActionBtn');
+        
+        console.log('Setting loading state on button:', confirmBtn);
+        // Set loading state
+        DashboardUI.ButtonManager.setLoading(confirmBtn, true);
+        confirmBtn.dataset.loadingText = 'Processing...';
+        
+        closeDecisionModal();
+        
+        const csrfToken = getCSRFToken();
+        console.log('CSRF token for approve:', csrfToken ? csrfToken.substring(0, 10) + '...' : 'NOT FOUND');
+        if (!csrfToken) {
+            DashboardUI.ButtonManager.setLoading(confirmBtn, false);
+            showToast('CSRF token not found. Please refresh the page and try again.', 'error');
+            console.error('CSRF Token Debug:', {
+                fromInput: document.querySelector('input[name="csrfmiddlewaretoken"]')?.value,
+                pageHTML: document.documentElement.innerHTML.substring(0, 500)
+            });
+            return;
+        }
+
+        console.log('Calling DashboardUI.AsyncHandler.execute for approve');
+        DashboardUI.AsyncHandler.execute(
+            async () => {
+                console.log('Making approve request to:', `/dashboard/requests/${requestId}/approve/`);
+                const formData = new FormData();
+                formData.append('csrfmiddlewaretoken', csrfToken);
+                
+                const response = await fetch(`/dashboard/requests/${requestId}/approve/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+                
+                console.log('Approve response status:', response.status);
+                if (!response.ok) {
+                    console.log('Approve response not ok, getting text...');
+                    const text = await response.text();
+                    console.log('Approve error response:', text.substring(0, 200));
+                    throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
+                }
+                
+                const data = await response.json();
+                console.log('Approve response data:', data);
+                return data;
+            },
+            {
+                button: confirmBtn,
+                successMessage: 'Request approved successfully!',
+                onSuccess: () => {
+                    setTimeout(() => location.reload(), 1000);
+                },
+                onError: (error) => {
+                    console.error('Approval error:', error);
+                }
+            }
+        );
+    }
+
+    function executeReject() {
+        console.log('executeReject called with pendingActionId:', pendingActionId);
+        if (!pendingActionId) {
+            console.log('No pendingActionId, returning');
+            return;
+        }
+        
+        const requestId = pendingActionId;
+        const confirmBtn = document.getElementById('confirmActionBtn');
+        
+        console.log('Setting loading state on button:', confirmBtn);
+        // Set loading state
+        DashboardUI.ButtonManager.setLoading(confirmBtn, true);
+        confirmBtn.dataset.loadingText = 'Processing...';
+        
+        closeDecisionModal();
+        
+        const csrfToken = getCSRFToken();
+        console.log('CSRF token for reject:', csrfToken ? csrfToken.substring(0, 10) + '...' : 'NOT FOUND');
+        if (!csrfToken) {
+            DashboardUI.ButtonManager.setLoading(confirmBtn, false);
+            showToast('CSRF token not found. Please refresh the page and try again.', 'error');
+            return;
+        }
+
+        console.log('Calling DashboardUI.AsyncHandler.execute for reject');
+        DashboardUI.AsyncHandler.execute(
+            async () => {
+                console.log('Making fetch request to reject URL:', `/dashboard/requests/${requestId}/reject/`);
+                const formData = new FormData();
+                formData.append('csrfmiddlewaretoken', csrfToken);
+                console.log('Request body contains CSRF token');
+                
+                const response = await fetch(`/dashboard/requests/${requestId}/reject/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    console.log('Response not ok, throwing error');
+                    const text = await response.text();
+                    console.log('Error response text:', text.substring(0, 200));
+                    throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
+                }
+                
+                const jsonResponse = await response.json();
+                console.log('Response JSON:', jsonResponse);
+                return jsonResponse;
+            },
+            {
+                button: confirmBtn,
+                successMessage: 'Request rejected successfully',
+                onSuccess: () => {
+                    setTimeout(() => location.reload(), 1000);
+                },
+                onError: (error) => {
+                    console.error('Rejection error:', error);
+                }
+            }
+        );
+    }
+
+    function applyFilters() {
+        const searchTerm = (searchInput?.value || '').toLowerCase();
+        const selectedType = typeFilter?.value || 'all';
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const rowText = row.textContent.toLowerCase();
+            const rowType = row.getAttribute('data-type');
+            const matchesSearch = rowText.includes(searchTerm);
+            const matchesType = selectedType === 'all' || rowType === selectedType;
+
+            if (matchesSearch && matchesType) {
+                row.style.display = '';
+                visibleCount += 1;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (visibleRowsCount) {
+            visibleRowsCount.textContent = visibleCount;
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', applyFilters);
+    }
+
+    if (typeFilter) {
+        typeFilter.addEventListener('change', applyFilters);
+    }
+
+    function approveRequest(id) {
+        console.log('approveRequest called with id:', id);
+        showDecisionModal(id, 'approve');
+    }
+
+    function rejectRequest(id) {
+        console.log('rejectRequest called with id:', id);
+        showDecisionModal(id, 'reject');
+    }
+
+    function viewDetails(id, title, type, requester, email, location, description, date, attendees) {
+        document.getElementById('detailTitle').textContent = title;
+        document.getElementById('detailType').textContent = type;
+        document.getElementById('detailRequester').textContent = requester;
+        document.getElementById('detailEmail').textContent = email;
+        document.getElementById('detailLocation').textContent = location;
+        document.getElementById('detailDescription').textContent = description;
+        document.getElementById('detailDate').textContent = date;
+        document.getElementById('detailAttendees').textContent = attendees;
+
+        const modal = document.getElementById('detailsModal');
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetailsModal() {
+        const modal = document.getElementById('detailsModal');
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    window.closeDetailsModal = closeDetailsModal;
+
+    // Close modals on ESC key
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeDetailsModal();
+            closeDecisionModal();
+        }
+    });
+
+    // Close decision modal when clicking backdrop
+    document.addEventListener('click', function (e) {
+        if (e.target.id === 'decisionModal') {
+            closeDecisionModal();
+        }
+    });
+
+    applyFilters();
+</script>
+
+<style>
+/* Enhanced Mobile Responsiveness for Pending Projects Table */
+@media (max-width: 1200px) {
+    .pending-table {
+        font-size: 0.9rem;
+    }
+    .pending-table thead th {
+        padding: 0.75rem 0.5rem;
+    }
+    .pending-table tbody td {
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .pending-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .pending-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+    }
+    
+    .pending-table {
+        font-size: 0.85rem;
+        min-width: 900px;
+    }
+    
+    .sticky-header thead {
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.25rem;
+        white-space: nowrap;
+    }
+    
+    .btn-icon {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .pending-stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .pending-card {
+        border-radius: 8px;
+    }
+    
+    .pending-toolbar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .toolbar-left,
+    .toolbar-right {
+        width: 100%;
+    }
+    
+    .search-box-inline {
+        width: 100%;
+    }
+    
+    .search-box-inline input {
+        width: 100%;
+    }
+    
+    .toolbar-select {
+        width: 100%;
+    }
+    
+    .pending-table {
+        font-size: 0.8rem;
+        min-width: 750px;
+    }
+    
+    .pending-table thead th {
+        padding: 0.5rem 0.4rem;
+        font-weight: 600;
+    }
+    
+    .pending-table tbody td {
+        padding: 0.5rem 0.4rem;
+    }
+    
+    .project-title-cell small {
+        display: none;
+    }
+    
+    .requester-cell small {
+        display: block;
+        font-size: 0.7rem;
+        margin-top: 0.2rem;
+    }
+    
+    .type-pill {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .pending-table {
+        font-size: 0.7rem;
+        min-width: 640px;
+    }
+    
+    .pending-table thead th {
+        padding: 0.4rem 0.3rem;
+        font-size: 0.65rem;
+    }
+    
+    .pending-table tbody td {
+        padding: 0.4rem 0.3rem;
+        font-size: 0.65rem;
+    }
+    
+    /* Hide non-essential columns on very small screens */
+    .pending-table th:nth-child(6),
+    .pending-table td:nth-child(6),
+    .pending-table th:nth-child(7),
+    .pending-table td:nth-child(7) {
+        display: none;
+    }
+    
+    .type-pill {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.6rem;
+    }
+    
+    .action-buttons {
+        white-space: nowrap;
+        gap: 0.2rem;
+    }
+    
+    .btn-icon {
+        padding: 0.3rem 0.35rem;
+        font-size: 0.6rem;
+    }
+    
+    .btn-icon i {
+        font-size: 0.65rem;
+    }
+    
+    .project-title-cell strong {
+        font-size: 0.65rem;
+    }
+    
+    .requester-cell {
+        font-size: 0.65rem;
+    }
+    
+    .requester-cell strong {
+        display: block;
+    }
+}
+
+/* Enhanced scrolling indicator for tablets and phones */
+.table-mobile-friendly {
+    position: relative;
+}
+
+.table-mobile-friendly::after {
+    content: '→ Scroll →';
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 0.7rem;
+    color: #999;
+    pointer-events: none;
+    display: none;
+    font-weight: 600;
+}
+
+@media (max-width: 992px) {
+    .table-mobile-friendly::after {
+        display: block;
+    }
+}
+
+/* Custom Decision Modal Styles */
+.decision-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.decision-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+.decision-modal-content {
+    position: relative;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    padding: 2rem;
+    animation: slideDown 0.3s ease;
+    z-index: 10000;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.decision-modal-body {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.decision-modal-body h2 {
+    font-size: 1.5rem;
+    margin: 1rem 0 0.5rem 0;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.decision-modal-body p {
+    color: #666;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.decision-modal-footer {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.decision-modal-footer .btn {
+    min-width: 120px;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.decision-modal-footer .btn-secondary {
+    background-color: #e9ecef;
+    color: #333;
+}
+
+.decision-modal-footer .btn-secondary:hover {
+    background-color: #dee2e6;
+}
+
+.decision-modal-footer .btn-success {
+    background-color: #4caf50;
+    color: white;
+}
+
+.decision-modal-footer .btn-success:hover {
+    background-color: #45a049;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.decision-modal-footer .btn-danger {
+    background-color: #f44336;
+    color: white;
+}
+
+.decision-modal-footer .btn-danger:hover {
+    background-color: #da190b;
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+/* Improve action button visibility */
+.enhanced-actions {
+    display: flex !important;
+    gap: 0.3rem !important;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.enhanced-actions .btn-icon {
+    flex-shrink: 0;
+}
+
+/* Status badge responsiveness */
+.status-badge {
+    display: inline-block;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+@media (max-width: 576px) {
+    .status-badge {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.65rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,393 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Support Our Community - Donate Today{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet">
+<link rel="stylesheet" href="{% static 'donations/donate.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="donate-hero">
+    <div class="donate-hero-content">
+        <h1>Support Our Community</h1>
+        <p>Every donation strengthens the Nepali Community of Vancouver</p>
+    </div>
+</div>
+
+
+<!-- Main Form -->
+<div class="donation-form-container">
+    <div class="form-card">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="error-message">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post" id="donationForm">
+            {% csrf_token %}
+
+            <!-- Tier Selection -->
+            <h2 class="form-section-title"><i class="fas fa-layer-group"></i> Select Your Donation Level</h2>
+
+            <div class="tier-grid">
+                <div class="tier-option">
+                    <input type="radio" name="donation_amount" value="20" id="tier20" required>
+                    <label for="tier20" class="tier-label">
+                        <div class="tier-card">
+                            <span class="tier-badge">Popular</span>
+                            <h3 class="tier-name">Supporter</h3>
+                            <div class="tier-amount">$20</div>
+                            <p class="tier-desc">One-time or Monthly</p>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="tier-option">
+                    <input type="radio" name="donation_amount" value="50" id="tier50">
+                    <label for="tier50" class="tier-label">
+                        <div class="tier-card">
+                            <span class="tier-badge">Recommended</span>
+                            <h3 class="tier-name">Friend</h3>
+                            <div class="tier-amount">$50</div>
+                            <p class="tier-desc">One-time or Monthly</p>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="tier-option">
+                    <input type="radio" name="donation_amount" value="100" id="tier100">
+                    <label for="tier100" class="tier-label">
+                        <div class="tier-card">
+                            <span class="tier-badge">Premium</span>
+                            <h3 class="tier-name">Patron</h3>
+                            <div class="tier-amount">$100</div>
+                            <p class="tier-desc">One-time or Monthly</p>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="tier-option">
+                    <input type="radio" name="donation_amount" value="custom" id="tierCustom">
+                    <label for="tierCustom" class="tier-label">
+                        <div class="tier-card">
+                            <span class="tier-badge">Custom</span>
+                            <h3 class="tier-name">Your Choice</h3>
+                            <div class="tier-amount">$?</div>
+                            <p class="tier-desc">Any Amount</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Custom Amount -->
+            <div class="custom-amount-container" id="customAmountContainer">
+                <label for="{{ form.custom_amount.id_for_label }}">
+                    <i class="fas fa-pen-fancy"></i> Enter Your Custom Amount
+                </label>
+                {{ form.custom_amount }}
+                {% if form.custom_amount.errors %}
+                <small style="color: var(--primary); margin-top: 0.5rem;">{{ form.custom_amount.errors }}</small>
+                {% endif %}
+            </div>
+
+            <!-- Donor Information -->
+            <h2 class="form-section-title"><i class="fas fa-user-circle"></i> Your Information</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.donor_name.id_for_label }}">
+                        <i class="fas fa-signature"></i> Full Name
+                    </label>
+                    {{ form.donor_name }}
+                    {% if form.donor_name.errors %}
+                    <small style="color: var(--primary);">{{ form.donor_name.errors }}</small>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.donor_email.id_for_label }}">
+                        <i class="fas fa-envelope"></i> Email Address
+                    </label>
+                    {{ form.donor_email }}
+                    {% if form.donor_email.errors %}
+                    <small style="color: var(--primary);">{{ form.donor_email.errors }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Interact Email -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.interact_email.id_for_label }}">
+                        <i class="fas fa-exchange-alt"></i> Interact e-Transfer Email
+                    </label>
+                    {{ form.interact_email }}
+                    {% if form.interact_email.errors %}
+                    <small style="color: var(--primary);">{{ form.interact_email.errors }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Options -->
+            <h2 class="form-section-title"><i class="fas fa-sliders-h"></i> Donation Options</h2>
+
+            <div class="checkbox-container">
+                <div class="checkbox-item">
+                    {{ form.is_recurring }}
+                    <label for="{{ form.is_recurring.id_for_label }}">
+                        <strong>Make this a monthly recurring donation</strong>
+                        <small>Support our community with an automatic monthly contribution</small>
+                    </label>
+                </div>
+
+                <div class="checkbox-item">
+                    {{ form.anonymous }}
+                    <label for="{{ form.anonymous.id_for_label }}">
+                        <strong>Keep my donation anonymous</strong>
+                        <small>Your contribution will remain private</small>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Purpose -->
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label for="{{ form.purpose.id_for_label }}">
+                    <i class="fas fa-heart"></i> Purpose (Optional)
+                </label>
+                {{ form.purpose }}
+                <small style="color: #666; margin-top: 0.5rem;">e.g., "Scholarship Fund", "Community Programs",
+                    "Cultural Events"</small>
+                {% if form.purpose.errors %}
+                <small style="color: var(--primary);">{{ form.purpose.errors }}</small>
+                {% endif %}
+            </div>
+
+            <!-- Payment Method Selection -->
+            <h2 class="form-section-title"><i class="fas fa-credit-card"></i> Payment Method</h2>
+
+            <div class="payment-method-selector"
+                data-selected-payment="{{ form.payment_method.value|default:'interact' }}">
+                {% for value, label in form.payment_method.field.choices %}
+                <div class="payment-option">
+                    <input type="radio" name="{{ form.payment_method.name }}" value="{{ value }}"
+                        id="payment_{{ value }}" onchange="togglePaymentMethod('{{ value }}')">
+                    <label for="payment_{{ value }}" class="payment-label">
+                        <span class="payment-icon">
+                            {% if value == "interact" %}
+                            <i class="fas fa-university"></i>
+                            {% else %}
+                            <i class="fas fa-credit-card"></i>
+                            {% endif %}
+                        </span>
+                        <span class="payment-text">
+                            <strong>{{ label }}</strong>
+                            {% if value == "interact" %}
+                            <small>Fast • Secure • Direct Bank Transfer</small>
+                            {% else %}
+                            <small>Visa • Mastercard • Debit Card</small>
+                            {% endif %}
+                        </span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if form.payment_method.errors %}
+            <small style="color: var(--primary); margin-top: 0.5rem;">{{ form.payment_method.errors }}</small>
+            {% endif %}
+
+            <!-- Interact Payment Section -->
+            <div id="interactSection" class="payment-section">
+                <h2 class="form-section-title"><i class="fas fa-building-columns"></i> Interact e-Transfer Payment</h2>
+
+                <div class="interact-section">
+                    <div class="interact-header">
+                        <div class="interact-logo">💳</div>
+                        <div style="text-align: left;">
+                            <h3 class="interact-title">Interact e-Transfer</h3>
+                            <p class="interact-subtitle">✓ Safe • Secure • Bank-to-Bank</p>
+                        </div>
+                    </div>
+
+                    <p class="interact-desc">
+                        Transfer funds directly from your bank account to ours using Interact e-Transfer. This secure
+                        method ensures your
+                        donation reaches us quickly while minimizing transaction fees.
+                    </p>
+
+                    <!-- Interact Email -->
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="{{ form.interact_email.id_for_label }}">
+                            <i class="fas fa-envelope"></i> Interact Email
+                        </label>
+                        {{ form.interact_email }}
+                        {% if form.interact_email.errors %}
+                        <small style="color: var(--primary);">{{ form.interact_email.errors }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="interact-steps">
+                        <strong style="color: var(--dark); display: block; margin-bottom: 1rem;">
+                            <i class="fas fa-tasks"></i> How to Complete Your Donation:
+                        </strong>
+                        <ol>
+                            <li>Log into your <strong>bank's online or mobile app</strong></li>
+                            <li>Select the <strong>Interact e-Transfer</strong> option</li>
+                            <li>Enter the amount: <strong>$</strong><span id="transferAmount">20</span></li>
+                            <li>Send to: <span
+                                    style="color: var(--accent); font-weight: 700;">donations@nepalicommunityvancouver.ca</span>
+                            </li>
+                            <li>Add your <strong>reference number</strong> in the message (see confirmation email)</li>
+                            <li>Complete the transfer and we'll confirm within <strong>24 hours</strong></li>
+                        </ol>
+                    </div>
+
+                    <div style="text-align: center; padding: 1rem 0;">
+                        <span class="transfer-email">donations@nepalicommunityvancouver.ca</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Payment Section -->
+            <div id="cardSection" class="payment-section" style="display: none;">
+                <h2 class="form-section-title"><i class="fas fa-credit-card"></i> Card Payment</h2>
+
+                <div class="card-section">
+                    <div class="card-header">
+                        <div class="card-logo">💳</div>
+                        <div style="text-align: left;">
+                            <h3 class="card-title">Credit/Debit Card</h3>
+                            <p class="card-subtitle">✓ Visa • Mastercard • Debit</p>
+                        </div>
+                    </div>
+
+                    <p class="card-desc">
+                        Pay securely with your credit or debit card. Your payment will be processed immediately.
+                    </p>
+
+                    <!-- Card Name -->
+                    <div class="form-group">
+                        <label for="{{ form.card_name.id_for_label }}">
+                            <i class="fas fa-user-card"></i> Name on Card
+                        </label>
+                        {{ form.card_name }}
+                        {% if form.card_name.errors %}
+                        <small style="color: var(--primary);">{{ form.card_name.errors }}</small>
+                        {% endif %}
+                    </div>
+
+                    <!-- Card Number -->
+                    <div class="form-group">
+                        <label for="{{ form.card_number.id_for_label }}">
+                            <i class="fas fa-hashtag"></i> Card Number
+                        </label>
+                        {{ form.card_number }}
+                        {% if form.card_number.errors %}
+                        <small style="color: var(--primary);">{{ form.card_number.errors }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-row">
+                        <!-- Card Expiry -->
+                        <div class="form-group">
+                            <label for="{{ form.card_expiry.id_for_label }}">
+                                <i class="fas fa-calendar"></i> Expiry (MM/YY)
+                            </label>
+                            {{ form.card_expiry }}
+                            {% if form.card_expiry.errors %}
+                            <small style="color: var(--primary);">{{ form.card_expiry.errors }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Card CVV -->
+                        <div class="form-group">
+                            <label for="{{ form.card_cvv.id_for_label }}">
+                                <i class="fas fa-lock"></i> CVV
+                            </label>
+                            {{ form.card_cvv }}
+                            {% if form.card_cvv.errors %}
+                            <small style="color: var(--primary);">{{ form.card_cvv.errors }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="security-badge">
+                        <i class="fas fa-shield-alt"></i> Your card information is encrypted and secure
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="submit-container">
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <i class="fas fa-heart"></i> Proceed to Donate
+                </button>
+            </div>
+
+            <div class="security-note">
+                <i class="fas fa-shield-alt"></i> Your information is secure and protected. We never store payment card
+                details.
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- FAQ Section -->
+<div class="faq-section">
+    <h2 class="faq-title"><i class="fas fa-question-circle"></i> Frequently Asked Questions</h2>
+
+    <div class="faq-grid">
+        <div class="faq-item">
+            <h4><i class="fas fa-lock"></i> Is my donation secure?</h4>
+            <p>Yes! Both Interact e-Transfer and card payments are encrypted and secure. Your personal information is
+                protected and never shared with third parties.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4><i class="fas fa-credit-card"></i> What payment methods do you accept?</h4>
+            <p>We accept Interact e-Transfer and credit/debit cards (Visa, Mastercard). Choose the payment method that
+                works best for you.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4><i class="fas fa-recycle"></i> Can I donate monthly?</h4>
+            <p>Yes! Check the "Make this a monthly recurring donation" option, and we'll send you a reminder each month
+                or charge your card automatically (for card payments).</p>
+        </div>
+
+        <div class="faq-item">
+            <h4><i class="fas fa-receipt"></i> Do I get a tax receipt?</h4>
+            <p>Yes! Once your donation is confirmed, we'll email you an official tax receipt. Ensure you're registered
+                with Canada Revenue Agency.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4><i class="fas fa-shield-alt"></i> Is my card information safe?</h4>
+            <p>Absolutely! We use industry-standard encryption for card payments. We never store your full card details
+                on our servers.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4><i class="fas fa-handshake"></i> How will my donation help?</h4>
+            <p>Your donation supports scholarships, cultural programs, community events, youth initiatives, and services
+                for Nepali families.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4><i class="fas fa-user-secret"></i> Can my donation be anonymous?</h4>
+            <p>Yes! Check the anonymous option and your name won't appear in our public donor list while still
+                supporting the community.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'donations/donate.js' %}"></script>
+{% endblock %}

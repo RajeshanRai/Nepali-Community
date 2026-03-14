@@ -1,0 +1,26 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# All files
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# HTML and template files - disable line wrapping
+[*.html]
+max_line_length = off
+word_wrap = false
+trim_trailing_whitespace = true
+
+# Django templates
+[templates/**]
+indent_style = space
+indent_size = 4
+max_line_length = off
+word_wrap = false

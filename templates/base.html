@@ -1,0 +1,349 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-user-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#8B1E3F" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Nepali Community">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- Primary Meta Tags -->
+    <title>{% block title %}Nepali Community of Vancouver{% endblock %}</title>
+    <meta name="title"
+        content="{% block meta_title %}Nepali Community of Vancouver - Cultural Heritage & Events{% endblock %}">
+    <meta name="description"
+        content="{% block meta_description %}Join the vibrant Nepali community in Vancouver. Discover cultural events, festivals, volunteer opportunities, and connect with diverse Nepali ethnic communities preserving rich traditions.{% endblock %}">
+    <meta name="keywords"
+        content="{% block meta_keywords %}Nepali community Vancouver, Nepal cultural events, Nepali festivals, Dashain Vancouver, Tihar celebration, Nepali volunteers, Nepal culture Canada, ethnic communities, cultural heritage{% endblock %}">
+    <meta name="author" content="Nepali Community of Vancouver">
+    <link rel="canonical" href="{% block canonical_url %}{{ request.build_absolute_uri }}{% endblock %}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:title"
+        content="{% block og_title %}Nepali Community of Vancouver - Cultural Heritage & Events{% endblock %}">
+    <meta property="og:description"
+        content="{% block og_description %}Join the vibrant Nepali community in Vancouver. Discover cultural events, festivals, volunteer opportunities, and connect with diverse communities.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% static 'images/og-default.jpg' %}{% endblock %}">
+    <meta property="og:site_name" content="Nepali Community of Vancouver">
+    <meta property="og:locale" content="en_CA">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.build_absolute_uri }}">
+    <meta property="twitter:title" content="{% block twitter_title %}Nepali Community of Vancouver{% endblock %}">
+    <meta property="twitter:description"
+        content="{% block twitter_description %}Join the vibrant Nepali community in Vancouver. Discover cultural events, festivals, and volunteer opportunities.{% endblock %}">
+    <meta property="twitter:image"
+        content="{% block twitter_image %}{% static 'images/og-default.jpg' %}{% endblock %}">
+
+    <!-- Additional SEO -->
+    <meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow">
+    <meta name="language" content="English">
+    <meta name="geo.region" content="CA-BC">
+    <meta name="geo.placename" content="Vancouver">
+    <meta name="geo.position" content="49.2827;-123.1207">
+    <meta name="ICBM" content="49.2827, -123.1207">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇳🇵</text></svg>">
+    <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
+
+    {% include 'includes/site_head_assets.html' %}
+
+    <style>
+        @media (max-width: 1024px) {
+            #mobileMenuToggle.mobile-menu-toggle {
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 44px !important;
+                height: 44px !important;
+                min-width: 44px !important;
+                min-height: 44px !important;
+                margin: 6px 8px !important;
+                padding: 0 !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                pointer-events: auto !important;
+                color: #ffffff !important;
+                background: rgba(255, 255, 255, 0.12) !important;
+                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                border-radius: 10px !important;
+                position: relative !important;
+                z-index: 2147483647 !important;
+            }
+
+            #mobileMenuToggle.mobile-menu-toggle.hamburger-hidden {
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+
+            #mobileMenuToggle.mobile-menu-toggle i {
+                display: inline-flex !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                color: #ffffff !important;
+                font-size: 18px !important;
+                line-height: 1 !important;
+            }
+        }
+    </style>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Nepali Community of Vancouver",
+      "description": "A vibrant community preserving Nepali cultural heritage in Vancouver, Canada",
+      "url": "{{ request.scheme }}://{{ request.get_host }}",
+      "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'images/logo.png' %}",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Vancouver",
+        "addressRegion": "BC",
+        "addressCountry": "CA"
+      },
+      "sameAs": [
+        "https://www.facebook.com/nepalivancouver",
+        "https://www.instagram.com/nepalivancouver",
+        "https://twitter.com/nepalivancouver"
+      ]
+    }
+    </script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+    <!-- top navbar -->
+    <div class="top-navbar" role="navigation" aria-label="Top social navigation">
+        <div class="left">
+            <a href="/">
+                <i class="fas fa-seedling"></i>
+                Nepal Community in Vancouver
+            </a>
+        </div>
+        <div class="center">
+            &nbsp;
+        </div>
+        <div class="right">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
+            <a href="#" aria-label="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a>
+            <a href="#" aria-label="Discord"><i class="fab fa-discord" aria-hidden="true"></i></a>
+        </div>
+    </div>
+    <!-- Mobile menu overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+    <!-- main navbar -->
+    <div class="main-navbar" role="navigation" aria-label="Main site navigation">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu" aria-controls="navMenu" aria-expanded="false">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+        <nav class="nav-menu" id="navMenu" aria-label="Primary" aria-hidden="true">
+            <!-- Sidebar Header -->
+            <div class="nav-menu-header">
+
+                <div class="nav-menu-title">
+                    <h3>NCV</h3>
+                    <p>Nepali Community Vancouver</p>
+                </div>
+            </div>
+
+            <!-- Navigation Items -->
+            <div class="nav-menu-items">
+                <a href="{% url 'home' %}" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="{% url 'about' %}" class="nav-item">
+                    <i class="fas fa-info-circle"></i>
+                    <span>About Us</span>
+                </a>
+                <a href="{% url 'announcement_list' %}" class="nav-item">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>Announcements</span>
+                </a>
+                <a href="{% url 'contact' %}" class="nav-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>Contact</span>
+                </a>
+
+                <div class="nav-divider"></div>
+
+                <div class="dropdown">
+                    <a href="{% url 'program_list' %}" class="nav-item" aria-expanded="false" aria-haspopup="true"
+                        aria-controls="programsDropdown">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Programs & Events</span>
+                        <i class="fas fa-chevron-down dropdown-chevron" aria-hidden="true"></i>
+                    </a>
+                    <div class="dropdown-content" id="programsDropdown">
+                        <a href="{% url 'program_list' %}"><i class="fas fa-list"></i> All Events</a>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'my_registrations' %}"><i class="fas fa-clipboard-list"></i> My
+                            Registrations</a>
+                        {% endif %}
+                        <a href="{% url 'calendar' %}"><i class="fas fa-calendar"></i> Community Calendar</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <a href="{% url 'community_list' %}" class="nav-item" aria-expanded="false" aria-haspopup="true"
+                        aria-controls="communitiesDropdown">
+                        <i class="fas fa-users"></i>
+                        <span>Communities</span>
+                        <i class="fas fa-chevron-down dropdown-chevron" aria-hidden="true"></i>
+                    </a>
+                    <div class="dropdown-content" id="communitiesDropdown">
+                        <a href="{% url 'community_list' %}"><i class="fas fa-user-friends"></i> All Communities</a>
+                        <a href="{% url 'partner_list' %}"><i class="fas fa-handshake"></i> Our Partners</a>
+                    </div>
+                </div>
+                <a href="{% url 'volunteer_list' %}" class="nav-item">
+                    <i class="fas fa-hands-helping"></i>
+                    <span>Volunteer</span>
+                </a>
+
+                <div class="nav-divider"></div>
+
+                <a href="{% url 'donation' %}" class="nav-item nav-item-donate">
+                    <i class="fas fa-heart"></i>
+                    <span>Donate</span>
+                </a>
+
+                <div class="nav-divider"></div>
+
+                {% if user.is_authenticated %}
+                {% if user.is_staff %}
+                <a href="{% url 'dashboard:admin_overview' %}" class="nav-item nav-admin-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Admin Dashboard</span>
+                </a>
+                {% endif %}
+                <form method="post" action="{% url 'logout' %}" class="nav-logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-logout nav-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+                {% else %}
+                <a href="{% url 'login' %}" class="nav-item">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="nav-menu-footer">
+                <div class="nav-menu-pattern"></div>
+            </div>
+        </nav>
+    </div>
+
+    {% block content %}{% endblock %}
+
+    <footer>
+        <div class="container footer-columns">
+            <!-- Column 1: Organization -->
+            <div class="footer-column">
+                <h4><i class="fas fa-mountain"></i> Nepal Community</h4>
+                <p>Nepali Community of Vancouver</p>
+                <p style="font-size: 0.9rem;">Preserving heritage, building futures.</p>
+                <p style="margin-top: 1rem; font-size: 0.85rem;">EST. 1998</p>
+            </div>
+
+            <!-- Column 2: Communities -->
+            <div class="footer-column">
+                <h5>Communities</h5>
+                <ul>
+                    <li><a href="{% url 'community_list' %}">All Communities</a></li>
+                    <li><a href="{% url 'partner_list' %}">Our Partners</a></li>
+                    <li><a href="{% url 'contact' %}">Join Our Community</a></li>
+                    <li><a href="{% url 'volunteer_list' %}">Volunteer</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Programs -->
+            <div class="footer-column">
+                <h5>Programs</h5>
+                <ul>
+                    <li><a href="{% url 'program_list' %}">All Events</a></li>
+                    <li><a href="{% url 'calendar' %}">Calendar</a></li>
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url 'my_registrations' %}">My Registrations</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <!-- Column 4: Resources -->
+            <div class="footer-column">
+                <h5>Resources</h5>
+                <ul>
+                    <li><a href="{% url 'announcement_list' %}">Announcements</a></li>
+                    <li><a href="{% url 'faq_list' %}">FAQ</a></li>
+                    <li><a href="{% url 'about' %}">About Us</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 5: Connect -->
+            <div class="footer-column">
+                <h5>Connect</h5>
+                <ul>
+                    <li><a href="{% url 'contact' %}">Contact Us</a></li>
+                    <li><a href="{% url 'register' %}">Register</a></li>
+                    <li><a href="{% url 'donation' %}">Donate</a></li>
+                    <li><a href="{% url 'partner_list' %}">Partner With Us</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 6: Social -->
+            <div class="footer-column">
+                <h5>Follow Us</h5>
+                <div style="display: flex; gap: 1rem; font-size: 1.5rem; margin: 1rem 0;">
+                    <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+                    <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" title="Discord"><i class="fab fa-discord"></i></a>
+                </div>
+                <h5 style="margin-top: 1.5rem;">Contact</h5>
+                <p style="font-size: 0.9rem;">
+                    📞 +1 (604) 123-4567<br>
+                    📧 info@nepalivc.ca<br>
+                    📍 Vancouver, BC
+                </p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <span>&copy; 2026 Nepali Community of Vancouver. All rights reserved.</span>
+                <span style="display: flex; gap: 1.5rem; font-size: 0.9rem;">
+                    <a href="{% url 'privacy_policy' %}">Privacy Policy</a> |
+                    <a href="{% url 'terms_of_use' %}">Terms of Use</a> |
+                    <a href="{% url 'accessibility' %}">Accessibility</a>
+                </span>
+            </p>
+        </div>
+    </footer>
+
+    {% include 'includes/site_footer_scripts.html' %}
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

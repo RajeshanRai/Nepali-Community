@@ -1,0 +1,139 @@
+/* =====================================================
+   CSS CUSTOM PROPERTIES (VARIABLES)
+   Modern design system for Nepali Community Vancouver
+   ===================================================== */
+
+:root {
+    /* ===== Color Palette ===== */
+    --color-black: #1a1a1a;
+    --color-white: #ffffff;
+    --color-orange: #FF6B35;
+    --color-gray: #808080;
+    --color-light-gray: #d3d3d3;
+    --color-dark-gray: #404040;
+
+    /* Semantic Colors */
+    --color-primary: var(--color-black);
+    --color-secondary: var(--color-gray);
+    --color-accent: var(--color-orange);
+    --color-background: var(--color-white);
+    --color-text: var(--color-black);
+    --color-text-muted: #6B7280;
+    --color-text-light: #9CA3AF;
+
+    /* State Colors */
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
+    --color-error: #EF4444;
+    --color-info: #3B82F6;
+
+    /* Background Variants */
+    --color-bg-light: #F9FAFB;
+    --color-bg-gray: #F3F4F6;
+
+    /* Border Colors */
+    --color-border: #E5E7EB;
+    --color-border-dark: #D1D5DB;
+
+    /* ===== Typography Scale ===== */
+    --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    --font-family-heading: 'Poppins', 'Inter', sans-serif;
+
+    /* Font Sizes (rem-based for accessibility) */
+    --font-size-xs: 0.75rem;
+    /* 12px */
+    --font-size-sm: 0.875rem;
+    /* 14px */
+    --font-size-base: 1rem;
+    /* 16px */
+    --font-size-lg: 1.125rem;
+    /* 18px */
+    --font-size-xl: 1.25rem;
+    /* 20px */
+    --font-size-2xl: 1.5rem;
+    /* 24px */
+    --font-size-3xl: 1.875rem;
+    /* 30px */
+    --font-size-4xl: 2.25rem;
+    /* 36px */
+    --font-size-5xl: 3rem;
+    /* 48px */
+
+    /* Line Heights */
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+
+    /* Font Weights */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+
+    /* ===== Spacing Scale ===== */
+    --spacing-xs: 0.25rem;
+    /* 4px */
+    --spacing-sm: 0.5rem;
+    /* 8px */
+    --spacing-md: 1rem;
+    /* 16px */
+    --spacing-lg: 1.5rem;
+    /* 24px */
+    --spacing-xl: 2rem;
+    /* 32px */
+    --spacing-2xl: 3rem;
+    /* 48px */
+    --spacing-3xl: 4rem;
+    /* 64px */
+
+    /* ===== Border Radius ===== */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+
+    /* ===== Shadows ===== */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+    /* ===== Transitions ===== */
+    --transition-fast: 150ms ease;
+    --transition-base: 300ms ease;
+    --transition-slow: 500ms ease;
+
+    /* ===== Z-index Scale ===== */
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+
+    /* ===== Container ===== */
+    --container-max-width: 1200px;
+    --container-padding: 1.5rem;
+
+    /* ===== Breakpoints (for reference in JS) ===== */
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1536px;
+}
+
+/* Dark Mode Variables (Future Enhancement) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-background: #111827;
+        --color-text: #F9FAFB;
+        --color-bg-light: #1F2937;
+        --color-bg-gray: #374151;
+        --color-border: #4B5563;
+    }
+}

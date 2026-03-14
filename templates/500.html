@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Server Error - 500{% endblock %}
+
+{% block extra_head %}
+<style>
+    .error-page {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2rem;
+    }
+
+    .error-content {
+        text-align: center;
+        max-width: 600px;
+    }
+
+    .error-code {
+        font-size: 10rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        line-height: 1;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .error-icon {
+        font-size: 6rem;
+        color: var(--color-accent);
+        margin-bottom: 2rem;
+        opacity: 0.8;
+        animation: shake 3s ease-in-out infinite;
+    }
+
+    .error-content h1 {
+        font-size: 2.5rem;
+        color: var(--color-primary);
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+
+    .error-content p {
+        font-size: 1.25rem;
+        color: rgba(26, 26, 26, 0.7);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .error-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .error-btn-primary {
+        background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+        color: white;
+    }
+
+    .error-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(230, 0, 0, 0.3);
+    }
+
+    .error-btn-secondary {
+        background: #ffffff;
+        color: var(--color-primary);
+        border: 2px solid var(--color-primary);
+    }
+
+    .error-btn-secondary:hover {
+        background: var(--color-primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .error-info {
+        margin-top: 3rem;
+        padding: 2rem;
+        background: rgba(255, 152, 0, 0.1);
+        border-left: 4px solid var(--color-accent);
+        border-radius: 12px;
+        text-align: left;
+    }
+
+    .error-info h2 {
+        font-size: 1.25rem;
+        color: var(--color-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .error-info ul {
+        margin: 0;
+        padding-left: 1.5rem;
+        color: rgba(26, 26, 26, 0.7);
+        line-height: 1.8;
+    }
+
+    .error-support {
+        margin-top: 2rem;
+        padding: 2rem;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .error-support h2 {
+        font-size: 1.5rem;
+        color: var(--color-primary);
+        margin-bottom: 1rem;
+    }
+
+    .error-support p {
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .support-contact {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--color-accent);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .support-contact:hover {
+        color: var(--color-primary);
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    @keyframes shake {
+
+        0%,
+        100% {
+            transform: rotate(0deg);
+        }
+
+        10%,
+        30%,
+        50%,
+        70%,
+        90% {
+            transform: rotate(-5deg);
+        }
+
+        20%,
+        40%,
+        60%,
+        80% {
+            transform: rotate(5deg);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .error-code {
+            font-size: 6rem;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+        }
+
+        .error-content h1 {
+            font-size: 2rem;
+        }
+
+        .error-content p {
+            font-size: 1.1rem;
+        }
+
+        .error-actions {
+            flex-direction: column;
+        }
+
+        .error-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .error-info,
+        .error-support {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="error-content">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="error-code">500</div>
+        <h1>Internal Server Error</h1>
+        <p>
+            Oops! Something went wrong on our end.
+            Our team has been notified and we're working to fix the issue.
+        </p>
+
+        <div class="error-actions">
+            <a href="{% url 'home' %}" class="error-btn error-btn-primary">
+                <i class="fas fa-home"></i> Go Home
+            </a>
+            <a href="javascript:location.reload()" class="error-btn error-btn-secondary">
+                <i class="fas fa-sync-alt"></i> Refresh Page
+            </a>
+        </div>
+
+        <div class="error-info">
+            <h2>
+                <i class="fas fa-info-circle"></i> What you can do:
+            </h2>
+            <ul>
+                <li>Try refreshing the page in a few moments</li>
+                <li>Go back to the home page and try again</li>
+                <li>Clear your browser cache and cookies</li>
+                <li>Contact us if the problem persists</li>
+            </ul>
+        </div>
+
+        <div class="error-support">
+            <h2>Need Help?</h2>
+            <p>
+                If you continue to experience this issue, please don't hesitate to reach out to our support team.
+            </p>
+            <a href="{% url 'contact' %}" class="support-contact">
+                <i class="fas fa-envelope"></i> Contact Support
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

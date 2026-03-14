@@ -1,0 +1,56 @@
+{% extends 'dashboard/placeholder.html' %}
+
+{% block title %}User Roles & Permissions{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-user-shield"></i> User Roles & Permissions</h1>
+        <p>Manage user roles, permissions, and access control</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="content-card-header">
+        <h3>Role Management</h3>
+    </div>
+    <div class="content-card-body">
+        <div class="roles-grid">
+            <div class="role-card">
+                <h4 class="text-danger"><i class="fas fa-crown"></i> Superuser</h4>
+                <p>Full system access and control</p>
+                <ul>
+                    <li>All permissions</li>
+                    <li>User management</li>
+                    <li>System settings</li>
+                    <li>Database access</li>
+                </ul>
+            </div>
+
+            <div class="role-card">
+                <h4 class="text-warning"><i class="fas fa-user-tie"></i> Staff</h4>
+                <p>Admin panel access</p>
+                <ul>
+                    <li>Manage content</li>
+                    <li>Approve requests</li>
+                    <li>View analytics</li>
+                    <li>Moderate users</li>
+                </ul>
+            </div>
+
+            <div class="role-card">
+                <h4 class="text-info"><i class="fas fa-user"></i> Member</h4>
+                <p>Standard user access</p>
+                <ul>
+                    <li>View events</li>
+                    <li>Register for programs</li>
+                    <li>Submit requests</li>
+                    <li>Volunteer</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

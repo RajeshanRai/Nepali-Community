@@ -1,0 +1,78 @@
+{% extends 'dashboard/admin_base.html' %}
+
+{% block title %}Contact Messages{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">Contact Messages</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-envelope-open-text"></i> Contact Messages</h1>
+        <p>Read and manage inbound contact submissions.</p>
+    </div>
+    <div class="page-header-actions">
+        <a href="{% url 'dashboard:contact_message_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Message
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="content-card-header">
+        <form method="GET" class="search-form">
+            <div class="search-input-group">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" placeholder="Search sender, email, subject..." value="{{ search }}">
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary">Search</button>
+            {% if search %}
+            <a href="{% url 'dashboard:contact_messages_list' %}" class="btn btn-sm btn-secondary">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="content-card-body">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Sender</th>
+                        <th>Subject</th>
+                        <th>Email</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for msg in contact_messages %}
+                    <tr>
+                        <td>#{{ msg.pk }}</td>
+                        <td>{{ msg.name }}</td>
+                        <td>{{ msg.subject|truncatechars:60 }}</td>
+                        <td>{{ msg.email }}</td>
+                        <td>{{ msg.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'dashboard:contact_message_edit' msg.pk %}" class="btn-icon btn-edit"
+                                    title="Edit"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'dashboard:contact_message_delete' msg.pk %}"
+                                    class="btn-icon btn-delete" title="Delete"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No contact messages found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

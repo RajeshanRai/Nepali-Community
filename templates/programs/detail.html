@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ object.title }} - Nepali Community of Vancouver{% endblock %}
+{% block meta_description %}{{ object.description|default:'Explore this community program hosted by the Nepali Community of Vancouver.'|truncatechars:160 }}{% endblock %}
+{% block og_title %}{{ object.title }} | Nepali Community of Vancouver{% endblock %}
+{% block og_description %}{{ object.description|default:'Explore this community program hosted by the Nepali Community of Vancouver.'|truncatechars:200 }}{% endblock %}
+{% block twitter_title %}{{ object.title }} | Nepali Community of Vancouver{% endblock %}
+{% block twitter_description %}{{ object.description|default:'Explore this community program hosted by the Nepali Community of Vancouver.'|truncatechars:200 }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'programs/css/program-detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="program-detail-page" data-program-detail data-program-id="{{ object.id }}" data-program-title="{{ object.title|escape }}" data-program-date="{{ object.date|date:'Y-m-d' }}" data-program-location="{{ object.location|default:'TBA'|escape }}" data-program-description="{{ object.description|default:'Join the Nepali Community of Vancouver for this special event.'|striptags|escape }}" data-program-url="{{ request.build_absolute_uri }}">
+    <div class="program-detail-progress" aria-hidden="true">
+        <span class="program-detail-progress__bar" data-detail-progress></span>
+    </div>
+
+    <section class="program-detail-hero">
+        <div class="program-detail-hero__ambient program-detail-hero__ambient--one"></div>
+        <div class="program-detail-hero__ambient program-detail-hero__ambient--two"></div>
+        <div class="container program-detail-shell">
+            <div class="program-detail-grid">
+                <div class="program-detail-story" data-reveal>
+                    <a href="{% url 'program_list' %}" class="program-detail-back-link">
+                        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                        <span>Back to all events</span>
+                    </a>
+
+                    <div class="program-detail-kicker-row">
+                        <span class="program-detail-kicker">Community event spotlight</span>
+                        <span class="program-detail-type-badge program-detail-type-badge--{{ object.event_type|default:'other' }}">
+                            {{ object.get_event_type_display|default:'Event' }}
+                        </span>
+                    </div>
+
+                    <h1 class="program-detail-title">{{ object.title }}</h1>
+
+                    <p class="program-detail-lead">
+                        {{ object.description|default:'A shared community experience created to bring people together through culture, learning, and connection.'|truncatechars:240 }}
+                    </p>
+
+                    <div class="program-section-header" data-reveal>
+                        <h3>Event essentials</h3>
+                        <p>Everything you need to quickly understand this program.</p>
+                    </div>
+
+                    <div class="program-detail-highlights">
+                        <article class="program-highlight-card" data-reveal>
+                            <span class="program-highlight-card__icon"><i class="fas fa-calendar-day" aria-hidden="true"></i></span>
+                            <div>
+                                <p class="program-highlight-card__label">Date</p>
+                                <strong>{{ object.date|date:"l, F j, Y" }}</strong>
+                            </div>
+                        </article>
+                        <article class="program-highlight-card" data-reveal>
+                            <span class="program-highlight-card__icon"><i class="fas fa-map-marker-alt" aria-hidden="true"></i></span>
+                            <div>
+                                <p class="program-highlight-card__label">Venue</p>
+                                <strong>{{ object.location|default:"Location to be announced" }}</strong>
+                            </div>
+                        </article>
+                        <article class="program-highlight-card" data-reveal>
+                            <span class="program-highlight-card__icon"><i class="fas fa-users" aria-hidden="true"></i></span>
+                            <div>
+                                <p class="program-highlight-card__label">Community energy</p>
+                                <strong><span data-attendance-count>{{ object.registered_count }}</span> attending</strong>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="program-section-header" data-reveal>
+                        <h3>Quick actions</h3>
+                        <p>Share, save, or open this program in calendar view.</p>
+                    </div>
+
+                    <div class="program-detail-actions" data-reveal>
+                        <button type="button" class="program-action-btn program-action-btn--primary" data-share-program>
+                            <i class="fas fa-share-nodes" aria-hidden="true"></i>
+                            <span>Share event</span>
+                        </button>
+                        <button type="button" class="program-action-btn" data-download-ics>
+                            <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                            <span>Add to calendar</span>
+                        </button>
+                        <a href="{% url 'calendar' %}" class="program-action-btn">
+                            <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                            <span>Calendar view</span>
+                        </a>
+                    </div>
+
+                    <div class="program-section-header" data-reveal>
+                        <h3>At a glance</h3>
+                        <p>Community, engagement, and format in one place.</p>
+                    </div>
+
+                    <div class="program-detail-meta-strip" data-reveal>
+                        <span>
+                            <i class="fas fa-layer-group" aria-hidden="true"></i>
+                            {{ object.community.name|default:"Nepali Community of Vancouver" }}
+                        </span>
+                        <span>
+                            <i class="fas {% if object.is_virtual %}fa-video{% else %}fa-location-dot{% endif %}" aria-hidden="true"></i>
+                            {% if object.is_virtual %}Virtual-friendly{% else %}In-person gathering{% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <aside class="program-detail-panel-wrap" data-reveal>
+                    <div class="program-detail-panel">
+                        <div class="program-detail-panel__glow"></div>
+                        <div class="program-date-orbit">
+                            <span class="program-date-orbit__month">{{ object.date|date:"M" }}</span>
+                            <strong class="program-date-orbit__day">{{ object.date|date:"d" }}</strong>
+                            <span class="program-date-orbit__year">{{ object.date|date:"Y" }}</span>
+                        </div>
+
+                        <div class="program-detail-panel__copy">
+                            <p class="program-detail-panel__eyebrow">Ready to join?</p>
+                            <h2>Reserve your place in this experience.</h2>
+                            <p>Responsive event access, quick registration, and one-click calendar saving are all built into this page.</p>
+                        </div>
+
+                        <div class="program-detail-panel__stats">
+                            <div>
+                                <span>Format</span>
+                                <strong>{% if object.is_virtual %}Virtual / Hybrid{% else %}On-site{% endif %}</strong>
+                            </div>
+                            <div>
+                                <span>Category</span>
+                                <strong>{{ object.get_event_type_display|default:'Community Event' }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="program-registration-card">
+                            <div class="program-registration-card__header">
+                                <h3>Event registration</h3>
+                                <p>{% if user.is_authenticated %}Your account lets you register instantly.{% else %}Join as a guest in less than a minute.{% endif %}</p>
+                            </div>
+
+                            {% if user.is_authenticated %}
+                            <form class="program-registration-form" data-registration-form data-authenticated="true" action="{% if is_registered %}{% url 'program_unregister' object.id %}{% else %}{% url 'register_event' object.id %}{% endif %}" method="post">
+                                {% csrf_token %}
+                                <div class="program-registration-form__user-pill">
+                                    <i class="fas fa-circle-check" aria-hidden="true"></i>
+                                    <span>Signed in as {{ request.user.get_full_name|default:request.user.username }}</span>
+                                </div>
+                                <button type="submit" class="program-register-btn {% if is_registered %}is-registered{% endif %}" data-register-button>
+                                    <i class="fas {% if is_registered %}fa-check-circle{% else %}fa-ticket{% endif %}" aria-hidden="true"></i>
+                                    <span>{% if is_registered %}You're registered{% else %}Register now{% endif %}</span>
+                                </button>
+                            </form>
+                            {% else %}
+                            <form class="program-registration-form" data-registration-form data-authenticated="false" action="{% url 'register_event' object.id %}" method="post">
+                                {% csrf_token %}
+                                <label class="program-field">
+                                    <span>Full name</span>
+                                    <input type="text" name="guest_name" placeholder="Your full name" required>
+                                </label>
+                                <label class="program-field">
+                                    <span>Email address</span>
+                                    <input type="email" name="guest_email" placeholder="name@example.com" required>
+                                </label>
+                                <label class="program-field">
+                                    <span>Phone number</span>
+                                    <input type="tel" name="guest_phone" placeholder="Your contact number" required>
+                                </label>
+                                <button type="submit" class="program-register-btn" data-register-button>
+                                    <i class="fas fa-ticket" aria-hidden="true"></i>
+                                    <span>Register as guest</span>
+                                </button>
+                            </form>
+                            {% endif %}
+
+                            <p class="program-registration-card__footnote">Need to explore first? Share the event or save it to your calendar and come back later.</p>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <section class="program-detail-content">
+        <div class="container program-detail-shell">
+            <div class="program-detail-content-grid">
+                <article class="program-detail-card program-detail-card--story" data-reveal>
+                    <div class="program-detail-card__header">
+                        <span class="program-detail-card__eyebrow">About the event</span>
+                        <h2>The story behind this gathering</h2>
+                    </div>
+                    <div class="program-detail-description">
+                        <p>{{ object.description|default:"More event details will be announced soon. Stay tuned for updates from the Nepali Community of Vancouver."|linebreaksbr }}</p>
+                    </div>
+                </article>
+
+                <article class="program-detail-card program-detail-card--insights" data-reveal>
+                    <div class="program-detail-card__header">
+                        <span class="program-detail-card__eyebrow">Event snapshot</span>
+                        <h2>Designed for participation</h2>
+                    </div>
+
+                    <div class="program-rhythm-grid">
+                        <div class="program-rhythm-card">
+                            <small>Community</small>
+                            <strong>{{ object.community.name|default:"NCV Community" }}</strong>
+                            <p>The hosting group shaping the gathering and local energy around it.</p>
+                        </div>
+                        <div class="program-rhythm-card">
+                            <small>Attendance</small>
+                            <strong><span data-attendance-count>{{ object.registered_count }}</span> people</strong>
+                            <p>Momentum is building. Register early to stay in the loop.</p>
+                        </div>
+                        <div class="program-rhythm-card">
+                            <small>Venue mode</small>
+                            <strong>{% if object.is_virtual %}Hybrid-ready{% else %}Physical venue{% endif %}</strong>
+                            <p>{% if object.is_virtual %}Join remotely if you cannot attend in person.{% else %}An in-person setting built for direct community connection.{% endif %}</p>
+                        </div>
+                        <div class="program-rhythm-card">
+                            <small>Category</small>
+                            <strong>{{ object.get_event_type_display|default:'Event' }}</strong>
+                            <p>A curated experience anchored in culture, learning, or community exchange.</p>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <div class="program-detail-toast" data-program-toast role="status" aria-live="polite"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'programs/js/program-detail.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,140 @@
+{# =====================================================
+REUSABLE ALERT/NOTIFICATION COMPONENT
+Usage: {% include 'components/alert.html' with message="Success!" type="success" %}
+===================================================== #}
+
+<div class="alert alert-{{ type|default:'info' }}{% if dismissible %} alert-dismissible{% endif %}{% if additional_classes %} {{ additional_classes }}{% endif %}"
+    role="alert" {% if aria_live %}aria-live="{{ aria_live }}" {% else %}aria-live="polite" {% endif %} {% if id
+    %}id="{{ id }}" {% endif %}>
+    {# Icon #}
+    {% if icon or type %}
+    <i class="{% if icon %}{{ icon }}{% else %}{% if type == 'success' %}fas fa-check-circle{% elif type == 'error' %}fas fa-exclamation-circle{% elif type == 'warning' %}fas fa-exclamation-triangle{% elif type == 'info' %}fas fa-info-circle{% endif %}{% endif %}"
+        aria-hidden="true"></i>
+    {% endif %}
+
+    {# Message Content #}
+    <div>
+        {% if title %}
+        <strong>{{ title }}</strong>
+        {% endif %}
+
+        {% if message %}
+        <span>{{ message }}</span>
+        {% endif %}
+
+        {% if content %}
+        {{ content|safe }}
+        {% endif %}
+
+        {# Action Link (Optional) #}
+        {% if action_text and action_url %}
+        <a href="{{ action_url }}" class="alert-link">{{ action_text }}</a>
+        {% endif %}
+    </div>
+
+    {# Dismiss Button (Optional) #}
+    {% if dismissible %}
+    <button type="button" class="alert-close" aria-label="Close" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
+    </button>
+    {% endif %}
+</div>
+
+<style>
+    /* Alert Close Button */
+    .alert-dismissible {
+        position: relative;
+        padding-right: 3rem;
+    }
+
+    .alert-close {
+        position: absolute;
+        right: var(--spacing-md);
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: inherit;
+        opacity: 0.7;
+        cursor: pointer;
+        padding: var(--spacing-xs);
+        transition: opacity var(--transition-base);
+    }
+
+    .alert-close:hover {
+        opacity: 1;
+    }
+
+    .alert-link {
+        font-weight: var(--font-weight-semibold);
+        text-decoration: underline;
+        margin-left: var(--spacing-sm);
+    }
+</style>
+
+{#
+USAGE EXAMPLES:
+
+1. Success Alert:
+{% include 'components/alert.html' with
+message="Your registration was successful!"
+type="success"
+%}
+
+2. Error Alert with Title:
+{% include 'components/alert.html' with
+title="Error"
+message="Please fill in all required fields."
+type="error"
+%}
+
+3. Warning Alert with Action:
+{% include 'components/alert.html' with
+message="Your session will expire soon."
+type="warning"
+action_text="Renew Session"
+action_url="/renew/"
+%}
+
+4. Info Alert (Dismissible):
+{% include 'components/alert.html' with
+message="New features available! Click here to learn more."
+type="info"
+dismissible=True
+%}
+
+5. Custom Icon Alert:
+{% include 'components/alert.html' with
+message="Welcome to our community!"
+type="info"
+icon="fas fa-heart"
+%}
+
+6. Alert with Custom Content:
+{% include 'components/alert.html' with
+type="warning"
+content="<strong>Important:</strong> Event registration closes in <strong>24 hours</strong>."
+%}
+
+7. Form Error Alert:
+{% if form.errors %}
+{% include 'components/alert.html' with
+title="Form Errors"
+message="Please correct the errors below."
+type="error"
+%}
+{% endif %}
+
+PARAMETERS:
+- message: Alert message text (string)
+- type: success | error | warning | info (default: info)
+- title: Bold title text (optional)
+- content: Custom HTML content (optional, overrides message)
+- icon: Custom Font Awesome icon class (optional, auto-generated based on type if not provided)
+- dismissible: Boolean, adds close button
+- action_text: Text for action link (optional)
+- action_url: URL for action link (optional)
+- aria_live: polite | assertive (default: polite)
+- id: HTML id attribute
+- additional_classes: Extra CSS classes
+#}

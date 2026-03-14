@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ community.name }} - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'communities/css/communities.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="community-detail-hero">
+    <div class="communities-container">
+        <div class="detail-header">
+            <a href="{% url 'community_list' %}" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Back to Communities
+            </a>
+
+            <div class="detail-hero-content">
+                {% if community.icon %}
+                <div class="detail-icon">
+                    <img src="{{ community.icon.url }}" alt="{{ community.name }}">
+                </div>
+                {% else %}
+                <div class="detail-icon detail-icon-placeholder">
+                    <i class="fas fa-mountain"></i>
+                </div>
+                {% endif %}
+
+                <div class="detail-info">
+                    <h1 class="detail-title">{{ community.name }}</h1>
+                    <div class="detail-stats">
+                        <span class="detail-stat">
+                            <i class="fas fa-user-friends"></i>
+                            {{ community.member_count }} Members
+                        </span>
+                        <span class="detail-stat">
+                            <i class="fas fa-calendar-check"></i>
+                            {{ community.events_per_year }} Events Annually
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="community-detail-content">
+    <div class="communities-container">
+        <div class="detail-grid">
+            <div class="detail-main">
+                <div class="detail-card">
+                    <h2 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        About {{ community.name }}
+                    </h2>
+                    <div class="detail-description">
+                        {% if community.introduction %}
+                        {{ community.introduction|linebreaks }}
+                        {% else %}
+                        <p class="text-muted">No description available yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if community.committees.exists %}
+                <div class="detail-card">
+                    <h2 class="section-title">
+                        <i class="fas fa-sitemap"></i>
+                        Committees & Leadership
+                    </h2>
+                    <div class="committees-list">
+                        {% for committee in community.committees.all %}
+                        <div class="committee-item">
+                            <h3 class="committee-name">
+                                <i class="fas fa-users-cog"></i>
+                                {{ committee.name }}
+                            </h3>
+                            {% if committee.description %}
+                            <p class="committee-desc">{{ committee.description }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="detail-sidebar">
+                {% if community.cultural_objects %}
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-hands"></i>
+                        Cultural Heritage
+                    </h3>
+                    <ul class="cultural-list">
+                        {% for item in community.cultural_objects %}
+                        <li class="cultural-item">
+                            <i class="fas fa-check-circle"></i>
+                            {{ item }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-phone-alt"></i>
+                        Get Involved
+                    </h3>
+                    <p class="sidebar-text">
+                        Interested in joining {{ community.name }} community events and activities?
+                    </p>
+                    <a href="{% url 'contact' %}" class="sidebar-btn">
+                        <i class="fas fa-envelope"></i>
+                        Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

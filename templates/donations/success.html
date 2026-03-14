@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Donation Confirmed - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'donations/success.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="success-container">
+    <div class="success-box">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+
+        <h1 class="success-title">Thank You for Your Donation!</h1>
+
+        <p class="success-message">
+            Your donation request has been received. We're grateful for your support of the Nepali Community of
+            Vancouver!
+        </p>
+
+        <div class="amount-display" id="amountDisplay">
+            ${{ donation_amount }}
+        </div>
+
+        <!-- Confirmation Details -->
+        <div class="confirmation-details">
+            <h3 style="margin-top: 0; text-align: center;">Donation Summary</h3>
+            <div class="detail-row">
+                <span class="detail-label">Donation Amount:</span>
+                <span class="detail-value">${{ donation_amount }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Payment Method:</span>
+                <span class="detail-value">
+                    {% if payment_method == "card" %}
+                    Credit/Debit Card
+                    {% else %}
+                    Interact e-Transfer
+                    {% endif %}
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Status:</span>
+                <span class="detail-value">
+                    <i class="fas fa-hourglass-half" style="color: var(--color-orange);"></i>
+                    {% if payment_method == "card" %}
+                    Processing
+                    {% else %}
+                    Pending Confirmation
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        {% if payment_method == "interact" %}
+        <!-- Bank Opening Section (Interact) -->
+        <div class="bank-button-container">
+            <p style="color: #666; margin-bottom: 1rem; font-size: 0.95rem;">
+                <i class="fas fa-info-circle" style="color: var(--color-orange);"></i> Ready to send your Interact
+                e-Transfer?
+            </p>
+            <button class="btn-bank" onclick="openBankApp()">
+                <i class="fas fa-university"></i> Open My Bank App
+            </button>
+            <p style="color: #999; font-size: 0.85rem; margin-top: 0.5rem;">
+                If your bank app doesn't open, follow the manual steps below
+            </p>
+        </div>
+
+        <!-- Next Steps (Interact) -->
+        <div class="next-steps">
+            <h3><i class="fas fa-list-ol"></i> Complete Your Donation</h3>
+            <p style="color: #333; margin-bottom: 1rem;">Please follow these steps to complete your donation:</p>
+            <ol>
+                <li><strong>Open your bank's mobile app or online banking</strong> and navigate to Interact e-Transfer
+                </li>
+                <li><strong>Enter the transfer amount:</strong> <span
+                        style="color: var(--color-orange); font-weight: 700;">${{
+                        donation_amount }}</span></li>
+                <li>
+                    <strong>Send to:</strong> <span class="transfer-email">donations@nepalicommunityvancouver.ca</span>
+                    <br>
+                    <button class="copy-email-btn" onclick="copyEmail('donations@nepalicommunityvancouver.ca', this)">
+                        <i class="fas fa-copy"></i> Copy Email
+                    </button>
+                </li>
+                <li><strong>Add a message</strong> with any reference number provided in your confirmation email</li>
+                <li><strong>Complete the transfer</strong> and we'll confirm your donation within 24 hours</li>
+            </ol>
+        </div>
+
+        <div class="info-box">
+            <p>
+                <i class="fas fa-info-circle"></i> <strong>Email Confirmation:</strong><br>
+                A detailed confirmation email has been sent to your email address. Please check your inbox (and spam
+                folder) for further instructions.
+            </p>
+        </div>
+
+        <div class="info-box">
+            <p>
+                <i class="fas fa-clock"></i> <strong>Confirmation Timeline:</strong><br>
+                Once we receive your Interact e-Transfer, we'll confirm your donation and send you a tax receipt within
+                24 business hours.
+            </p>
+        </div>
+        {% else %}
+        <!-- Card Payment Confirmation Section -->
+        <div class="next-steps">
+            <h3><i class="fas fa-credit-card"></i> Payment Processing</h3>
+            <p style="color: #333; margin-bottom: 1rem;">Your card payment is being processed securely.</p>
+            <div
+                style="background: rgba(255, 107, 53, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--color-orange);">
+                <ul style="margin: 0; padding-left: 1.5rem;">
+                    <li><strong>Processing Status:</strong> Your payment is currently being processed</li>
+                    <li><strong>Confirmation:</strong> You will receive a confirmation email within 24 hours</li>
+                    <li><strong>Tax Receipt:</strong> A tax receipt will be sent once payment is confirmed</li>
+                    <li><strong>Recurring:</strong> If set up, monthly charges will appear on your statement</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <p>
+                <i class="fas fa-info-circle"></i> <strong>Email Confirmation:</strong><br>
+                A detailed confirmation email has been sent to your email address. Please check your inbox (and spam
+                folder) for payment status and reference number.
+            </p>
+        </div>
+
+        <div class="info-box">
+            <p>
+                <i class="fas fa-shield-alt"></i> <strong>Secure Payment:</strong><br>
+                Your card information was processed securely and will not be stored on our servers.
+            </p>
+        </div>
+        {% endif %}
+
+        <div class="info-box">
+            <p>
+                <i class="fas fa-question-circle"></i> <strong>Need Help?</strong><br>
+                If you have any questions, please contact us at <span
+                    class="transfer-email">donations@nepalicommunityvancouver.ca</span>
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="buttons">
+            <a href="{% url 'home' %}" class="btn-primary">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+            <a href="{% url 'donation' %}" class="btn-secondary">
+                <i class="fas fa-heart"></i> Make Another Donation
+            </a>
+        </div>
+
+        <!-- Share Section -->
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
+            <p style="color: #666; margin-bottom: 1rem;">Know someone who would like to support our community?</p>
+            <a href="{% url 'donation' %}" class="btn-secondary" style="display: inline-block;">
+                <i class="fas fa-share"></i> Share This Link
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'donations/success.js' %}"></script>
+{% endblock %}

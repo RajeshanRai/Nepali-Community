@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Volunteer Opportunities - Nepal Community{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'volunteers/css/volunteers.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container volunteer-page">
+    <div class="page-header">
+        <h1>Volunteer Opportunities</h1>
+        <p>Make a difference in your community. Join us in building a stronger, more connected Nepal community.</p>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="filters-section">
+        <div class="category-filters">
+            <a href="{% url 'volunteer_list' %}" class="filter-btn {% if not current_category %}active{% endif %}">
+                <i class="fas fa-list"></i> All Opportunities
+            </a>
+            {% for value, label in categories %}
+            <a href="?category={{ value }}" class="filter-btn {% if current_category == value %}active{% endif %}">
+                {{ label }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Opportunities List -->
+    <div class="opportunities-grid">
+        {% if opportunities %}
+        {% for opportunity in opportunities %}
+        <div class="opportunity-card">
+            <div class="card-header">
+                <span class="category-badge category-{{ opportunity.category }}">
+                    {{ opportunity.get_category_display }}
+                </span>
+                {% if opportunity.is_remote %}
+                <span class="remote-badge"><i class="fas fa-laptop-house"></i> Remote</span>
+                {% endif %}
+                {% if opportunity.status == 'filled' or opportunity.positions_remaining == 0 %}
+                <span class="status-badge status-filled"><i class="fas fa-check-circle"></i> FULL</span>
+                {% endif %}
+            </div>
+
+            <h3>{{ opportunity.title }}</h3>
+            <p class="description">{{ opportunity.description|truncatewords:30 }}</p>
+
+            <div class="opportunity-details">
+                {% if not opportunity.is_remote and opportunity.location %}
+                <div class="detail-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>{{ opportunity.location }}</span>
+                </div>
+                {% endif %}
+
+                {% if opportunity.time_commitment %}
+                <div class="detail-item">
+                    <i class="fas fa-clock"></i>
+                    <span>{{ opportunity.time_commitment }}</span>
+                </div>
+                {% endif %}
+
+                {% if opportunity.start_date %}
+                <div class="detail-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>Starts: {{ opportunity.start_date|date:"M d, Y" }}</span>
+                </div>
+                {% endif %}
+
+                <div class="detail-item">
+                    <i class="fas fa-users"></i>
+                    <span>{{ opportunity.positions_remaining }} position{{ opportunity.positions_remaining|pluralize }}
+                        available</span>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                {% if opportunity.is_active %}
+                <a href="{% url 'volunteer_detail' opportunity.pk %}" class="btn btn-primary">
+                    Learn More & Apply
+                </a>
+                {% else %}
+                <a href="{% url 'volunteer_detail' opportunity.pk %}" class="btn btn-secondary">
+                    <i class="fas fa-info-circle"></i> View Details (Full)
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h3>No Opportunities Available</h3>
+            <p>{% if current_category %}No volunteer opportunities in this category yet.{% else %}Check back soon for
+                new volunteer opportunities!{% endif %}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <section class="volunteer-request-section">
+        <div class="request-container">
+            <div class="request-header">
+                <div class="header-icon"><i class="fas fa-hands-helping"></i></div>
+                <h2>Ready to Make an Impact?</h2>
+                <p>Tell us about yourself and we'll connect you with the perfect volunteer opportunity</p>
+            </div>
+
+            <form method="post" action="{% url 'volunteer_request_submit' %}" class="volunteer-request-form">
+                {% csrf_token %}
+
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Your Information</span>
+                    </div>
+                    <div class="section-grid">
+                        <div class="form-group">
+                            <label for="id_name"><i class="fas fa-user"></i> Name</label>
+                            {{ request_form.name }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_email"><i class="fas fa-envelope"></i> Email</label>
+                            {{ request_form.email }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_phone"><i class="fas fa-phone"></i> Phone</label>
+                            {{ request_form.phone }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_address"><i class="fas fa-map-marker-alt"></i> Address</label>
+                            {{ request_form.address }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preference Section -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-star"></i>
+                        <span>Your Preferences</span>
+                    </div>
+                    <div class="section-grid">
+                        <div class="form-group">
+                            <label for="id_volunteer_type"><i class="fas fa-briefcase"></i> Volunteer Type</label>
+                            {{ request_form.volunteer_type }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_expertise"><i class="fas fa-lightbulb"></i> Expertise / General</label>
+                            {{ request_form.expertise }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Details Section -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Additional Details</span>
+                    </div>
+                    <div class="section-grid full-width">
+                        <div class="form-group full-width">
+                            <label for="id_schedule_availability"><i class="fas fa-calendar"></i> When Can You
+                                Volunteer?</label>
+                            {{ request_form.schedule_availability }}
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="id_purpose"><i class="fas fa-heart"></i> Why Do You Want to Volunteer?</label>
+                            {{ request_form.purpose }}
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Submit My Request</span>
+                </button>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'volunteers/js/volunteers.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Community Programs & Events - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'programs/css/programs.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container programs-page-shell">
+    <section class="program-hero">
+        <h1>Community Programs & Events</h1>
+    </section>
+
+    <!-- Sub-Navigation Tabs -->
+    <nav class="programs-nav" data-aos="fade-up">
+        <a href="{% url 'program_list' %}" class="programs-nav-item active">
+            <i class="fas fa-calendar-check"></i> All Events
+        </a>
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'my_registrations' %}" class="programs-nav-item">
+            <i class="fas fa-bookmark"></i> My Registrations
+        </a>
+        {% endif %}
+        <a href="{% url 'calendar' %}" class="programs-nav-item">
+            <i class="fas fa-calendar-alt"></i> Community Calendar
+        </a>
+
+    </nav>
+
+    <!-- Filters Section -->
+    <section class="event-filters" data-aos="fade-up" data-aos-delay="100">
+        <a href="?" class="filter-btn {% if not current_type %}active{% endif %}">All Events</a>
+        <a href="?type=festival" class="filter-btn {% if current_type == 'festival' %}active{% endif %}">Festivals</a>
+        <a href="?type=workshop" class="filter-btn {% if current_type == 'workshop' %}active{% endif %}">Workshops</a>
+        <a href="?type=meeting" class="filter-btn {% if current_type == 'meeting' %}active{% endif %}">Meetings</a>
+        <a href="?type=cultural" class="filter-btn {% if current_type == 'cultural' %}active{% endif %}">Cultural
+            Classes</a>
+        <a href="?type=other" class="filter-btn {% if current_type == 'other' %}active{% endif %}">Other</a>
+
+        <div class="event-search">
+            <form method="get" action="">
+                {% if current_type %}<input type="hidden" name="type" value="{{ current_type }}">{% endif %}
+                <input type="text" name="q" placeholder="Search events..." value="{{ search_q }}">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Event List -->
+    <section class="event-list">
+        {% if programs %}
+        {% for p in programs %}
+        <div class="event-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:'50' }}">
+            <div class="date">{{ p.date|date:"M d" }}</div>
+            <div style="flex: 1;">
+                <div class="title">{{ p.title }}</div>
+                <p style="margin: 0.35rem 0 0 0; font-size: 0.8rem !important; color: rgba(26, 26, 26, 0.75);">
+                    {{ p.description|truncatechars:150 }}
+                </p>
+                <div class="meta" style="margin-top: 0.45rem;">
+                    <span>
+                        <i class="fas fa-map-marker-alt"></i>
+                        {{ p.location|default:"TBA" }}
+                    </span>
+                    <span>
+                        <i class="fas fa-users"></i>
+                        {{ p.registered_count }} attending
+                    </span>
+                    {% if p.is_virtual %}
+                    <span>
+                        <i class="fas fa-video"></i>
+                        Virtual Event
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.6rem !important; flex-wrap: wrap; align-items: center;">
+                {% if request.user.is_authenticated %}
+                {% if p.id in user_registrations %}
+                <button class="btn btn-unregister btn-secondary" data-program-id="{{ p.id }}">
+                    <i class="fas fa-check"></i> Registered
+                </button>
+                {% else %}
+                <button class="btn btn-register btn-primary" data-program-id="{{ p.id }}">
+                    <i class="fas fa-calendar-plus"></i> Register
+                </button>
+                {% endif %}
+                {% else %}
+                <button class="btn btn-register btn-primary" data-program-id="{{ p.id }}"
+                    onclick="alert('Please login to register for events');">
+                    <i class="fas fa-sign-in-alt"></i> Login to Register
+                </button>
+                {% endif %}
+                <a href="{% url 'program_detail' p.id %}" class="btn btn-secondary">
+                    <i class="fas fa-info-circle"></i> Details
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div style="text-align: center; padding: 1.25rem 0.85rem; background: #ffffff; border-radius: 16px;">
+            <i class="fas fa-calendar-times"
+                style="font-size: 2.2rem; color: rgba(26, 26, 26, 0.2); margin-bottom: 0.55rem;"></i>
+            <h3 style="font-size: 0.9rem; color: var(--color-primary); margin-bottom: 0.3rem;">No Events Found</h3>
+            <p style="font-size: 0.72rem; color: rgba(26, 26, 26, 0.6); margin: 0;">
+                {% if search_q %}No events match your search.{% else %}No events scheduled at the moment. Check back
+                later!{% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Event Request Section -->
+    <section class="event-request-section" data-aos="fade-up" data-aos-delay="200">
+        <div class="section-header">
+            <div class="header-content">
+                <h3><i class="fas fa-plus-circle"></i> Request an Event?</h3>
+                <p>We'd love to hear your ideas! Tell us about the event you'd like to see.</p>
+            </div>
+        </div>
+        <div class="request-form-wrapper">
+            <form id="event-request-form" class="event-form">
+                {% csrf_token %}
+                <!-- Left Column: Basic Info -->
+                <div class="form-column">
+                    <div class="form-group animated-group">
+                        <label for="req-title" class="form-label">
+                            <i class="fas fa-heading"></i> Event Title <span class="required">*</span>
+                        </label>
+                        <input type="text" name="title" id="req-title" placeholder="e.g., Holi Festival Celebration"
+                            required class="form-input" />
+                        <div class="input-hint">Give your event a catchy name</div>
+                    </div>
+
+                    <div class="form-group animated-group">
+                        <label for="req-date" class="form-label">
+                            <i class="fas fa-calendar-alt"></i> Preferred Date <span class="required">*</span>
+                        </label>
+                        <input type="date" name="date" id="req-date" class="form-input" required />
+                        <div class="input-hint">When would you like this event?</div>
+                    </div>
+
+                    <div class="form-group animated-group">
+                        <label for="req-location" class="form-label">
+                            <i class="fas fa-map-marker-alt"></i> Location / Venue
+                        </label>
+                        <input type="text" name="location" id="req-location"
+                            placeholder="e.g., Vancouver Convention Center" class="form-input" />
+                        <div class="input-hint">Where should it take place?</div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Details -->
+                <div class="form-column">
+                    <div class="form-group animated-group">
+                        <label for="req-description" class="form-label">
+                            <i class="fas fa-edit"></i> Event Description <span class="required">*</span>
+                        </label>
+                        <textarea name="description" id="req-description"
+                            placeholder="Describe the event, activities, cultural significance..." rows="4"
+                            class="form-input textarea-input"></textarea>
+                        <div class="input-hint"><span id="char-count">0</span>/500 characters</div>
+                    </div>
+
+                    <div class="form-group animated-group">
+                        <label for="req-event-type" class="form-label">
+                            <i class="fas fa-tags"></i> Event Type
+                        </label>
+                        <select name="event_type" id="req-event-type" class="form-input">
+                            <option value="other">Other</option>
+                            <option value="festival">Festival</option>
+                            <option value="workshop">Workshop</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="cultural">Cultural</option>
+                        </select>
+                        <div class="input-hint">Choose the best matching category</div>
+                    </div>
+
+                    <div class="form-group animated-group">
+                        <label for="req-community" class="form-label">
+                            <i class="fas fa-users"></i> Community <span class="required">*</span>
+                        </label>
+                        <select name="community" id="req-community" class="form-input" required>
+                            <option value="">Select community</option>
+                            {% for c in communities %}
+                            <option value="{{ c.id }}">{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="input-hint">Which community is this event for?</div>
+                    </div>
+
+                    <div class="form-group animated-group">
+                        <label for="req-attendees" class="form-label">
+                            <i class="fas fa-users"></i> Expected Attendees
+                        </label>
+                        <input type="number" name="target_attendees" id="req-attendees"
+                            placeholder="How many people expected?" min="1" class="form-input" />
+                        <div class="input-hint">Help us plan the spaces</div>
+                    </div>
+                </div>
+
+                <!-- Contact Info (always shown) -->
+                <div class="form-row">
+                    <div class="form-group animated-group">
+                        <label for="req-name" class="form-label">
+                            <i class="fas fa-user"></i> Your Name <span class="required">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="requester_name"
+                            id="req-name"
+                            placeholder="Full Name"
+                            required
+                            class="form-input"
+                            value="{% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}"
+                        />
+                    </div>
+
+                    <div class="form-group animated-group">
+                        <label for="req-email" class="form-label">
+                            <i class="fas fa-envelope"></i> Email <span class="required">*</span>
+                        </label>
+                        <input
+                            type="email"
+                            name="requester_email"
+                            id="req-email"
+                            placeholder="your@email.com"
+                            required
+                            class="form-input"
+                            value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}"
+                        />
+                    </div>
+
+                    <div class="form-group animated-group">
+                        <label for="req-phone" class="form-label">
+                            <i class="fas fa-phone"></i> Phone
+                        </label>
+                        <input
+                            type="tel"
+                            name="requester_phone"
+                            id="req-phone"
+                            placeholder="(Optional)"
+                            class="form-input"
+                            value="{% if request.user.is_authenticated %}{{ request.user.phone_number|default:'' }}{% endif %}"
+                        />
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" id="submit-request" class="btn btn-primary btn-large submit-btn">
+                        <i class="fas fa-paper-plane"></i> Submit Your Request
+                    </button>
+                </div>
+            </form>
+            <div id="request-result" class="success-message" style="margin-top:1rem; display:none;"></div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'programs/js/programs.js' %}"></script>
+{% endblock %}

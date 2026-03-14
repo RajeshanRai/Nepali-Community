@@ -1,0 +1,142 @@
+{# =====================================================
+REUSABLE CARD COMPONENT
+Usage: {% include 'components/card.html' with title="Event Name" description="Details..." %}
+===================================================== #}
+
+<div class="card{% if variant %} card-{{ variant }}{% endif %}{% if interactive %} card-interactive{% endif %}{% if additional_classes %} {{ additional_classes }}{% endif %}"
+    {% if id %}id="{{ id }}" {% endif %} {% if data_aos %}data-aos="{{ data_aos }}" {% endif %} {% if data_attrs %} {%
+    for key, value in data_attrs.items %} data-{{ key }}="{{ value }}" {% endfor %} {% endif %}>
+    {# Card Badge (Optional) #}
+    {% if badge %}
+    <div class="card-badge">{{ badge }}</div>
+    {% endif %}
+
+    {# Card Image (Optional) #}
+    {% if image %}
+    <img src="{{ image }}" alt="{{ image_alt|default:title }}" class="card-image{% if image_top %}-top{% endif %}">
+    {% endif %}
+
+    {# Card Header #}
+    {% if title or header_content %}
+    <div class="card-header">
+        <div>
+            {% if subtitle_before %}
+            <div class="card-subtitle">{{ subtitle_before }}</div>
+            {% endif %}
+
+            {% if title %}
+            <h3 class="card-title">{{ title }}</h3>
+            {% endif %}
+
+            {% if subtitle %}
+            <div class="card-subtitle">{{ subtitle }}</div>
+            {% endif %}
+        </div>
+
+        {% if header_actions %}
+        <div class="card-actions">
+            {{ header_actions }}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {# Card Body #}
+    {% if description or content or body_content %}
+    <div class="card-body">
+        {% if description %}
+        <p class="card-description">{{ description|safe }}</p>
+        {% endif %}
+
+        {% if content %}
+        {{ content|safe }}
+        {% endif %}
+
+        {% if body_content %}
+        {{ body_content }}
+        {% endif %}
+
+        {# Card Meta Information #}
+        {% if meta_items %}
+        <div class="card-meta">
+            {% for meta in meta_items %}
+            <div class="card-meta-item">
+                {% if meta.icon %}<i class="{{ meta.icon }}"></i>{% endif %}
+                <span>{{ meta.text }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {# Card Footer #}
+    {% if footer_content or actions %}
+    <div class="card-footer">
+        {% if footer_content %}
+        {{ footer_content }}
+        {% endif %}
+
+        {% if actions %}
+        <div class="card-actions{% if actions_align %} card-actions-{{ actions_align }}{% endif %}">
+            {{ actions }}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{#
+USAGE EXAMPLES:
+
+1. Simple Card:
+{% include 'components/card.html' with title="Welcome" description="This is a simple card" %}
+
+2. Event Card with Meta:
+{% include 'components/card.html' with
+title="Dashain Festival"
+description="Celebrate Dashain with the community"
+badge="Oct 15"
+meta_items=event_meta
+actions=action_buttons
+%}
+
+3. Interactive Card with Image:
+{% include 'components/card.html' with
+title="Community Workshop"
+description="Learn traditional dance"
+image="/static/images/workshop.jpg"
+interactive=True
+variant="accent"
+%}
+
+4. Card with Custom Content:
+{% include 'components/card.html' with
+title="Statistics"
+content="<strong>100+</strong> active members"
+variant="elevated"
+%}
+
+PARAMETERS:
+- title: Card title (string)
+- subtitle: Subtitle text (optional)
+- subtitle_before: Subtitle above title (optional)
+- description: Card description (string, supports safe HTML)
+- content: Custom HTML content (optional)
+- body_content: Direct body content (optional)
+- image: Image URL (optional)
+- image_alt: Alt text for image
+- image_top: Boolean, if true image spans full width
+- badge: Badge text (optional)
+- variant: accent | elevated | flat | bordered | gradient (optional)
+- interactive: Boolean, makes card hover-interactive
+- meta_items: List of {icon, text} dictionaries
+- actions: HTML for action buttons
+- actions_align: start | end | center (default: start)
+- footer_content: Custom footer content
+- header_actions: Actions in header (optional)
+- id: HTML id attribute
+- data_aos: AOS animation name
+- data_attrs: Dictionary of data attributes
+- additional_classes: Extra CSS classes
+#}

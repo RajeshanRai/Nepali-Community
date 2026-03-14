@@ -1,0 +1,65 @@
+{# =====================================================
+REUSABLE BUTTON COMPONENT
+Usage: {% include 'components/button.html' with text="Click Me" style="primary" size="md" %}
+===================================================== #}
+
+<button type="{{ type|default:'button' }}"
+    class="btn btn-{{ style|default:'primary' }}{% if size %} btn-{{ size }}{% endif %}{% if block %} btn-block{% endif %}{% if additional_classes %} {{ additional_classes }}{% endif %}"
+    {% if id %}id="{{ id }}" {% endif %} {% if disabled %}disabled{% endif %} {% if data_attrs %} {% for key, value in
+    data_attrs.items %} data-{{ key }}="{{ value }}" {% endfor %} {% endif %} {% if aria_label
+    %}aria-label="{{ aria_label }}" {% endif %}>
+    {% if icon_before %}
+    <i class="{{ icon_before }}"></i>
+    {% endif %}
+
+    {% if text %}
+    <span>{{ text }}</span>
+    {% else %}
+    {{ content }}
+    {% endif %}
+
+    {% if icon_after %}
+    <i class="{{ icon_after }}"></i>
+    {% endif %}
+</button>
+
+{#
+USAGE EXAMPLES:
+
+1. Primary Button:
+{% include 'components/button.html' with text="Register" style="primary" %}
+
+2. Secondary Button with Icon:
+{% include 'components/button.html' with text="Learn More" style="secondary" icon_after="fas fa-arrow-right" %}
+
+3. Large Success Button:
+{% include 'components/button.html' with text="Approve" style="success" size="lg" icon_before="fas fa-check" %}
+
+4. Icon Only Button:
+{% include 'components/button.html' with icon_before="fas fa-search" style="ghost" aria_label="Search"
+additional_classes="btn-icon" %}
+
+5. Disabled Button:
+{% include 'components/button.html' with text="Sold Out" style="secondary" disabled=True %}
+
+6. Full Width Button:
+{% include 'components/button.html' with text="Submit Application" style="primary" block=True %}
+
+7. Button with Data Attributes:
+{% include 'components/button.html' with text="Delete" style="danger" data_attrs=data_dict %}
+Where data_dict = {'program-id': '123', 'action': 'delete'}
+
+PARAMETERS:
+- text: Button text (string)
+- style: primary | secondary | accent | success | warning | danger | ghost | outline-primary (default: primary)
+- size: xs | sm | md | lg | xl (optional)
+- type: button | submit | reset (default: button)
+- icon_before: Font Awesome class (e.g., "fas fa-heart")
+- icon_after: Font Awesome class
+- id: HTML id attribute
+- disabled: boolean
+- block: boolean (full width)
+- aria_label: Accessibility label
+- data_attrs: Dictionary of data attributes
+- additional_classes: Extra CSS classes
+#}

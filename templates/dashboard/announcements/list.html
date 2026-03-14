@@ -1,0 +1,162 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}Announcements Management{% endblock %}
+
+{% block extra_css %}
+
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/announcements-list.css' %}">
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">Announcements</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-bullhorn"></i> Announcements Management</h1>
+        <p>Create and manage community announcements</p>
+    </div>
+    <div class="page-header-actions">
+        <a href="{% url 'dashboard:announcement_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Announcement
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="content-card-header">
+        <div class="search-filter-bar">
+            <form method="GET" class="search-form">
+                <div class="search-input-group">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" placeholder="Search announcements..." value="{{ search }}">
+                </div>
+                <select name="category" class="form-control form-control-max-250">
+                    <option value="">All Categories</option>
+                    {% for option in category_options %}
+                    <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>{{ option.label }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                {% if search or selected_category %}
+                <a href="{% url 'dashboard:announcements_list' %}" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-redo"></i> Reset
+                </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <div class="content-card-body">
+        {% if announcements %}
+        <div class="announcements-list">
+            {% for announcement in announcements %}
+            <div class="announcement-item" data-priority="{{ announcement.priority }}">
+                <div class="announcement-icon">
+                    <i
+                        class="fas fa-{% if announcement.priority == 'urgent' %}exclamation-triangle{% elif announcement.priority == 'high' %}exclamation-circle{% elif announcement.priority == 'normal' %}info-circle{% else %}note{% endif %}"></i>
+                </div>
+
+                <div class="announcement-content flex-grow">
+                    <div class="announcement-header">
+                        <h3 class="announcement-title">
+                            {% if announcement.is_pinned %}
+                            <i class="fas fa-thumbtack text-warning"></i>
+                            {% endif %}
+                            {{ announcement.title }}
+                        </h3>
+                        <div class="announcement-badges">
+                            <span
+                                class="badge badge-{% if announcement.category == 'emergency' %}danger{% elif announcement.category == 'event' %}info{% elif announcement.category == 'opportunity' %}success{% else %}secondary{% endif %}">
+                                {{ announcement.get_category_display }}
+                            </span>
+                            <span
+                                class="badge badge-{% if announcement.priority == 'urgent' %}danger{% elif announcement.priority == 'high' %}warning{% else %}secondary{% endif %}">
+                                {{ announcement.get_priority_display }}
+                            </span>
+                            {% if announcement.is_active %}
+                            <span class="badge badge-success">
+                                <i class="fas fa-check"></i> Active
+                            </span>
+                            {% else %}
+                            <span class="badge badge-secondary">
+                                <i class="fas fa-eye-slash"></i> Inactive
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <p class="announcement-content-text">{{ announcement.content|truncatewords:50 }}</p>
+
+                    <div class="announcement-footer">
+                        <div class="announcement-meta">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-alt"></i>
+                                Published: {{ announcement.publish_date|date:"M d, Y H:i" }}
+                            </small>
+                            {% if announcement.expire_date %}
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i>
+                                Expires: {{ announcement.expire_date|date:"M d, Y H:i" }}
+                            </small>
+                            {% endif %}
+                            <small class="text-muted">
+                                <i class="fas fa-eye"></i>
+                                Views: {{ announcement.views_count }}
+                            </small>
+                        </div>
+
+                        <div class="announcement-actions">
+                            <a href="{% url 'dashboard:announcement_edit' announcement.pk %}" class="btn-icon btn-edit"
+                                title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button
+                                onclick="deleteAnnouncement({{ announcement.pk }}, '{{ announcement.title|escapejs }}')"
+                                class="btn-icon btn-delete" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-bullhorn"></i>
+            <h3>No Announcements Yet</h3>
+            <p>
+                {% if search or selected_category %}
+                No announcements match your search criteria.
+                {% else %}
+                Create your first announcement to inform the community!
+                {% endif %}
+            </p>
+            <a href="{% url 'dashboard:announcement_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Announcement
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function deleteAnnouncement(id, title) {
+        confirmDelete({
+            url: `/dashboard/announcements/${id}/delete/`,
+            itemName: title,
+            itemType: 'announcement'
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'dashboard/admin_base.html' %}
+{% block title %}Notifications{% endblock %}
+{% block breadcrumb_items %}<li class="breadcrumb-item active">Notifications</li>{% endblock %}
+{% block page_header %}<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-bell"></i> Notifications</h1>
+        <p>System notifications and alerts</p>
+    </div>
+</div>{% endblock %}
+{% block content %}<div class="content-card">
+    <div class="content-card-body empty-state-card"><i class="fas fa-bell-slash"></i>
+        <h3>No Notifications</h3>
+        <p>You're all caught up! Notification system with real-time alerts coming soon.</p>
+    </div>
+</div>{% endblock %}

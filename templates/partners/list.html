@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Our Partners - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'partners/css/partners.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="partners-hero">
+    <div class="partners-container">
+        <div class="partners-hero-content">
+            <span class="partners-badge">
+                <i class="fas fa-handshake"></i>
+                Partnership Network
+            </span>
+            <h1 class="partners-title">Our Trusted Partners</h1>
+            <p class="partners-subtitle">
+                Collaborating with organizations and businesses that share our vision of preserving
+                Nepali culture and supporting our community in Vancouver.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="partners-list-section">
+    <div class="partners-container">
+        {% if partners %}
+        <div class="partners-grid">
+            {% for partner in partners %}
+            <article class="partner-card" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:'50' }}">
+                <div class="partner-card-inner">
+                    {% if partner.logo %}
+                    <div class="partner-logo">
+                        <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" loading="lazy">
+                    </div>
+                    {% else %}
+                    <div class="partner-logo partner-logo-placeholder">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    {% endif %}
+
+                    <div class="partner-content">
+                        <h2 class="partner-name">{{ partner.name }}</h2>
+
+                        {% if partner.partnership_since %}
+                        <p class="partner-since">
+                            <i class="fas fa-calendar-alt"></i>
+                            Partner since {{ partner.partnership_since|date:"Y" }}
+                        </p>
+                        {% endif %}
+
+                        {% if partner.description %}
+                        <p class="partner-description">
+                            {{ partner.description|truncatewords:25 }}
+                        </p>
+                        {% endif %}
+
+                        <div class="partner-actions">
+                            {% if partner.website %}
+                            <a href="{{ partner.website }}" target="_blank" rel="noopener noreferrer"
+                                class="partner-link">
+                                <i class="fas fa-external-link-alt"></i>
+                                Visit Website
+                            </a>
+                            {% endif %}
+
+                            {% if partner.social_links %}
+                            <div class="partner-social">
+                                {% if partner.social_links.facebook %}
+                                <a href="{{ partner.social_links.facebook }}" target="_blank" rel="noopener noreferrer"
+                                    class="social-icon">
+                                    <i class="fab fa-facebook"></i>
+                                </a>
+                                {% endif %}
+                                {% if partner.social_links.twitter %}
+                                <a href="{{ partner.social_links.twitter }}" target="_blank" rel="noopener noreferrer"
+                                    class="social-icon">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                                {% endif %}
+                                {% if partner.social_links.linkedin %}
+                                <a href="{{ partner.social_links.linkedin }}" target="_blank" rel="noopener noreferrer"
+                                    class="social-icon">
+                                    <i class="fab fa-linkedin"></i>
+                                </a>
+                                {% endif %}
+                                {% if partner.social_links.instagram %}
+                                <a href="{{ partner.social_links.instagram }}" target="_blank" rel="noopener noreferrer"
+                                    class="social-icon">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="partners-empty">
+            <div class="empty-icon">
+                <i class="fas fa-handshake-slash"></i>
+            </div>
+            <h3>No Partners Yet</h3>
+            <p>Partner organizations will be displayed here once they are added.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="partners-cta">
+    <div class="partners-container">
+        <div class="cta-content">
+            <h2 class="cta-title">Become a Partner</h2>
+            <p class="cta-text">
+                Interested in partnering with the Nepali Community of Vancouver? We're always looking to build
+                meaningful relationships with organizations that share our values.
+            </p>
+            <a href="{% url 'contact' %}" class="cta-btn">
+                <i class="fas fa-envelope"></i>
+                Get in Touch
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    AOS.init({
+        duration: 600,
+        once: true,
+        offset: 80
+    });
+</script>
+{% endblock %}

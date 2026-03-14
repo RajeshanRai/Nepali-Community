@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Announcements - Nepal Community{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20260308">
+{% endblock %}
+
+{% block content %}
+<div class="container announcements-page">
+    <section class="announcements-hero">
+        <div class="hero-grid-overlay" aria-hidden="true"></div>
+        <div class="hero-content">
+            <p class="hero-kicker">Latest Community Broadcasts</p>
+            <h1><i class="fas fa-bullhorn"></i> Community Announcements</h1>
+            <p>Stay updated with alerts, opportunities, and event updates from the Nepali community.</p>
+            <div class="hero-utility">
+                <a href="#announcements-feed" class="hero-utility-btn">
+                    <i class="fas fa-arrow-down"></i>
+                    Jump to announcements
+                </a>
+                {% if current_category %}
+                <a href="{% url 'announcement_list' %}" class="hero-utility-btn hero-utility-btn-soft">
+                    <i class="fas fa-filter-circle-xmark"></i>
+                    Viewing {{ current_category|title }} • Clear filter
+                </a>
+                {% else %}
+                <span class="hero-utility-note">
+                    <i class="fas fa-lightbulb"></i>
+                    Tip: Use category filters below to find updates faster.
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="hero-illustration" aria-hidden="true">
+            <div class="wave wave-one"></div>
+            <div class="wave wave-two"></div>
+            <div class="hero-circle"><i class="fas fa-bell"></i></div>
+            <span class="hero-tag tag-live"><i class="fas fa-bolt"></i> Live</span>
+            <span class="hero-tag tag-news"><i class="fas fa-newspaper"></i> News</span>
+        </div>
+    </section>
+
+    <section class="filters-section">
+        <div class="filters-header">
+            <h2><i class="fas fa-sliders-h"></i> Browse by Category</h2>
+            {% if current_category %}
+            <a href="{% url 'announcement_list' %}" class="clear-filter-link">
+                <i class="fas fa-times-circle"></i> Clear filter
+            </a>
+            {% endif %}
+        </div>
+        <div class="category-filters">
+            <a href="{% url 'announcement_list' %}" class="filter-btn {% if not current_category %}active{% endif %}">
+                <i class="fas fa-list"></i>
+                <span>All Announcements</span>
+            </a>
+            {% for value, label in categories %}
+            <a href="?category={{ value }}" class="filter-btn {% if current_category == value %}active{% endif %}">
+                <span>{{ label }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <div class="announcements-list" id="announcements-feed">
+        {% if announcements %}
+        {% for announcement in announcements %}
+        <article
+            class="announcement-card priority-{{ announcement.priority }} {% if announcement.is_pinned %}pinned{% endif %}">
+            <a href="{% url 'announcement_detail' announcement.pk %}" class="announcement-card-link"
+                aria-label="Read announcement: {{ announcement.title }}"></a>
+            <div class="card-top-accent"></div>
+            <div class="card-header">
+                {% if announcement.is_pinned %}
+                <span class="pinned-dot" title="Pinned"><i class="fas fa-thumbtack"></i></span>
+                {% endif %}
+            </div>
+
+            <h2 class="announcement-subject">{{ announcement.title }}</h2>
+            <p class="content-preview">{{ announcement.content|striptags|truncatewords:30 }}</p>
+            <div class="card-chevron" aria-hidden="true">See more <i class="fas fa-arrow-right"></i></div>
+        </article>
+        {% endfor %}
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page=1{% if current_category %}&category={{ current_category }}{% endif %}"
+                class="page-link">&laquo; First</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}"
+                class="page-link">Previous</a>
+            {% endif %}
+
+            <span class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}"
+                class="page-link">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if current_category %}&category={{ current_category }}{% endif %}"
+                class="page-link">Last &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h3>No Announcements</h3>
+            <p>
+                {% if current_category %}
+                No announcements in this category yet.
+                {% else %}
+                Check back soon for updates!
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

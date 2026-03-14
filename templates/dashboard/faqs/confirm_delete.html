@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete FAQ - Admin Dashboard{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'dashboard/css/admin-advanced.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/confirm-delete-shared.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="confirm-container">
+    <h1><i class="fas fa-exclamation-triangle"></i> Delete FAQ?</h1>
+    <p>Are you sure you want to delete this FAQ? This action cannot be undone.</p>
+
+    <h3 class="confirm-item-title">{{ faq.question }}</h3>
+
+    <form method="POST" class="inline-form">
+        {% csrf_token %}
+        <div class="confirm-actions">
+            <a href="{% url 'dashboard:faqs_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Delete FAQ
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

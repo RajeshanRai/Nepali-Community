@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Register - Nepali Community of Vancouver{% endblock %}
+{% block body_class %}auth-page register-page{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'users/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+    <section class="auth-card" aria-labelledby="register-title">
+        <aside class="auth-visual">
+            <div class="auth-brand" aria-label="Nepali Community of Vancouver">
+                <span class="auth-brand-mark" aria-hidden="true">
+                    <i class="fas fa-mountain"></i>
+                </span>
+                <span class="auth-brand-copy">
+                    <strong>Nepali Community</strong>
+                    <span>Vancouver, Canada</span>
+                </span>
+            </div>
+
+            <div class="auth-hero">
+                <div class="auth-kicker">
+                    <span class="auth-kicker-dot" aria-hidden="true"></span>
+                    New Member
+                </div>
+                <h1 class="auth-display">Join the community with a simple, <em>welcoming account setup</em>.</h1>
+                <p class="auth-copy">Create your profile to participate in programs, receive updates, and connect with local Nepali families and organizations.</p>
+
+                <div class="auth-highlight-grid" aria-label="Why create an account">
+                    <article class="auth-highlight-card">
+                        <span class="auth-highlight-icon" aria-hidden="true"><i class="fas fa-calendar-alt"></i></span>
+                        <div>
+                            <strong>Easy participation</strong>
+                            <span>Register for events and programs with less friction.</span>
+                        </div>
+                    </article>
+                    <article class="auth-highlight-card">
+                        <span class="auth-highlight-icon" aria-hidden="true"><i class="fas fa-bullhorn"></i></span>
+                        <div>
+                            <strong>Stay informed</strong>
+                            <span>Receive relevant community announcements and updates.</span>
+                        </div>
+                    </article>
+                    <article class="auth-highlight-card">
+                        <span class="auth-highlight-icon" aria-hidden="true"><i class="fas fa-users"></i></span>
+                        <div>
+                            <strong>Feel connected</strong>
+                            <span>Discover volunteer opportunities and community activities nearby.</span>
+                        </div>
+                    </article>
+                    <article class="auth-highlight-card">
+                        <span class="auth-highlight-icon" aria-hidden="true"><i class="fas fa-lock"></i></span>
+                        <div>
+                            <strong>Safe and familiar</strong>
+                            <span>Your registration uses the project’s existing Django auth flow.</span>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="auth-side-note">
+                    <span>Already registered?</span>
+                    <a href="{% url 'login' %}">Sign in here</a>
+                </div>
+            </div>
+        </aside>
+
+        <div class="auth-form-panel">
+            <div class="auth-form-header">
+                <h2 id="register-title">Create account</h2>
+                <p>Fill in your details below to get started.</p>
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="auth-alert" role="alert" aria-live="assertive">
+                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                <div>
+                    {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="auth-alert {% if 'success' in message.tags %}auth-alert-success{% endif %}" role="status" aria-live="polite">
+                <i class="fas {% if 'success' in message.tags %}fa-check-circle{% else %}fa-info-circle{% endif %}" aria-hidden="true"></i>
+                <div>{{ message }}</div>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" class="auth-form" novalidate data-auth-form aria-labelledby="register-title">
+                {% csrf_token %}
+
+                <div class="auth-grid-two">
+                    <div class="auth-field">
+                        <div class="auth-control{% if form.first_name.errors %} is-invalid{% endif %}" data-field>
+                            <span class="auth-input-icon" aria-hidden="true"><i class="fas fa-user"></i></span>
+                            <input id="id_first_name" type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" autocomplete="given-name" placeholder=" " class="auth-input{% if form.first_name.errors %} input-error{% endif %}">
+                            <label class="auth-floating-label" for="id_first_name">First name</label>
+                        </div>
+                        {% if form.first_name.errors %}
+                        <div class="auth-field-error"><i class="fas fa-exclamation-circle" aria-hidden="true"></i>{{ form.first_name.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="auth-field">
+                        <div class="auth-control{% if form.last_name.errors %} is-invalid{% endif %}" data-field>
+                            <span class="auth-input-icon" aria-hidden="true"><i class="fas fa-user"></i></span>
+                            <input id="id_last_name" type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" autocomplete="family-name" placeholder=" " class="auth-input{% if form.last_name.errors %} input-error{% endif %}">
+                            <label class="auth-floating-label" for="id_last_name">Last name</label>
+                        </div>
+                        {% if form.last_name.errors %}
+                        <div class="auth-field-error"><i class="fas fa-exclamation-circle" aria-hidden="true"></i>{{ form.last_name.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <div class="auth-control{% if form.email.errors %} is-invalid{% endif %}" data-field>
+                        <span class="auth-input-icon" aria-hidden="true"><i class="fas fa-envelope"></i></span>
+                        <input id="id_email" type="email" name="email" value="{{ form.email.value|default:'' }}" autocomplete="email" required aria-required="true" placeholder=" " class="auth-input{% if form.email.errors %} input-error{% endif %}">
+                        <label class="auth-floating-label" for="id_email">Email address</label>
+                    </div>
+                    {% if form.email.errors %}
+                    <div class="auth-field-error"><i class="fas fa-exclamation-circle" aria-hidden="true"></i>{{ form.email.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="auth-field">
+                    <div class="auth-control{% if form.username.errors %} is-invalid{% endif %}" data-field>
+                        <span class="auth-input-icon" aria-hidden="true"><i class="fas fa-at"></i></span>
+                        <input id="id_username" type="text" name="username" value="{{ form.username.value|default:'' }}" autocomplete="username" required aria-required="true" placeholder=" " class="auth-input{% if form.username.errors %} input-error{% endif %}">
+                        <label class="auth-floating-label" for="id_username">Username</label>
+                    </div>
+                    {% if form.username.errors %}
+                    <div class="auth-field-error"><i class="fas fa-exclamation-circle" aria-hidden="true"></i>{{ form.username.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="auth-field">
+                    <div class="auth-control{% if form.password.errors %} is-invalid{% endif %}" data-field>
+                        <span class="auth-input-icon" aria-hidden="true"><i class="fas fa-lock"></i></span>
+                        <input id="id_password" type="password" name="password" autocomplete="new-password" required aria-required="true" placeholder=" " class="auth-input{% if form.password.errors %} input-error{% endif %}" aria-describedby="strengthLabel">
+                        <label class="auth-floating-label" for="id_password">Password</label>
+                    </div>
+                    <div class="auth-strength" aria-live="polite">
+                        <div class="auth-strength-track"><div class="auth-strength-fill" id="strengthFill"></div></div>
+                        <span class="auth-strength-label" id="strengthLabel">Use 8+ characters with uppercase, lowercase, number, and symbol.</span>
+                    </div>
+                    {% if form.password.errors %}
+                    <div class="auth-field-error"><i class="fas fa-exclamation-circle" aria-hidden="true"></i>{{ form.password.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="auth-field">
+                    <div class="auth-control{% if form.password_confirm.errors %} is-invalid{% endif %}" data-field>
+                        <span class="auth-input-icon" aria-hidden="true"><i class="fas fa-shield"></i></span>
+                        <input id="id_password_confirm" type="password" name="password_confirm" autocomplete="new-password" required aria-required="true" placeholder=" " class="auth-input{% if form.password_confirm.errors %} input-error{% endif %}" aria-describedby="matchStatus">
+                        <label class="auth-floating-label" for="id_password_confirm">Confirm password</label>
+                    </div>
+                    <div class="auth-match" id="matchStatus" aria-live="polite"></div>
+                    {% if form.password_confirm.errors %}
+                    <div class="auth-field-error"><i class="fas fa-exclamation-circle" aria-hidden="true"></i>{{ form.password_confirm.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="auth-submit" data-submit-btn>
+                    <span class="btn-text">Create account</span>
+                    <span class="btn-icon" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                    <span class="btn-spinner" aria-hidden="true"></span>
+                </button>
+
+                <div class="auth-divider" aria-hidden="true"><span>or continue with</span></div>
+
+                <div class="auth-social-grid">
+                    <button type="button" class="auth-social-btn" data-provider="google" aria-label="Google registration placeholder"><i class="fab fa-google" aria-hidden="true"></i><span>Google</span></button>
+                    <button type="button" class="auth-social-btn" data-provider="facebook" aria-label="Facebook registration placeholder"><i class="fab fa-facebook-f" aria-hidden="true"></i><span>Facebook</span></button>
+                </div>
+
+                <p class="auth-footnote">By creating an account you agree to the community guidelines and privacy policy.</p>
+            </form>
+
+            <div class="auth-form-footer">Already have an account? <a href="{% url 'login' %}">Back to login</a></div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'users/auth.js' %}"></script>
+{% endblock %}
