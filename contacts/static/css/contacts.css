@@ -177,7 +177,7 @@
     gap: clamp(0.45rem, 1.6vw, 0.7rem);
 }
 
-.social-links a {
+.social-links .social-link {
     width: clamp(34px, 7.5vw, 38px);
     height: clamp(34px, 7.5vw, 38px);
     border-radius: 999px;
@@ -186,13 +186,37 @@
     justify-content: center;
     background: var(--card-bg)7f7;
     border: 1px solid #ffd6d6;
-    color: #FF7A00;
+    color: var(--social-brand, #FF7A00);
+    font-size: 1rem;
+    text-align: center;
     line-height: 1;
     position: relative;
     transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.social-links a::after {
+.social-links .social-link i {
+    font-size: 1rem;
+    width: 1em;
+    height: 1em;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1 !important;
+    font-style: normal !important;
+    vertical-align: middle;
+    color: currentColor !important;
+    transition: color 0.2s ease;
+}
+
+.social-links .social-link i::before {
+    display: block;
+    line-height: 1 !important;
+    font-style: normal !important;
+    color: currentColor !important;
+}
+
+.social-links .social-link::after {
     content: attr(data-name);
     position: absolute;
     left: 50%;
@@ -212,7 +236,7 @@
     z-index: 6;
 }
 
-.social-links a::before {
+.social-links .social-link::before {
     content: "";
     position: absolute;
     left: 50%;
@@ -226,39 +250,103 @@
     z-index: 6;
 }
 
-.social-links a:hover {
+.social-links .social-link:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 16px rgba(20, 20, 20, 0.14);
 }
 
-.social-links a:hover::after,
-.social-links a:hover::before {
+.social-links .social-link:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 3px rgba(30, 95, 116, 0.25), 0 8px 16px rgba(20, 20, 20, 0.14);
+    outline: none;
+}
+
+.social-links .social-link:hover::after,
+.social-links .social-link:hover::before {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
 
-.social-links a:nth-child(1):hover {
-    background: #eaf2ff;
-    border-color: #b7d0ff;
+.social-links .social-link:focus-visible::after,
+.social-links .social-link:focus-visible::before {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.social-links .social-link--facebook {
+    --social-brand: #1877f2;
     color: #1877f2;
+    border-color: #cddfff;
+    background: #eaf2ff;
 }
 
-.social-links a:nth-child(2):hover {
-    background: var(--card-bg)0f7;
-    border-color: #ffc3df;
+.social-links .social-link--instagram {
+    --social-brand: #e1306c;
     color: #e1306c;
+    border-color: #ffc3df;
+    background: #fff0f7;
 }
 
-.social-links a:nth-child(3):hover {
-    background: #ecf9ff;
-    border-color: #b9e9ff;
+.social-links .social-link--twitter {
+    --social-brand: #1da1f2;
     color: #1da1f2;
+    border-color: #b9e9ff;
+    background: #ecf9ff;
 }
 
-.social-links a:nth-child(4):hover {
-    background: var(--card-bg)0f0;
-    border-color: #ffc8c8;
+.social-links .social-link--youtube {
+    --social-brand: #ff0000;
     color: #ff0000;
+    border-color: #ffc8c8;
+    background: #fff0f0;
+}
+
+.social-links .social-link--facebook:hover {
+    color: #ffffff;
+    border-color: #1877f2;
+    background: #1877f2;
+}
+
+.social-links .social-link--instagram:hover {
+    color: #ffffff;
+    border-color: #e1306c;
+    background: #e1306c;
+}
+
+.social-links .social-link--twitter:hover {
+    color: #ffffff;
+    border-color: #1da1f2;
+    background: #1da1f2;
+}
+
+.social-links .social-link--youtube:hover {
+    color: #ffffff;
+    border-color: #ff0000;
+    background: #ff0000;
+}
+
+.social-links .social-link--facebook:focus-visible {
+    color: #ffffff;
+    border-color: #1877f2;
+    background: #1877f2;
+}
+
+.social-links .social-link--instagram:focus-visible {
+    color: #ffffff;
+    border-color: #e1306c;
+    background: #e1306c;
+}
+
+.social-links .social-link--twitter:focus-visible {
+    color: #ffffff;
+    border-color: #1da1f2;
+    background: #1da1f2;
+}
+
+.social-links .social-link--youtube:focus-visible {
+    color: #ffffff;
+    border-color: #ff0000;
+    background: #ff0000;
 }
 
 @keyframes orbitPulse {

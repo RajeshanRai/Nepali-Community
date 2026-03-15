@@ -1,56 +1,908 @@
-{% extends 'dashboard/placeholder.html' %}
-
+{% extends 'dashboard/admin_base.html' %}
 {% block title %}User Roles & Permissions{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ur-page,
+    .ur-page * { box-sizing: border-box; }
+
+    .ur-page {
+        background:
+            radial-gradient(circle at 10% 8%, rgba(59, 130, 246, 0.12), transparent 34%),
+            radial-gradient(circle at 88% 10%, rgba(16, 185, 129, 0.11), transparent 30%),
+            radial-gradient(circle at 50% 98%, rgba(245, 158, 11, 0.10), transparent 40%);
+        border-radius: 18px;
+        padding: 1rem;
+    }
+
+    .ur-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .ur-kpi {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 0.8rem;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .ur-kpi h4 {
+        margin: 0 0 0.25rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+    }
+
+    .ur-kpi p {
+        margin: 0;
+        font-size: 1.55rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .ur-control-bar {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 0.85rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .ur-control-row {
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .ur-field {
+        display: grid;
+        gap: 0.3rem;
+    }
+
+    .ur-field label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+        color: #64748b;
+    }
+
+    .ur-input,
+    .ur-select {
+        height: 36px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 0 0.6rem;
+        font-size: 0.84rem;
+        color: #0f172a;
+        background: #fff;
+    }
+
+    .ur-input { min-width: 240px; }
+
+    .ur-visible-count {
+        margin-left: auto;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #334155;
+        padding: 0.3rem 0.6rem;
+        border-radius: 999px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+    }
+
+    .ur-table-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+    }
+
+    .ur-table-wrap { overflow-x: auto; }
+
+    .ur-table {
+        width: 100%;
+        min-width: 980px;
+        border-collapse: collapse;
+    }
+
+    .ur-table th,
+    .ur-table td {
+        padding: 0.65rem 0.55rem;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+        font-size: 0.84rem;
+    }
+
+    .ur-table th {
+        font-size: 0.73rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        background: #f8fafc;
+        font-weight: 700;
+    }
+
+    .ur-user {
+        display: grid;
+        gap: 0.1rem;
+    }
+
+    .ur-user strong { color: #0f172a; }
+    .ur-user small { color: #64748b; }
+
+    .ur-role-badge,
+    .ur-flag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.18rem 0.52rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        border: 1px solid transparent;
+    }
+
+    .ur-role-super { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+    .ur-role-staff { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+    .ur-role-member { background: #dbeafe; color: #1d4ed8; border-color: #bfdbfe; }
+    .ur-flag-on { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+    .ur-flag-off { background: #e2e8f0; color: #475569; border-color: #cbd5e1; }
+    .ur-status-active { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+    .ur-status-inactive { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+
+    .ur-action-row {
+        display: inline-flex;
+        gap: 0.35rem;
+    }
+
+    .ur-action {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #334155;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .ur-action:hover { background: #f1f5f9; }
+
+    .ur-empty {
+        padding: 1.4rem;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .member-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: rgba(2, 6, 23, 0.58);
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .member-modal.is-open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .member-modal__content {
+        width: min(760px, 100%);
+        max-height: calc(100vh - 2rem);
+        overflow: auto;
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 32px 70px rgba(15, 23, 42, 0.35);
+        padding: 1.1rem 1.1rem 1rem;
+        position: relative;
+        transform: translateY(8px) scale(0.985);
+        transition: transform 0.2s ease;
+    }
+
+    .member-modal.is-open .member-modal__content {
+        transform: translateY(0) scale(1);
+    }
+
+    .member-modal__content h3 {
+        margin: 0 0 0.75rem;
+        color: #0f172a;
+        font-size: 1.05rem;
+    }
+
+    .member-modal .close {
+        position: absolute;
+        top: 0.55rem;
+        right: 0.7rem;
+        border: none;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: #f1f5f9;
+        color: #334155;
+        cursor: pointer;
+        font-size: 1.15rem;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .member-modal .close:hover {
+        background: #e2e8f0;
+    }
+
+    .member-profile-body .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.65rem;
+    }
+
+    .member-profile-body .profile-grid > div {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.6rem;
+        background: #f8fafc;
+        display: grid;
+        gap: 0.2rem;
+    }
+
+    .member-profile-body strong {
+        color: #475569;
+        font-size: 0.73rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .member-profile-body span {
+        color: #0f172a;
+        font-size: 0.84rem;
+        font-weight: 700;
+        word-break: break-word;
+    }
+
+    .warn-modal-content {
+        width: min(620px, 100%);
+    }
+
+    .warn-modal-note {
+        margin: 0 0 0.75rem;
+        color: #475569;
+        font-size: 0.86rem;
+    }
+
+    .warn-modal-label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+    }
+
+    .warn-modal-textarea {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 0.65rem;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .warn-modal-textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .warn-helper-row {
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+    }
+
+    .warn-char-count {
+        font-size: 0.76rem;
+        color: #64748b;
+        font-weight: 700;
+    }
+
+    .warn-char-count.over {
+        color: #b91c1c;
+    }
+
+    .warn-template-list {
+        margin-top: 0.75rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+    }
+
+    .warn-template-btn {
+        border: 1px solid #bfdbfe;
+        background: #eff6ff;
+        color: #1d4ed8;
+        border-radius: 999px;
+        padding: 0.2rem 0.58rem;
+        font-size: 0.74rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .warn-template-btn:hover {
+        background: #dbeafe;
+    }
+
+    .warn-modal-actions {
+        margin-top: 0.9rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.55rem;
+        flex-wrap: wrap;
+    }
+
+    .warn-state {
+        margin-top: 0.75rem;
+        border-radius: 10px;
+        padding: 0.62rem 0.75rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+        border: 1px solid transparent;
+        opacity: 0;
+        transform: translateY(-4px);
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        pointer-events: none;
+    }
+
+    .warn-state.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    .warn-state-success {
+        background: #dcfce7;
+        border-color: #86efac;
+        color: #166534;
+    }
+
+    .warn-state-error {
+        background: #fee2e2;
+        border-color: #fca5a5;
+        color: #991b1b;
+    }
+
+    .warn-submit.is-loading {
+        opacity: 0.72;
+        pointer-events: none;
+    }
+
+    .ur-inline-warn {
+        margin-top: 0.2rem;
+        display: none;
+        align-items: center;
+        gap: 0.25rem;
+        width: fit-content;
+        padding: 0.14rem 0.48rem;
+        border-radius: 999px;
+        background: #fff7ed;
+        color: #b45309;
+        border: 1px solid #fdba74;
+        font-size: 0.7rem;
+        font-weight: 700;
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    .ur-inline-warn.is-visible {
+        display: inline-flex;
+        animation: warnPop 280ms ease forwards;
+    }
+
+    @keyframes warnPop {
+        0% { opacity: 0; transform: scale(0.92); }
+        70% { opacity: 1; transform: scale(1.04); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 900px) {
+        .ur-visible-count {
+            margin-left: 0;
+        }
+
+        .member-modal {
+            padding: 0.6rem;
+        }
+
+        .member-modal__content {
+            border-radius: 12px;
+            padding: 0.95rem;
+        }
+
+        .warn-modal-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">Users</li>
+<li class="breadcrumb-item active">Roles</li>
+{% endblock %}
 
 {% block page_header %}
 <div class="page-header">
     <div class="page-header-content">
         <h1><i class="fas fa-user-shield"></i> User Roles & Permissions</h1>
-        <p>Manage user roles, permissions, and access control</p>
+        <p>Dynamic role intelligence with live filtering and moderation shortcuts.</p>
     </div>
 </div>
 {% endblock %}
 
 {% block content %}
-<div class="content-card">
-    <div class="content-card-header">
-        <h3>Role Management</h3>
-    </div>
-    <div class="content-card-body">
-        <div class="roles-grid">
-            <div class="role-card">
-                <h4 class="text-danger"><i class="fas fa-crown"></i> Superuser</h4>
-                <p>Full system access and control</p>
-                <ul>
-                    <li>All permissions</li>
-                    <li>User management</li>
-                    <li>System settings</li>
-                    <li>Database access</li>
-                </ul>
-            </div>
+<div class="ur-page">
+    <section class="ur-kpi-grid">
+        <article class="ur-kpi"><h4>Total Users</h4><p>{{ total_users }}</p></article>
+        <article class="ur-kpi"><h4>Superusers</h4><p>{{ superusers_count }}</p></article>
+        <article class="ur-kpi"><h4>Staff</h4><p>{{ staff_count }}</p></article>
+        <article class="ur-kpi"><h4>Members</h4><p>{{ members_count }}</p></article>
+        <article class="ur-kpi"><h4>Verified</h4><p>{{ verified_count }}</p></article>
+        <article class="ur-kpi"><h4>Community Reps</h4><p>{{ community_rep_count }}</p></article>
+        <article class="ur-kpi"><h4>Inactive</h4><p>{{ inactive_count }}</p></article>
+    </section>
 
-            <div class="role-card">
-                <h4 class="text-warning"><i class="fas fa-user-tie"></i> Staff</h4>
-                <p>Admin panel access</p>
-                <ul>
-                    <li>Manage content</li>
-                    <li>Approve requests</li>
-                    <li>View analytics</li>
-                    <li>Moderate users</li>
-                </ul>
+    <section class="ur-control-bar">
+        <div class="ur-control-row">
+            <div class="ur-field">
+                <label for="ur-search">Search</label>
+                <input id="ur-search" class="ur-input" type="search" placeholder="Name, username, email or phone">
             </div>
-
-            <div class="role-card">
-                <h4 class="text-info"><i class="fas fa-user"></i> Member</h4>
-                <p>Standard user access</p>
-                <ul>
-                    <li>View events</li>
-                    <li>Register for programs</li>
-                    <li>Submit requests</li>
-                    <li>Volunteer</li>
-                </ul>
+            <div class="ur-field">
+                <label for="ur-role-filter">Role</label>
+                <select id="ur-role-filter" class="ur-select">
+                    <option value="all">All</option>
+                    <option value="superuser">Superuser</option>
+                    <option value="staff">Staff</option>
+                    <option value="member">Member</option>
+                </select>
             </div>
+            <div class="ur-field">
+                <label for="ur-status-filter">Status</label>
+                <select id="ur-status-filter" class="ur-select">
+                    <option value="all">All</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            <div class="ur-field">
+                <label for="ur-sort">Sort</label>
+                <select id="ur-sort" class="ur-select">
+                    <option value="newest">Newest joined</option>
+                    <option value="oldest">Oldest joined</option>
+                    <option value="name_asc">Name A-Z</option>
+                    <option value="name_desc">Name Z-A</option>
+                </select>
+            </div>
+            <div id="ur-visible-count" class="ur-visible-count">Showing 0 users</div>
         </div>
+    </section>
+
+    <section class="ur-table-card">
+        <div class="ur-table-wrap">
+            <table class="ur-table" id="ur-role-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Flags</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Engagement</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ur-role-body">
+                    {% for user in users %}
+                    <tr
+                        data-name="{{ user.get_full_name|default:user.username|lower }}"
+                        data-username="{{ user.username|lower }}"
+                        data-email="{{ user.email|lower }}"
+                        data-phone="{{ user.phone_number|default:''|lower }}"
+                        data-role="{% if user.is_superuser %}superuser{% elif user.is_staff %}staff{% else %}member{% endif %}"
+                        data-status="{% if user.is_active %}active{% else %}inactive{% endif %}"
+                        data-joined="{{ user.date_joined|date:'YmdHis' }}"
+                        data-joined-label="{{ user.date_joined|date:'M d, Y' }}"
+                    >
+                        <td>
+                            <div class="ur-user">
+                                <strong>{{ user.get_full_name|default:user.username }}</strong>
+                                <small>@{{ user.username }}</small>
+                                <small>{{ user.email|default:'No email' }}</small>
+                                <span id="ur-warn-pill-{{ user.id }}" class="ur-inline-warn {% if user.last_warned_at %}is-visible{% endif %}"><i class="fas fa-exclamation-circle"></i> {% if user.last_warned_at %}Last warned: {{ user.last_warned_at|date:"M d, Y g:i A" }}{% else %}Last warned: never{% endif %}</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if user.is_superuser %}
+                            <span class="ur-role-badge ur-role-super"><i class="fas fa-crown"></i> Superuser</span>
+                            {% elif user.is_staff %}
+                            <span class="ur-role-badge ur-role-staff"><i class="fas fa-user-tie"></i> Staff</span>
+                            {% else %}
+                            <span class="ur-role-badge ur-role-member"><i class="fas fa-user"></i> Member</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="ur-flag {% if user.is_verified_member %}ur-flag-on{% else %}ur-flag-off{% endif %}">
+                                <i class="fas fa-check-circle"></i> Verified
+                            </span>
+                            <span class="ur-flag {% if user.is_community_rep %}ur-flag-on{% else %}ur-flag-off{% endif %}">
+                                <i class="fas fa-users"></i> Rep
+                            </span>
+                        </td>
+                        <td>
+                            <span class="ur-role-badge {% if user.is_active %}ur-status-active{% else %}ur-status-inactive{% endif %}">
+                                {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                        <td>{{ user.registration_count }} events</td>
+                        <td>
+                            <div class="ur-action-row">
+                                <button type="button" class="ur-action" title="View profile" onclick="urViewUser(event, {{ user.id }})"><i class="fas fa-eye"></i></button>
+                                <button type="button" class="ur-action" title="Warn member" onclick="urOpenWarn(event, {{ user.id }}, '{{ user.get_full_name|default:user.username|escapejs }}')"><i class="fas fa-exclamation-triangle"></i></button>
+                                {% if not user.is_superuser %}
+                                <button type="button" class="ur-action" title="{{ user.is_active|yesno:'Ban member,Unban member' }}" onclick="urToggleBan({{ user.id }}, {{ user.is_active|lower }})">
+                                    <i class="fas fa-{% if user.is_active %}ban{% else %}check{% endif %}"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="ur-empty">No users found</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<div class="member-modal" id="memberProfileModal" aria-hidden="true">
+    <div class="member-modal__content">
+        <button type="button" class="close" onclick="urCloseMemberModal()">&times;</button>
+        <h3 id="memberProfileTitle">Member Profile</h3>
+        <div id="memberProfileBody" class="member-profile-body"></div>
     </div>
 </div>
+
+<div class="member-modal" id="warnMemberModal" aria-hidden="true">
+    <div class="member-modal__content warn-modal-content">
+        <button type="button" class="close" onclick="urCloseWarn()">&times;</button>
+        <h3 id="warnModalTitle">Warn Member</h3>
+        <p class="warn-modal-note">Add a warning message for this member. This action will be saved in moderation history.</p>
+        <label for="warnReasonInput" class="warn-modal-label">Warning reason</label>
+        <textarea id="warnReasonInput" class="warn-modal-textarea" rows="4" placeholder="Enter warning reason (optional)"></textarea>
+        <div class="warn-helper-row">
+            <span class="warn-char-count" id="warnCharCount">0 / 500</span>
+        </div>
+        <div class="warn-template-list">
+            <button type="button" class="warn-template-btn" data-template="Please keep communication respectful with other members.">Respectful Communication</button>
+            <button type="button" class="warn-template-btn" data-template="Please avoid posting duplicate or repetitive content.">Duplicate Content</button>
+            <button type="button" class="warn-template-btn" data-template="Please follow event submission guidelines for complete and accurate details.">Submission Guidelines</button>
+            <button type="button" class="warn-template-btn" data-template="Please keep profile and contact details accurate for verification.">Profile Accuracy</button>
+        </div>
+        <div class="warn-modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="urCloseWarn()">Cancel</button>
+            <button type="button" id="urWarnSubmitBtn" class="btn btn-warning warn-submit" onclick="urSubmitWarn()">Send Warning</button>
+        </div>
+        <div id="warnState" class="warn-state" aria-live="polite"></div>
+    </div>
+</div>
+
+<script>
+    let urWarnTargetUserId = null;
+    const UR_WARN_MAX = 500;
+
+    function urGetCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return '';
+    }
+
+    function urCsrfToken() {
+        const metaToken = document.querySelector('meta[name="csrf-token"]');
+        if (metaToken && metaToken.content && metaToken.content !== 'NOTPROVIDED') {
+            return metaToken.content;
+        }
+        return urGetCookie('csrftoken');
+    }
+
+    function urRoleRows() {
+        return Array.from(document.querySelectorAll('#ur-role-body tr[data-role]'));
+    }
+
+    function urApplyFilters() {
+        const q = (document.getElementById('ur-search').value || '').trim().toLowerCase();
+        const role = document.getElementById('ur-role-filter').value;
+        const status = document.getElementById('ur-status-filter').value;
+        const sort = document.getElementById('ur-sort').value;
+        const tbody = document.getElementById('ur-role-body');
+        const rows = urRoleRows();
+
+        rows.forEach(row => {
+            const matchesSearch = !q || [row.dataset.name, row.dataset.username, row.dataset.email, row.dataset.phone]
+                .filter(Boolean)
+                .some(val => val.includes(q));
+            const matchesRole = role === 'all' || row.dataset.role === role;
+            const matchesStatus = status === 'all' || row.dataset.status === status;
+            row.style.display = (matchesSearch && matchesRole && matchesStatus) ? '' : 'none';
+        });
+
+        const visibleRows = rows.filter(r => r.style.display !== 'none');
+        visibleRows.sort((a, b) => {
+            if (sort === 'oldest') return (a.dataset.joined || '').localeCompare(b.dataset.joined || '');
+            if (sort === 'name_asc') return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+            if (sort === 'name_desc') return (b.dataset.name || '').localeCompare(a.dataset.name || '');
+            return (b.dataset.joined || '').localeCompare(a.dataset.joined || '');
+        });
+        visibleRows.forEach(row => tbody.appendChild(row));
+
+        document.getElementById('ur-visible-count').textContent = `Showing ${visibleRows.length} users`;
+    }
+
+    function urCloseMemberModal() {
+        const modal = document.getElementById('memberProfileModal');
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    async function urViewUser(event, id) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        const modal = document.getElementById('memberProfileModal');
+        const body = document.getElementById('memberProfileBody');
+        document.getElementById('memberProfileTitle').textContent = 'Member Profile';
+        body.innerHTML = '<p class="ac-item-meta">Loading profile...</p>';
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+
+        try {
+            const response = await fetch(`/dashboard/admin/users/${id}/profile/`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Unable to load profile.');
+            }
+
+            const user = data.user;
+            document.getElementById('memberProfileTitle').textContent = `${user.full_name} (@${user.username})`;
+            body.innerHTML = `
+                <div class="profile-grid">
+                    <div><strong>Email</strong><span>${user.email || 'N/A'}</span></div>
+                    <div><strong>Phone</strong><span>${user.phone_number}</span></div>
+                    <div><strong>Joined</strong><span>${user.date_joined}</span></div>
+                    <div><strong>Last Login</strong><span>${user.last_login}</span></div>
+                    <div><strong>Primary Community</strong><span>${user.primary_community}</span></div>
+                    <div><strong>Secondary Community</strong><span>${user.secondary_community}</span></div>
+                    <div><strong>Event Registrations</strong><span>${user.registration_count}</span></div>
+                    <div><strong>Posts</strong><span>${user.posts_count}</span></div>
+                    <div><strong>Verified Member</strong><span>${user.is_verified_member ? 'Yes' : 'No'}</span></div>
+                    <div><strong>Community Rep</strong><span>${user.is_community_rep ? 'Yes' : 'No'}</span></div>
+                </div>
+            `;
+        } catch (error) {
+            body.innerHTML = `<p class="ac-item-meta">${error.message || 'Failed to load member profile.'}</p>`;
+            showToast(error.message || 'Failed to load member profile.', 'error');
+        }
+    }
+
+    function urUpdateWarnCounter() {
+        const input = document.getElementById('warnReasonInput');
+        const counter = document.getElementById('warnCharCount');
+        const text = input.value || '';
+        const len = text.length;
+        counter.textContent = `${len} / ${UR_WARN_MAX}`;
+        counter.classList.toggle('over', len > UR_WARN_MAX);
+    }
+
+    function urSetWarnState(type, message) {
+        const state = document.getElementById('warnState');
+        state.className = 'warn-state';
+        if (!message) {
+            state.textContent = '';
+            return;
+        }
+        state.textContent = message;
+        state.classList.add('is-visible');
+        state.classList.add(type === 'success' ? 'warn-state-success' : 'warn-state-error');
+    }
+
+    function urMarkRowWarned(userId, warnedAtDisplay) {
+        const badge = document.getElementById(`ur-warn-pill-${userId}`);
+        if (!badge) return;
+        const stamp = warnedAtDisplay || 'just now';
+        badge.innerHTML = `<i class="fas fa-exclamation-circle"></i> Last warned: ${stamp}`;
+        badge.classList.remove('is-visible');
+        void badge.offsetWidth;
+        badge.classList.add('is-visible');
+    }
+
+    function urApplyWarnTemplate(text) {
+        const input = document.getElementById('warnReasonInput');
+        const current = (input.value || '').trim();
+        input.value = current ? `${current}\n${text}` : text;
+        urUpdateWarnCounter();
+        input.focus();
+    }
+
+    function urOpenWarn(event, id, displayName) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        urWarnTargetUserId = id;
+        document.getElementById('warnModalTitle').textContent = `Warn ${displayName}`;
+        const input = document.getElementById('warnReasonInput');
+        input.value = '';
+        urUpdateWarnCounter();
+        urSetWarnState('', '');
+        const modal = document.getElementById('warnMemberModal');
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        setTimeout(() => input.focus(), 0);
+    }
+
+    function urCloseWarn() {
+        urWarnTargetUserId = null;
+        urSetWarnState('', '');
+        const modal = document.getElementById('warnMemberModal');
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    async function urSubmitWarn() {
+        if (!urWarnTargetUserId) {
+            urCloseWarn();
+            return;
+        }
+
+        const reason = document.getElementById('warnReasonInput').value.trim();
+        if (reason.length > UR_WARN_MAX) {
+            urSetWarnState('error', `Warning reason must be ${UR_WARN_MAX} characters or fewer.`);
+            return;
+        }
+
+        const submitBtn = document.getElementById('urWarnSubmitBtn');
+        submitBtn.classList.add('is-loading');
+        submitBtn.disabled = true;
+        urSetWarnState('', '');
+
+        try {
+            const response = await fetch(`/dashboard/admin/users/${urWarnTargetUserId}/warn/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': urCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams({ reason })
+            });
+
+            const data = await response.json();
+            if (response.ok && data.success) {
+                urSetWarnState('success', data.message || 'Warning recorded successfully.');
+                urMarkRowWarned(urWarnTargetUserId, data.warned_at_display);
+                showToast('Warning recorded successfully.', 'success');
+                setTimeout(() => {
+                    urCloseWarn();
+                }, 850);
+                return;
+            }
+
+            urSetWarnState('error', data.message || 'Failed to warn member.');
+        } catch (error) {
+            urSetWarnState('error', 'Failed to warn member. Please try again.');
+        } finally {
+            submitBtn.classList.remove('is-loading');
+            submitBtn.disabled = false;
+        }
+    }
+
+    async function urToggleBan(id, isActive) {
+        const action = isActive ? 'ban' : 'unban';
+        const confirmed = await window.GlobalUI.confirm({
+            title: `${action.charAt(0).toUpperCase()}${action.slice(1)} member`,
+            message: `Are you sure you want to ${action} this member?`,
+            okText: action.charAt(0).toUpperCase() + action.slice(1),
+            variant: action === 'ban' ? 'danger' : 'primary'
+        });
+
+        if (!confirmed) return;
+
+        const response = await fetch(`/dashboard/admin/users/${id}/toggle-ban/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': urCsrfToken(),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            showToast(data.message || 'Member status updated.', 'success');
+            window.location.reload();
+            return;
+        }
+
+        showToast(data.message || 'Failed to update member status.', 'error');
+    }
+
+    ['ur-search', 'ur-role-filter', 'ur-status-filter', 'ur-sort'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', urApplyFilters);
+        el.addEventListener('change', urApplyFilters);
+    });
+
+    const warnInput = document.getElementById('warnReasonInput');
+    if (warnInput) {
+        warnInput.addEventListener('input', urUpdateWarnCounter);
+    }
+
+    document.querySelectorAll('.warn-template-btn').forEach(btn => {
+        btn.addEventListener('click', () => urApplyWarnTemplate(btn.dataset.template || ''));
+    });
+
+    document.querySelectorAll('.member-modal').forEach(modal => {
+        modal.addEventListener('click', (event) => {
+            if (event.target !== modal) return;
+            if (modal.id === 'memberProfileModal') {
+                urCloseMemberModal();
+            } else if (modal.id === 'warnMemberModal') {
+                urCloseWarn();
+            }
+        });
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        urCloseMemberModal();
+        urCloseWarn();
+    });
+
+    urApplyFilters();
+    urUpdateWarnCounter();
+</script>
 {% endblock %}

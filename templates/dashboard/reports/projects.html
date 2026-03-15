@@ -1,16 +1,296 @@
 {% extends 'dashboard/admin_base.html' %}
+
 {% block title %}Project Success Rate{% endblock %}
-{% block breadcrumb_items %}<li class="breadcrumb-item">Reports</li>
-<li class="breadcrumb-item active">Projects</li>{% endblock %}
-{% block page_header %}<div class="page-header">
+
+{% block extra_css %}
+<style>
+    .project-report-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .project-report-card {
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 1rem;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+    }
+
+    .project-report-card .label {
+        display: block;
+        font-size: 0.76rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #64748b;
+        margin-bottom: 0.35rem;
+    }
+
+    .project-report-card .value {
+        font-size: 1.8rem;
+        line-height: 1.1;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .project-report-card .meta {
+        margin-top: 0.45rem;
+        font-size: 0.84rem;
+        color: #475569;
+    }
+
+    .project-report-panels {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .funnel-list {
+        display: grid;
+        gap: 0.85rem;
+    }
+
+    .funnel-row {
+        display: grid;
+        grid-template-columns: 140px 1fr auto;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .funnel-label,
+    .funnel-value {
+        font-size: 0.88rem;
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .funnel-track {
+        height: 10px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        overflow: hidden;
+    }
+
+    .funnel-fill {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #f97316, #fb923c);
+    }
+
+    .summary-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .summary-table th,
+    .summary-table td {
+        padding: 0.7rem 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+        font-size: 0.88rem;
+    }
+
+    .summary-table th {
+        color: #64748b;
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .rate-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 66px;
+        padding: 0.25rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        background: rgba(249, 115, 22, 0.14);
+        color: #c2410c;
+    }
+
+    .community-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.8rem;
+        margin-top: 0.5rem;
+    }
+
+    .community-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 0.85rem;
+        background: #fff;
+    }
+
+    .community-card h4 {
+        margin: 0 0 0.35rem;
+        font-size: 0.95rem;
+        color: #0f172a;
+    }
+
+    .community-card p {
+        margin: 0.2rem 0;
+        font-size: 0.84rem;
+        color: #475569;
+    }
+
+    @media (max-width: 960px) {
+        .project-report-panels {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .funnel-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">Reports</li>
+<li class="breadcrumb-item active">Projects</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
     <div class="page-header-content">
         <h1><i class="fas fa-project-diagram"></i> Project Success Rate</h1>
-        <p>Analyze project outcomes and success metrics</p>
+        <p>Track request approvals, program conversion, and completed project outcomes.</p>
     </div>
-</div>{% endblock %}
-{% block content %}<div class="content-card">
-    <div class="content-card-body empty-state-card"><i class="fas fa-chart-pie"></i>
-        <h3>Project Analytics</h3>
-        <p>Project success rate and analysis reports coming soon.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="project-report-grid">
+    <article class="project-report-card">
+        <span class="label">Total Requests</span>
+        <p class="value">{{ total_requests }}</p>
+        <p class="meta">{{ pending_requests }} currently pending review</p>
+    </article>
+    <article class="project-report-card">
+        <span class="label">Approval Rate</span>
+        <p class="value">{{ approval_rate }}%</p>
+        <p class="meta">Based on {{ approved_requests }} approvals vs {{ rejected_requests }} rejections</p>
+    </article>
+    <article class="project-report-card">
+        <span class="label">Program Conversion</span>
+        <p class="value">{{ conversion_rate }}%</p>
+        <p class="meta">{{ approved_with_program }} approved requests became real programs</p>
+    </article>
+    <article class="project-report-card">
+        <span class="label">Completion Rate</span>
+        <p class="value">{{ completion_rate }}%</p>
+        <p class="meta">{{ completed_programs }} completed and {{ active_upcoming_programs }} upcoming/active</p>
+    </article>
+    <article class="project-report-card">
+        <span class="label">Avg Registrations</span>
+        <p class="value">{{ avg_registrations }}</p>
+        <p class="meta">Average registrations per approved converted program</p>
+    </article>
+</section>
+
+<section class="project-report-panels">
+    <article class="content-card">
+        <div class="content-card-body">
+            <h3>Outcome Funnel</h3>
+            <div class="funnel-list">
+                {% for row in outcome_rows %}
+                <div class="funnel-row">
+                    <div class="funnel-label">{{ row.label }}</div>
+                    <div class="funnel-track"><div class="funnel-fill" style="width: {{ row.width }}%;"></div></div>
+                    <div class="funnel-value">{{ row.value }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </article>
+
+    <article class="content-card">
+        <div class="content-card-body">
+            <h3>Event Type Success</h3>
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Total</th>
+                        <th>Approved</th>
+                        <th>Success</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in event_type_summary %}
+                    <tr>
+                        <td>{{ row.label }}</td>
+                        <td>{{ row.total }}</td>
+                        <td>{{ row.approved }}</td>
+                        <td><span class="rate-pill">{{ row.success_rate }}%</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">No request data available yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+
+<article class="content-card" style="margin-bottom: 1rem;">
+    <div class="content-card-body">
+        <h3>Community Performance</h3>
+        <div class="community-grid">
+            {% for row in community_summary %}
+            <div class="community-card">
+                <h4>{{ row.community__name }}</h4>
+                <p>{{ row.approved }} approved of {{ row.total }} requests</p>
+                <span class="rate-pill">{{ row.success_rate }}%</span>
+            </div>
+            {% empty %}
+            <p>No community-linked requests available yet.</p>
+            {% endfor %}
+        </div>
     </div>
-</div>{% endblock %}
+</article>
+
+<article class="content-card">
+    <div class="content-card-body">
+        <h3>Recent Request Outcomes</h3>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Community</th>
+                    <th>Status</th>
+                    <th>Program</th>
+                    <th>Submitted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request_obj in recent_requests %}
+                <tr>
+                    <td>{{ request_obj.title }}</td>
+                    <td>{{ request_obj.community.name|default:'Not assigned' }}</td>
+                    <td><span class="rate-pill">{{ request_obj.get_status_display }}</span></td>
+                    <td>{% if request_obj.created_program %}{{ request_obj.created_program.title }}{% else %}Not created{% endif %}</td>
+                    <td>{{ request_obj.submitted_at|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No project request activity yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</article>
+{% endblock %}

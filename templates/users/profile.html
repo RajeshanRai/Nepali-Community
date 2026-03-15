@@ -1,0 +1,1363 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Profile - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'users/profile.css' %}">
+<style>
+    #member-profile-stage {
+        --hero-bg: linear-gradient(132deg, var(--color-primary, #1a1a1a) 0%, color-mix(in srgb, var(--color-primary, #1a1a1a) 70%, var(--color-accent, #FF6B35) 30%) 52%, var(--color-accent, #FF6B35) 100%);
+        --hero-ink: var(--color-white, #ffffff);
+        --hero-ink-soft: rgba(231, 251, 255, 0.78);
+        --hero-card-bg: rgba(255, 255, 255, 0.14);
+        --hero-border: rgba(var(--primary-rgb, 255, 107, 53), 0.36);
+        position: relative;
+        overflow: hidden;
+        border-radius: 26px;
+        border: 1px solid rgba(186, 238, 255, 0.24);
+        background: var(--hero-bg);
+        box-shadow: 0 30px 60px rgba(2, 17, 33, 0.3);
+        isolation: isolate;
+        padding: clamp(1rem, 2vw, 1.45rem);
+    }
+
+    #member-profile-stage::before,
+    #member-profile-stage::after {
+        content: "";
+        position: absolute;
+        pointer-events: none;
+        z-index: 0;
+        border-radius: 999px;
+    }
+
+    #member-profile-stage::before {
+        width: 340px;
+        height: 340px;
+        right: -130px;
+        top: -130px;
+        background: radial-gradient(circle, rgba(113, 233, 255, 0.42) 0%, rgba(113, 233, 255, 0) 70%);
+    }
+
+    #member-profile-stage::after {
+        width: 260px;
+        height: 260px;
+        left: -110px;
+        bottom: -110px;
+        background: radial-gradient(circle, rgba(136, 255, 193, 0.3) 0%, rgba(136, 255, 193, 0) 72%);
+    }
+
+    #member-profile-stage .profile-hero-copy,
+    #member-profile-stage .profile-hero-card {
+        position: relative;
+        z-index: 1;
+    }
+
+    #member-profile-stage .profile-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        border: 1px solid rgba(210, 251, 255, 0.32);
+        border-radius: 999px;
+        padding: 0.34rem 0.62rem;
+        color: var(--hero-ink);
+        background: rgba(255, 255, 255, 0.08);
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        font-size: 0.72rem;
+    }
+
+    #member-profile-stage .profile-kicker::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--color-accent, #FF6B35);
+        box-shadow: 0 0 0 5px rgba(var(--primary-rgb, 255, 107, 53), 0.22);
+    }
+
+    #member-profile-stage h1 {
+        color: var(--hero-ink);
+        letter-spacing: -0.03em;
+        font-size: clamp(1.8rem, 3.8vw, 2.7rem);
+        margin: 0.7rem 0 0.35rem;
+        line-height: 1.08;
+    }
+
+    #member-profile-stage .profile-hero-copy > p {
+        color: var(--hero-ink-soft);
+        max-width: 56ch;
+        font-size: clamp(0.94rem, 2vw, 1.05rem);
+    }
+
+    #member-profile-stage .profile-hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        margin-top: 0.9rem;
+    }
+
+    #member-profile-stage .profile-hero-meta span {
+        border-radius: 999px;
+        border: 1px solid rgba(var(--primary-rgb, 255, 107, 53), 0.34);
+        background: rgba(255, 255, 255, 0.09);
+        color: #effcff;
+        padding: 0.36rem 0.7rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.42rem;
+        font-size: 0.85rem;
+    }
+
+    #member-profile-stage .profile-hero-meta span i {
+        opacity: 0.9;
+    }
+
+    #member-profile-stage .profile-hero-card {
+        background: var(--hero-card-bg);
+        border: 1px solid var(--hero-border);
+        border-radius: 20px;
+        backdrop-filter: blur(8px);
+        padding: 0.95rem;
+        transform-style: preserve-3d;
+        transition: transform 260ms ease, box-shadow 260ms ease;
+        box-shadow: 0 20px 34px rgba(2, 16, 24, 0.24);
+    }
+
+    #member-profile-stage .profile-avatar-wrap {
+        border: 2px solid rgba(235, 255, 255, 0.45);
+        box-shadow: 0 9px 24px rgba(1, 20, 38, 0.35);
+    }
+
+    #member-profile-stage .profile-hero-status {
+        margin-top: 0.85rem;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.55rem;
+    }
+
+    #member-profile-stage .profile-hero-status > div {
+        border-radius: 12px;
+        border: 1px solid rgba(var(--primary-rgb, 255, 107, 53), 0.26);
+        background: rgba(var(--primary-rgb, 255, 107, 53), 0.14);
+        padding: 0.6rem 0.55rem;
+    }
+
+    #member-profile-stage .profile-hero-status strong {
+        color: #f2fdff;
+        font-size: clamp(1rem, 2.2vw, 1.2rem);
+        letter-spacing: -0.02em;
+    }
+
+    #member-profile-stage .profile-hero-status span {
+        color: rgba(221, 248, 255, 0.86);
+        font-size: 0.77rem;
+    }
+
+    #member-profile-stage[data-animate="true"] .profile-hero-copy,
+    #member-profile-stage[data-animate="true"] .profile-hero-card,
+    #member-profile-stage[data-animate="true"] .profile-hero-meta span,
+    #member-profile-stage[data-animate="true"] .profile-hero-status > div {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    #member-profile-stage.hero-ready .profile-hero-copy,
+    #member-profile-stage.hero-ready .profile-hero-card,
+    #member-profile-stage.hero-ready .profile-hero-meta span,
+    #member-profile-stage.hero-ready .profile-hero-status > div {
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 320ms ease, transform 420ms cubic-bezier(0.2, 0.85, 0.2, 1);
+    }
+
+    #member-profile-stage.hero-ready .profile-hero-card {
+        transition-delay: 90ms;
+    }
+
+    #member-profile-stage.hero-ready .profile-hero-meta span:nth-child(2) {
+        transition-delay: 60ms;
+    }
+
+    #member-profile-stage.hero-ready .profile-hero-meta span:nth-child(3) {
+        transition-delay: 120ms;
+    }
+
+    #member-profile-stage.hero-ready .profile-hero-status > div:nth-child(2) {
+        transition-delay: 70ms;
+    }
+
+    #member-profile-stage.hero-ready .profile-hero-status > div:nth-child(3) {
+        transition-delay: 140ms;
+    }
+
+    @media (max-width: 1024px) {
+        #member-profile-stage .profile-hero-status {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 720px) {
+        #member-profile-stage {
+            border-radius: 18px;
+            padding: 0.9rem;
+        }
+
+        #member-profile-stage .profile-hero-meta {
+            gap: 0.45rem;
+        }
+
+        #member-profile-stage .profile-hero-meta span {
+            width: 100%;
+            justify-content: flex-start;
+            border-radius: 12px;
+        }
+
+        #member-profile-stage .profile-hero-card {
+            margin-top: 0.25rem;
+            border-radius: 16px;
+            padding: 0.78rem;
+        }
+
+        #member-profile-stage .profile-hero-status {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    #profile-edit-form {
+        align-items: start;
+    }
+
+    #profile-edit-form .profile-file-input,
+    #profile-edit-form .cfn-wrap {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 900px) {
+        #profile-edit-form {
+            grid-template-columns: 1fr;
+        }
+
+        #profile-edit-form .profile-field-block,
+        #profile-edit-form .profile-form-span {
+            grid-column: 1 / -1;
+        }
+
+        #profile-edit-form .profile-button {
+            width: 100%;
+        }
+    }
+
+    #profile-access-hub {
+        --access-bg: linear-gradient(145deg, var(--color-background, #ffffff) 0%, var(--color-bg-light, #F9FAFB) 50%, var(--color-bg-gray, #F3F4F6) 100%);
+        --access-panel-bg: rgba(255, 255, 255, 0.86);
+        --access-border: color-mix(in srgb, var(--color-border, #E5E7EB) 88%, var(--color-accent, #FF6B35) 12%);
+        --access-shadow: 0 20px 55px rgba(11, 37, 69, 0.12);
+        --access-ink: var(--color-text, #1a1a1a);
+        --access-muted: var(--color-text-muted, #6B7280);
+        --access-brand: var(--color-accent, #FF6B35);
+        --access-brand-soft: rgba(var(--primary-rgb, 255, 107, 53), 0.13);
+        --access-danger: var(--color-error, #EF4444);
+        --access-danger-soft: rgba(239, 68, 68, 0.08);
+        isolation: isolate;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid color-mix(in srgb, var(--color-border, #E5E7EB) 86%, var(--color-accent, #FF6B35) 14%);
+        border-radius: 24px;
+        background: var(--access-bg);
+        box-shadow: var(--access-shadow);
+    }
+
+    #profile-access-hub::before,
+    #profile-access-hub::after {
+        content: "";
+        position: absolute;
+        pointer-events: none;
+        z-index: 0;
+        border-radius: 999px;
+        filter: blur(2px);
+    }
+
+    #profile-access-hub::before {
+        width: 240px;
+        height: 240px;
+        right: -60px;
+        top: -80px;
+        background: radial-gradient(circle, rgba(var(--primary-rgb, 255, 107, 53), 0.26) 0%, rgba(var(--primary-rgb, 255, 107, 53), 0) 70%);
+    }
+
+    #profile-access-hub::after {
+        width: 220px;
+        height: 220px;
+        left: -70px;
+        bottom: -95px;
+        background: radial-gradient(circle, rgba(var(--primary-rgb, 255, 107, 53), 0.18) 0%, rgba(var(--primary-rgb, 255, 107, 53), 0) 70%);
+    }
+
+    #profile-access-hub .profile-card-header,
+    #profile-access-hub .profile-settings-grid {
+        position: relative;
+        z-index: 1;
+    }
+
+    #profile-access-hub .profile-card-header {
+        margin-bottom: 1.2rem;
+    }
+
+    #profile-access-hub .profile-card-header h2 {
+        color: var(--access-ink);
+        letter-spacing: -0.02em;
+        margin-bottom: 0.2rem;
+    }
+
+    #profile-access-hub .profile-section-kicker {
+        color: var(--access-brand);
+        letter-spacing: 0.12em;
+    }
+
+    #profile-access-hub,
+    #profile-access-hub * {
+        box-sizing: border-box;
+    }
+
+    #profile-access-hub .profile-settings-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 1rem;
+        align-items: start;
+    }
+
+    #profile-access-hub .profile-settings-panel {
+        grid-column: span 6;
+        margin: 0;
+        padding: 1.05rem 1.05rem 1rem;
+        border-radius: 18px;
+        border: 1px solid var(--access-border);
+        background: var(--access-panel-bg);
+        backdrop-filter: blur(6px);
+        box-shadow: 0 10px 26px rgba(15, 34, 51, 0.08);
+        transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    }
+
+    #profile-access-hub .profile-settings-stack-right {
+        grid-column: 7 / -1;
+        display: grid;
+        gap: 1rem;
+        align-content: start;
+    }
+
+    #profile-access-hub .profile-settings-panel:hover {
+        transform: translateY(-2px);
+        border-color: rgba(0, 113, 106, 0.32);
+        box-shadow: 0 16px 28px rgba(15, 34, 51, 0.14);
+    }
+
+    #profile-access-hub .profile-settings-panel h3 {
+        margin-bottom: 0.35rem;
+        font-size: 1.02rem;
+        letter-spacing: -0.01em;
+        color: var(--access-ink);
+    }
+
+    #profile-access-hub .profile-settings-panel p {
+        color: var(--access-muted);
+        margin: 0.2rem 0 0.8rem;
+        line-height: 1.45;
+    }
+
+    #profile-access-hub .profile-settings-panel-full {
+        grid-column: 1 / -1;
+    }
+
+    #profile-access-hub .profile-settings-panel-wide {
+        grid-column: 1 / -1;
+    }
+
+    #profile-access-hub .profile-settings-panel-right {
+        grid-column: 7 / -1;
+    }
+
+    #profile-access-hub .profile-settings-panel-danger {
+        background: linear-gradient(160deg, var(--access-danger-soft) 0%, rgba(255, 255, 255, 0.94) 100%);
+        border-color: rgba(178, 32, 45, 0.25);
+    }
+
+    #profile-access-hub .profile-field-block {
+        margin-bottom: 0.75rem;
+    }
+
+    #profile-access-hub .profile-field-block label,
+    #profile-access-hub .profile-checkline span {
+        color: var(--access-ink);
+    }
+
+    #profile-access-hub .profile-field-block input,
+    #profile-access-hub .profile-field-block select,
+    #profile-access-hub .profile-field-block textarea,
+    #profile-access-hub .profile-app-confirm-form input {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid var(--color-border-dark, #D1D5DB);
+        background: #fff;
+        padding: 0.64rem 0.74rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    #profile-access-hub .profile-field-block input:focus,
+    #profile-access-hub .profile-field-block select:focus,
+    #profile-access-hub .profile-field-block textarea:focus,
+    #profile-access-hub .profile-app-confirm-form input:focus {
+        outline: none;
+        border-color: var(--color-accent, #FF6B35);
+        box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 255, 107, 53), 0.22);
+    }
+
+    #profile-access-hub .profile-button {
+        width: auto;
+        min-width: 122px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        padding: 0.55rem 1rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    #profile-access-hub .profile-button-secondary {
+        border-color: rgba(var(--primary-rgb, 255, 107, 53), 0.36);
+        background: linear-gradient(180deg, #ffffff 0%, color-mix(in srgb, var(--color-accent, #FF6B35) 10%, #ffffff 90%) 100%);
+        color: var(--color-primary, #1a1a1a);
+    }
+
+    #profile-access-hub .profile-button-secondary:hover {
+        border-color: rgba(var(--primary-rgb, 255, 107, 53), 0.55);
+        background: linear-gradient(180deg, #ffffff 0%, color-mix(in srgb, var(--color-accent, #FF6B35) 16%, #ffffff 84%) 100%);
+    }
+
+    #profile-access-hub .profile-button-danger {
+        background: linear-gradient(180deg, color-mix(in srgb, var(--color-error, #EF4444) 86%, #ffffff 14%) 0%, var(--color-error, #EF4444) 100%);
+        color: #fff;
+        box-shadow: 0 7px 16px rgba(239, 68, 68, 0.26);
+    }
+
+    #profile-access-hub .profile-button-danger:hover {
+        filter: brightness(1.04);
+    }
+
+    #profile-access-hub .profile-status-chip {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0.34rem 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+    }
+
+    #profile-access-hub .profile-status-chip.success {
+        background: var(--access-brand-soft);
+        color: var(--color-primary, #1a1a1a);
+        border: 1px solid rgba(var(--primary-rgb, 255, 107, 53), 0.28);
+    }
+
+    #profile-access-hub .profile-status-chip.warning {
+        background: color-mix(in srgb, var(--color-warning, #F59E0B) 16%, #ffffff 84%);
+        color: var(--color-primary, #1a1a1a);
+        border: 1px solid color-mix(in srgb, var(--color-warning, #F59E0B) 38%, #ffffff 62%);
+    }
+
+    #profile-access-hub .profile-two-factor-stack {
+        display: grid;
+        gap: 0.75rem;
+        margin-top: 0.6rem;
+    }
+
+    #profile-access-hub .profile-two-factor-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.62rem;
+        align-items: center;
+    }
+
+    #profile-access-hub .profile-two-factor-actions .profile-inline-form {
+        margin: 0;
+        display: inline-flex;
+        flex: 0 0 auto;
+    }
+
+    #profile-access-hub .profile-two-factor-actions .profile-button {
+        width: auto !important;
+        min-width: 0;
+        padding: 0.54rem 0.88rem;
+    }
+
+    #profile-access-hub .profile-two-factor-stack .profile-inline-form {
+        margin: 0;
+    }
+
+    #profile-access-hub .profile-two-factor-actions .profile-button-danger {
+        min-width: 0;
+    }
+
+    #profile-access-hub .profile-inline-form {
+        margin: 0;
+    }
+
+    #profile-access-hub .profile-app-setup-box {
+        margin-top: 0.9rem;
+        border-radius: 14px;
+        border: 1px dashed rgba(var(--primary-rgb, 255, 107, 53), 0.45);
+        background: rgba(255, 255, 255, 0.88);
+        padding: 0.85rem;
+    }
+
+    #profile-access-hub .profile-app-steps-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+        gap: 0.75rem;
+        align-items: start;
+    }
+
+    #profile-access-hub .profile-app-step {
+        background: rgba(255, 255, 255, 0.66);
+        border: 1px solid rgba(0, 113, 106, 0.14);
+        border-radius: 10px;
+        padding: 0.62rem;
+    }
+
+    #profile-access-hub .profile-app-qr {
+        width: min(100%, 210px);
+        aspect-ratio: 1;
+        object-fit: contain;
+        display: block;
+        border-radius: 10px;
+        border: 1px solid rgba(8, 52, 88, 0.2);
+        background: #fff;
+        padding: 0.35rem;
+        margin: 0.5rem 0 0.7rem;
+    }
+
+    #profile-access-hub .profile-app-step p {
+        margin-top: 0;
+    }
+
+    #profile-access-hub .profile-app-setup-box code {
+        display: block;
+        margin: 0.35rem 0 0.7rem;
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--color-primary, #1a1a1a) 88%, #ffffff 12%);
+        color: #f0f8ff;
+        padding: 0.55rem 0.62rem;
+        overflow-wrap: anywhere;
+    }
+
+    #profile-access-hub .profile-app-confirm-form {
+        margin-top: 0.72rem;
+    }
+
+    #profile-access-hub .profile-app-step .profile-app-confirm-form {
+        margin-top: 0;
+    }
+
+    #profile-access-hub .profile-checkline {
+        margin-top: 0.45rem;
+        margin-bottom: 0.35rem;
+    }
+
+    #profile-access-hub .profile-settings-toggle {
+        display: none;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem;
+        border: 0;
+        background: transparent;
+        color: var(--access-ink);
+        padding: 0;
+        margin-bottom: 0.5rem;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    #profile-access-hub .profile-settings-toggle .toggle-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 999px;
+        border: 1px solid color-mix(in srgb, var(--color-border, #E5E7EB) 80%, var(--color-accent, #FF6B35) 20%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-accent, #FF6B35);
+        transition: transform 220ms ease, background 220ms ease;
+        background: rgba(255, 255, 255, 0.7);
+    }
+
+    #profile-access-hub .profile-settings-panel[data-collapsed="true"] .toggle-icon {
+        transform: rotate(-90deg);
+    }
+
+    #profile-access-hub .profile-settings-body {
+        overflow: hidden;
+        max-height: 1200px;
+        opacity: 1;
+        transition: max-height 260ms ease, opacity 180ms ease;
+    }
+
+    #profile-access-hub .profile-settings-panel[data-collapsed="true"] .profile-settings-body {
+        max-height: 0;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    @media (max-width: 1024px) {
+        #profile-access-hub .profile-settings-stack-right,
+        #profile-access-hub .profile-settings-panel {
+            grid-column: span 12;
+        }
+    }
+
+    @media (max-width: 680px) {
+        #profile-access-hub {
+            border-radius: 16px;
+            padding: 0.95rem;
+        }
+
+        #profile-access-hub .profile-card-header {
+            margin-bottom: 0.8rem;
+        }
+
+        #profile-access-hub .profile-settings-grid {
+            gap: 0.72rem;
+        }
+
+        #profile-access-hub .profile-settings-panel {
+            border-radius: 14px;
+            padding: 0.82rem 0.82rem 0.78rem;
+        }
+
+        #profile-access-hub .profile-settings-toggle {
+            display: inline-flex;
+        }
+
+        #profile-access-hub .profile-settings-panel h3 {
+            margin: 0;
+            font-size: 0.98rem;
+        }
+
+        #profile-access-hub .profile-settings-body > h3 {
+            display: none;
+        }
+
+        #profile-access-hub .profile-app-steps-grid {
+            grid-template-columns: 1fr;
+        }
+
+        #profile-access-hub .profile-two-factor-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+
+        #profile-access-hub .profile-two-factor-actions .profile-inline-form {
+            display: block;
+        }
+
+        #profile-access-hub .profile-two-factor-actions .profile-button {
+            width: 100% !important;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page-shell">
+    <section class="profile-page-hero" id="member-profile-stage" data-animate="true" aria-label="Member profile overview">
+        <div class="profile-hero-copy">
+            <span class="profile-kicker">Member Profile</span>
+            <h1>{{ user.display_name }}</h1>
+            <p>Your profile, security settings, and community activity — all in one place.</p>
+            <div class="profile-hero-meta">
+                <span><i class="fa-solid fa-at" aria-hidden="true"></i>{{ user.username }}</span>
+                <span><i class="fa-solid fa-envelope" aria-hidden="true"></i>{{ user.email }}</span>
+                {% if display_location %}
+                <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>{{ display_location }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="profile-hero-card">
+            <div class="profile-avatar-wrap">
+                {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" alt="{{ user.display_name }} profile picture" class="profile-avatar-image">
+                {% else %}
+                <span class="profile-avatar-fallback">{{ user.initials }}</span>
+                {% endif %}
+            </div>
+            <div class="profile-hero-status">
+                <div>
+                    <strong>{{ profile_completion }}%</strong>
+                    <span>Profile completion</span>
+                </div>
+                <div>
+                    <strong>{% if user.is_verified_member %}Verified{% else %}Pending{% endif %}</strong>
+                    <span>Member status</span>
+                </div>
+                <div>
+                    <strong>{% if user.email_verified %}Verified{% else %}Unverified{% endif %}</strong>
+                    <span>Email status</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% if messages %}
+    <div class="profile-message-stack" aria-live="polite">
+        {% for message in messages %}
+        <div class="profile-alert profile-alert-{{ message.tags|default:'info' }}">
+            <i class="fa-solid {% if 'success' in message.tags %}fa-circle-check{% elif 'error' in message.tags %}fa-circle-exclamation{% else %}fa-circle-info{% endif %}" aria-hidden="true"></i>
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="profile-layout">
+        <aside class="profile-sidebar-card">
+            <div class="profile-sidebar-quick-actions" aria-label="Profile quick actions">
+                <div class="profile-sidebar-quick-actions-head">
+                    <h3>Quick Actions</h3>
+                    <span>Account controls</span>
+                </div>
+                {% if user.is_superuser %}
+                <a href="{% url 'dashboard:admin_overview' %}" class="profile-quick-link">
+                    <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
+                    <span>Admin Dashboard</span>
+                </a>
+                {% endif %}
+                <form method="post" action="{% url 'logout' %}" class="profile-sidebar-logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="profile-quick-link profile-quick-link-logout">
+                        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </div>
+
+            <h2 style="font-size:1rem">Profile Summary</h2>
+            <ul class="profile-summary-list">
+                <li>
+                    <span>Display name</span>
+                    <strong>{{ user.display_name }}</strong>
+                </li>
+                <li>
+                    <span>Primary community</span>
+                    <strong>{{ user.primary_community|default:'Not selected' }}</strong>
+                </li>
+                <li>
+                    <span>Secondary community</span>
+                    <strong>{{ user.secondary_community|default:'Not selected' }}</strong>
+                </li>
+                <li>
+                    <span>Recovery email</span>
+                    <strong>{{ user.recovery_email|default:'Not set' }}</strong>
+                </li>
+                <li>
+                    <span>Recovery phone</span>
+                    <strong>{{ user.recovery_phone|default:'Not set' }}</strong>
+                </li>
+                <li>
+                    <span>Email verification</span>
+                    <strong>{% if user.email_verified %}Verified{% else %}Pending{% endif %}</strong>
+                </li>
+                <li>
+                    <span>2FA method</span>
+                    <strong>{% if user.two_factor_method == 'email' %}Email code{% elif user.two_factor_method == 'app' %}Authenticator app{% else %}Disabled{% endif %}</strong>
+                </li>
+            </ul>
+
+            <div class="profile-security-notes">
+                <article>
+                    <h3>Security & verification</h3>
+                    <p>{% if user.is_verified_member %}Your account carries the verified community member badge.{% else %}Your account is active, but community verification has not been approved yet.{% endif %}</p>
+                </article>
+                <article>
+                    <h3>Two-factor authentication</h3>
+                    <p>{% if user.two_factor_method == 'email' %}Email-based verification is enabled at login.{% elif user.two_factor_method == 'app' %}Authenticator app verification is enabled at login.{% else %}Two-factor authentication is currently disabled.{% endif %}</p>
+                </article>
+                <article>
+                    <h3>Account deletion</h3>
+                    <p>Self-service permanent deletion is intentionally disabled. Use deactivation below and contact support if you need full data removal.</p>
+                </article>
+            </div>
+        </aside>
+
+        <div class="profile-main-stack">
+            <section class="profile-card profile-card-basic-compact">
+                <div class="profile-card-header">
+                    <div>
+                        <span class="profile-section-kicker">Basic Profile Information</span>
+                        <h2>Edit your details</h2>
+                    </div>
+                </div>
+                <form method="post" action="{{ profile_action_url }}" enctype="multipart/form-data" class="profile-form-grid" id="profile-edit-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_profile">
+
+                    {% for hidden in profile_form.hidden_fields %}
+                    {{ hidden }}
+                    {% endfor %}
+
+                    <div class="profile-form-span profile-field-block">
+                        <label for="{{ profile_form.profile_picture.id_for_label }}">Profile picture</label>
+                        {{ profile_form.profile_picture }}
+                        {% if profile_form.profile_picture.help_text %}<small>{{ profile_form.profile_picture.help_text }}</small>{% endif %}
+                        {% for error in profile_form.profile_picture.errors %}<div class="profile-field-error">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="profile-field-block">
+                        <label for="{{ profile_form.email.id_for_label }}">{{ profile_form.email.label }}</label>
+                        {{ profile_form.email }}
+                        {% if profile_form.email.help_text %}<small>{{ profile_form.email.help_text }}</small>{% endif %}
+                        {% for error in profile_form.email.errors %}<div class="profile-field-error">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    {% for field in profile_form.visible_fields %}
+                    {% if field.name != 'profile_picture' and field.name != 'email' %}
+                    <div class="profile-field-block{% if field.name == 'bio' or field.name == 'address' %} profile-form-span{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                        {% for error in field.errors %}<div class="profile-field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% for error in profile_form.non_field_errors %}
+                    <div class="profile-field-error profile-form-span">{{ error }}</div>
+                    {% endfor %}
+
+                    <div class="profile-form-actions profile-form-span">
+                        <button type="submit" class="profile-button" style="min-width:104px">Save profile</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="profile-card" id="profile-access-hub" aria-label="Password and access settings">
+                <div class="profile-card-header">
+                    <div>
+                        <span class="profile-section-kicker">Account Settings</span>
+                        <h2>Password and access</h2>
+                    </div>
+                </div>
+                <div class="profile-settings-grid">
+                    <form method="post" class="profile-settings-panel" data-collapsible-panel>
+                        <button type="button" class="profile-settings-toggle" aria-expanded="true">
+                            <h3>Change password</h3>
+                            <span class="toggle-icon"><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></span>
+                        </button>
+                        <div class="profile-settings-body">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="change_password">
+                            <h3>Change password</h3>
+                            {% for field in password_form %}
+                            <div class="profile-field-block">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.help_text %}<small>{{ field.help_text|safe }}</small>{% endif %}
+                                {% for error in field.errors %}<div class="profile-field-error">{{ error }}</div>{% endfor %}
+                            </div>
+                            {% endfor %}
+                            {% for error in password_form.non_field_errors %}
+                            <div class="profile-field-error">{{ error }}</div>
+                            {% endfor %}
+                            <button type="submit" class="profile-button profile-button-secondary">Update password</button>
+                        </div>
+                    </form>
+
+                    <div class="profile-settings-stack-right">
+                        <div class="profile-settings-panel" data-collapsible-panel>
+                            <button type="button" class="profile-settings-toggle" aria-expanded="true">
+                                <h3>Email verification</h3>
+                                <span class="toggle-icon"><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></span>
+                            </button>
+                            <div class="profile-settings-body">
+                                <h3>Email verification</h3>
+                                <p>{% if user.email_verified %}Email verified - secure workflows enabled.{% else %}Verify your email to unlock secure account features.{% endif %}</p>
+                                {% if user.email_verified %}
+                                <span class="profile-status-chip success">Verified</span>
+                                {% else %}
+                                <span class="profile-status-chip warning">Pending verification</span>
+                                <form method="post" class="profile-inline-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="resend_verification_email">
+                                    <button type="submit" class="profile-button profile-button-secondary">Resend email</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <form method="post" class="profile-settings-panel profile-settings-panel-danger" data-collapsible-panel>
+                            <button type="button" class="profile-settings-toggle" aria-expanded="true">
+                                <h3>Deactivate account</h3>
+                                <span class="toggle-icon"><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></span>
+                            </button>
+                            <div class="profile-settings-body">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="deactivate_account">
+                                <h3>Deactivate account</h3>
+                                <p>Your account will be disabled immediately. Contact an administrator to restore access.</p>
+                                <div class="profile-field-block">
+                                    <label for="{{ deactivate_form.password.id_for_label }}">Password</label>
+                                    {{ deactivate_form.password }}
+                                    {% for error in deactivate_form.password.errors %}<div class="profile-field-error">{{ error }}</div>{% endfor %}
+                                </div>
+                                <label class="profile-checkline">
+                                    {{ deactivate_form.confirm }}
+                                    <span>I understand this will deactivate my account.</span>
+                                </label>
+                                {% for error in deactivate_form.confirm.errors %}<div class="profile-field-error">{{ error }}</div>{% endfor %}
+                                {% for error in deactivate_form.non_field_errors %}<div class="profile-field-error">{{ error }}</div>{% endfor %}
+                                <button type="submit" class="profile-button profile-button-danger">Deactivate</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="profile-settings-panel profile-settings-panel-wide" data-collapsible-panel>
+                        <button type="button" class="profile-settings-toggle" aria-expanded="true">
+                            <h3>Two-factor authentication</h3>
+                            <span class="toggle-icon"><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></span>
+                        </button>
+                        <div class="profile-settings-body">
+                            <h3>Two-factor authentication</h3>
+                            <p>Add a second factor to protect your sign-in.</p>
+                            <div class="profile-two-factor-stack">
+                                {% if user.two_factor_method == 'email' %}
+                                <span class="profile-status-chip success">Email code enabled</span>
+                                {% elif user.two_factor_method == 'app' %}
+                                <span class="profile-status-chip success">Authenticator app enabled</span>
+                                {% else %}
+                                <span class="profile-status-chip warning">2FA is disabled</span>
+                                {% endif %}
+
+                                <div class="profile-two-factor-actions" aria-label="2FA setup actions">
+                                    <form method="post" class="profile-inline-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="enable_email_2fa">
+                                        <button type="submit" class="profile-button profile-button-secondary">Email 2FA</button>
+                                    </form>
+
+                                    <form method="post" class="profile-inline-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="start_app_2fa_setup">
+                                        <button type="submit" class="profile-button profile-button-secondary">Authenticator app</button>
+                                    </form>
+
+                                    {% if user.two_factor_method == 'email' or user.two_factor_method == 'app' %}
+                                    <form method="post" class="profile-inline-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="disable_2fa">
+                                        <button type="submit" class="profile-button profile-button-danger">Disable 2FA</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if pending_totp_secret %}
+                            <div class="profile-app-setup-box">
+                                <div class="profile-app-steps-grid">
+                                    <div class="profile-app-step">
+                                        <p><strong>Step 1:</strong> Scan this QR code in your authenticator app (Google Authenticator, Authy, etc.).</p>
+                                        {% if totp_qr_data_uri %}
+                                        <img src="{{ totp_qr_data_uri }}" alt="Authenticator setup QR code" class="profile-app-qr">
+                                        {% endif %}
+                                        <p class="profile-small-note">If scanning fails, enter this secret manually:</p>
+                                        <code>{{ pending_totp_secret }}</code>
+                                        <p class="profile-small-note"><strong>Provisioning URI:</strong> {{ totp_setup_uri }}</p>
+                                    </div>
+                                    <div class="profile-app-step">
+                                        <form method="post" class="profile-app-confirm-form">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="confirm_app_2fa_setup">
+                                            <div class="profile-field-block">
+                                                <label for="{{ app_2fa_form.code.id_for_label }}"><strong>Step 2:</strong> Enter the 6-digit code from your app</label>
+                                                {{ app_2fa_form.code }}
+                                                {% for error in app_2fa_form.code.errors %}<div class="profile-field-error">{{ error }}</div>{% endfor %}
+                                            </div>
+                                            <button type="submit" class="profile-button">Confirm &amp; enable</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="profile-card">
+                <div class="profile-card-header">
+                    <div>
+                        <span class="profile-section-kicker">Activity History</span>
+                        <h2>Your recent community activity</h2>
+                    </div>
+                </div>
+                <div class="profile-activity-grid">
+                    <article class="profile-activity-panel">
+                        <h3>Event registrations</h3>
+                        {% if event_registrations %}
+                        <ul class="profile-activity-list">
+                            {% for registration in event_registrations %}
+                            <li>
+                                <div>
+                                    <strong><a href="{% url 'program_detail' registration.program.pk %}">{{ registration.program.title }}</a></strong>
+                                    <span>Registered on {{ registration.registered_at|date:'M d, Y' }}</span>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="profile-empty-state">No event registrations yet.</p>
+                        {% endif %}
+                    </article>
+
+                    <article class="profile-activity-panel">
+                        <h3>Volunteer activity</h3>
+                        {% if volunteer_applications or volunteer_requests %}
+                        <ul class="profile-activity-list">
+                            {% for application in volunteer_applications %}
+                            <li>
+                                <div>
+                                    <strong><a href="{% url 'volunteer_detail' application.opportunity.pk %}">{{ application.opportunity.title }}</a></strong>
+                                    <span>{{ application.get_status_display }} on {{ application.applied_at|date:'M d, Y' }}</span>
+                                </div>
+                            </li>
+                            {% endfor %}
+                            {% for volunteer_request in volunteer_requests %}
+                            <li>
+                                <div>
+                                    <strong>{{ volunteer_request.get_volunteer_type_display }}</strong>
+                                    <span>{{ volunteer_request.get_status_display }} on {{ volunteer_request.created_at|date:'M d, Y' }}</span>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="profile-empty-state">No volunteer activity yet.</p>
+                        {% endif %}
+                    </article>
+
+                    <article class="profile-activity-panel">
+                        <h3>Event requests</h3>
+                        {% if event_requests %}
+                        <ul class="profile-activity-list">
+                            {% for event_request in event_requests %}
+                            <li>
+                                <div>
+                                    <strong>{{ event_request.title }}</strong>
+                                    <span>{{ event_request.get_status_display }} on {{ event_request.submitted_at|date:'M d, Y' }}</span>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="profile-empty-state">No event requests submitted yet.</p>
+                        {% endif %}
+                    </article>
+
+                    <article class="profile-activity-panel">
+                        <h3>Donations</h3>
+                        {% if donations %}
+                        <ul class="profile-activity-list">
+                            {% for donation in donations %}
+                            <li>
+                                <div>
+                                    <strong>${{ donation.amount }}</strong>
+                                    <span>{{ donation.get_status_display }} on {{ donation.created_at|date:'M d, Y' }}</span>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="profile-empty-state">No donation history on this account yet.</p>
+                        {% endif %}
+                    </article>
+
+                    <article class="profile-activity-panel">
+                        <h3>Recently viewed content</h3>
+                        {% if recent_views %}
+                        <ul class="profile-activity-list">
+                            {% for item in recent_views %}
+                            <li>
+                                <div>
+                                    <strong><a href="{{ item.url }}">{{ item.title }}</a></strong>
+                                    <span>{{ item.content_type|title }} viewed on {{ item.viewed_at|date:'M d, Y g:i A' }}</span>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="profile-empty-state">Recently viewed pages will appear here as you browse the site.</p>
+                        {% endif %}
+                    </article>
+                </div>
+            </section>
+
+            <section class="profile-card">
+                <div class="profile-card-header">
+                    <div>
+                        <span class="profile-section-kicker">Security & Verification</span>
+                        <h2>Login history and protection status</h2>
+                    </div>
+                </div>
+                <div class="profile-security-grid">
+                    <article class="profile-security-panel">
+                        <h3>Verification overview</h3>
+                        <ul class="profile-status-list">
+                            <li>
+                                <span>Email verification</span>
+                                <strong>{% if user.email_verified %}Verified{% else %}Pending{% endif %}</strong>
+                            </li>
+                            <li>
+                                <span>Member badge</span>
+                                <strong>{% if user.is_verified_member %}Verified{% else %}Pending{% endif %}</strong>
+                            </li>
+                            <li>
+                                <span>Recovery contact</span>
+                                <strong>{% if user.recovery_email or user.recovery_phone %}Configured{% else %}Missing{% endif %}</strong>
+                            </li>
+                            <li>
+                                <span>Two-factor authentication</span>
+                                <strong>{% if user.two_factor_method == 'email' %}Email code{% elif user.two_factor_method == 'app' %}Authenticator app{% else %}Disabled{% endif %}</strong>
+                            </li>
+                        </ul>
+                    </article>
+
+                    <article class="profile-security-panel">
+                        <h3>Recent login activity</h3>
+                        {% if login_activity %}
+                        <ul class="profile-activity-list">
+                            {% for login in login_activity %}
+                            <li>
+                                <div>
+                                    <strong>{{ login.device_label }}</strong>
+                                    <span>{{ login.logged_in_at|date:'M d, Y g:i A' }}{% if login.ip_address %} • {{ login.ip_address }}{% endif %}</span>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="profile-empty-state">Your login history will appear here after your next sign-in.</p>
+                        {% endif %}
+                    </article>
+
+                    <article class="profile-security-panel profile-security-panel-wide">
+                        <h3>Security alerts</h3>
+                        <p class="profile-empty-state">Alerts are delivered via moderation notices, password resets, and 2FA activity. If you suspect unauthorised access, change your password and review 2FA immediately.</p>
+                    </article>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<script>
+    (function () {
+        var stayTargetKey = 'profile:stay-target';
+
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+
+        function forceTop() {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        }
+
+        function scrollToAccessHub() {
+            var hub = document.getElementById('profile-access-hub');
+            if (!hub) {
+                forceTop();
+                return;
+            }
+            hub.scrollIntoView({ behavior: 'auto', block: 'start' });
+        }
+
+        function applyInitialScrollPreference() {
+            var stayTarget = sessionStorage.getItem(stayTargetKey);
+            if (stayTarget === 'access-hub') {
+                sessionStorage.removeItem(stayTargetKey);
+                requestAnimationFrame(scrollToAccessHub);
+                return;
+            }
+
+            forceTop();
+            requestAnimationFrame(forceTop);
+        }
+
+        applyInitialScrollPreference();
+        window.addEventListener('pageshow', applyInitialScrollPreference, { once: true });
+
+        var heroStage = document.getElementById('member-profile-stage');
+        if (heroStage) {
+            requestAnimationFrame(function () {
+                heroStage.classList.add('hero-ready');
+            });
+
+            var heroCard = heroStage.querySelector('.profile-hero-card');
+            if (heroCard && window.matchMedia('(min-width: 1025px)').matches) {
+                heroStage.addEventListener('mousemove', function (event) {
+                    var rect = heroStage.getBoundingClientRect();
+                    var x = (event.clientX - rect.left) / rect.width;
+                    var y = (event.clientY - rect.top) / rect.height;
+                    var rotateY = (x - 0.5) * 4;
+                    var rotateX = (0.5 - y) * 3;
+                    heroCard.style.transform = 'translateY(-2px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg)';
+                });
+
+                heroStage.addEventListener('mouseleave', function () {
+                    heroCard.style.transform = 'translateY(0) rotateX(0deg) rotateY(0deg)';
+                });
+            }
+        }
+
+        var profileForm = document.getElementById('profile-edit-form');
+        if (profileForm) {
+            var userIdentity = profileForm.querySelector('[name="username"]');
+            var userKey = userIdentity && userIdentity.value ? userIdentity.value : 'current-user';
+            var draftKey = 'profile-edit-draft:' + userKey;
+
+            function shouldSkipField(element) {
+                if (!element || !element.name) {
+                    return true;
+                }
+                if (element.type === 'file') {
+                    return true;
+                }
+                if (element.type === 'hidden' && (element.name === 'csrfmiddlewaretoken' || element.name === 'action')) {
+                    return true;
+                }
+                return false;
+            }
+
+            function saveDraft() {
+                var payload = {};
+                var elements = profileForm.querySelectorAll('input, select, textarea');
+
+                elements.forEach(function (element) {
+                    if (shouldSkipField(element)) {
+                        return;
+                    }
+
+                    if (element.type === 'checkbox' || element.type === 'radio') {
+                        payload[element.name] = element.checked;
+                        return;
+                    }
+
+                    payload[element.name] = element.value;
+                });
+
+                localStorage.setItem(draftKey, JSON.stringify(payload));
+            }
+
+            function restoreDraft() {
+                var stored = localStorage.getItem(draftKey);
+                if (!stored) {
+                    return;
+                }
+
+                var payload;
+                try {
+                    payload = JSON.parse(stored);
+                } catch (error) {
+                    localStorage.removeItem(draftKey);
+                    return;
+                }
+
+                Object.keys(payload).forEach(function (name) {
+                    var selectorName = typeof CSS !== 'undefined' && typeof CSS.escape === 'function' ? CSS.escape(name) : name;
+                    var element = profileForm.querySelector('[name="' + selectorName + '"]');
+                    if (!element || shouldSkipField(element)) {
+                        return;
+                    }
+
+                    if (element.type === 'checkbox' || element.type === 'radio') {
+                        element.checked = Boolean(payload[name]);
+                        return;
+                    }
+
+                    if (!element.value) {
+                        element.value = payload[name];
+                    }
+                });
+            }
+
+            restoreDraft();
+
+            profileForm.addEventListener('input', saveDraft);
+            profileForm.addEventListener('change', saveDraft);
+
+            profileForm.addEventListener('submit', function () {
+                localStorage.removeItem(draftKey);
+            });
+        }
+
+        var root = document.getElementById('profile-access-hub');
+        if (!root) {
+            return;
+        }
+
+        var sectionForms = root.querySelectorAll('form[method="post"]');
+        sectionForms.forEach(function (form) {
+            form.addEventListener('submit', function () {
+                sessionStorage.setItem(stayTargetKey, 'access-hub');
+            });
+        });
+
+        var mobileMq = window.matchMedia('(max-width: 680px)');
+        var panels = root.querySelectorAll('[data-collapsible-panel]');
+
+        function setCollapseState(panel, collapsed) {
+            panel.setAttribute('data-collapsed', collapsed ? 'true' : 'false');
+            var toggle = panel.querySelector('.profile-settings-toggle');
+            if (toggle) {
+                toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            }
+        }
+
+        function syncToViewport() {
+            panels.forEach(function (panel, index) {
+                if (mobileMq.matches) {
+                    setCollapseState(panel, index !== 0);
+                } else {
+                    setCollapseState(panel, false);
+                }
+            });
+        }
+
+        panels.forEach(function (panel) {
+            var toggle = panel.querySelector('.profile-settings-toggle');
+            if (!toggle) {
+                return;
+            }
+
+            toggle.addEventListener('click', function () {
+                if (!mobileMq.matches) {
+                    return;
+                }
+
+                var isCollapsed = panel.getAttribute('data-collapsed') === 'true';
+                setCollapseState(panel, !isCollapsed);
+            });
+        });
+
+        if (typeof mobileMq.addEventListener === 'function') {
+            mobileMq.addEventListener('change', syncToViewport);
+        } else {
+            mobileMq.addListener(syncToViewport);
+        }
+
+        syncToViewport();
+    })();
+</script>
+{% endblock %}

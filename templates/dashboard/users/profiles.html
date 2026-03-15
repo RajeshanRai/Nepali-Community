@@ -1,0 +1,946 @@
+﻿{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}Profiles{% endblock %}
+
+{% block extra_css %}
+<style>
+#dashboard-profiles-page {
+    width: 100%;
+}
+
+#dashboard-profiles-page .profiles-shell { display:flex; flex-direction:column; gap:1.4rem; }
+#dashboard-profiles-page .profiles-card { background:var(--bg-card,#fff); border:1px solid var(--border-color,#e5e7eb); border-radius:12px; overflow:hidden; }
+#dashboard-profiles-page .profiles-card .panel-header { display:flex; align-items:center; justify-content:space-between; gap:.6rem; padding:.85rem 1.1rem; border-bottom:1px solid var(--border-color,#e5e7eb); background:var(--bg-secondary,#f9fafb); }
+#dashboard-profiles-page .profiles-card .panel-header h3 { margin:0; font-size:.92rem; font-weight:600; display:flex; align-items:center; gap:.45rem; color:var(--text-primary,#111827); }
+#dashboard-profiles-page .profiles-card .panel-body { padding:1.1rem; }
+
+#dashboard-profiles-page .profiles-two-col { display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; }
+#dashboard-profiles-page .profiles-info-grid { display:flex; gap:1.4rem; align-items:flex-start; }
+#dashboard-profiles-page .profile-avatar-col { flex-shrink:0; }
+#dashboard-profiles-page .profile-avatar-lg { width:88px; height:88px; border-radius:50%; object-fit:cover; border:3px solid var(--border-color,#e5e7eb); }
+#dashboard-profiles-page .profile-avatar-placeholder { width:88px; height:88px; border-radius:50%; background:var(--bg-secondary,#f3f4f6); display:flex; align-items:center; justify-content:center; font-size:2.8rem; color:var(--text-muted,#9ca3af); }
+#dashboard-profiles-page .profile-details-col { flex:1; min-width:0; }
+
+#dashboard-profiles-page .profile-info-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:.55rem 1.4rem; margin:0; }
+#dashboard-profiles-page .info-row { display:flex; flex-direction:column; gap:.12rem; }
+#dashboard-profiles-page .info-row--full { grid-column:1/-1; }
+#dashboard-profiles-page .info-row dt { font-size:.69rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted,#6b7280); }
+#dashboard-profiles-page .info-row dd { margin:0; font-size:.87rem; color:var(--text-primary,#111827); display:flex; align-items:center; gap:.3rem; flex-wrap:wrap; }
+
+#dashboard-profiles-page .badge { display:inline-flex; align-items:center; padding:.18em .52em; border-radius:999px; font-size:.7rem; font-weight:600; letter-spacing:.02em; }
+#dashboard-profiles-page .badge-success { background:#d1fae5; color:#065f46; }
+#dashboard-profiles-page .badge-warning { background:#fef3c7; color:#92400e; }
+#dashboard-profiles-page .badge-danger  { background:#fee2e2; color:#991b1b; }
+#dashboard-profiles-page .badge-info    { background:#dbeafe; color:#1e40af; }
+#dashboard-profiles-page .badge-primary { background:#ede9fe; color:#4c1d95; }
+#dashboard-profiles-page .badge-secondary { background:#f3f4f6; color:#374151; }
+#dashboard-profiles-page .badge-outline { background:transparent; color:var(--color-primary,#374151); border:1px solid currentColor; }
+#dashboard-profiles-page .text-muted { color:var(--text-muted,#9ca3af); }
+
+#dashboard-profiles-page .pf-form { display:flex; flex-direction:column; gap:1rem; }
+#dashboard-profiles-page .pf-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:.75rem 1rem; }
+#dashboard-profiles-page .pf-field { display:flex; flex-direction:column; gap:.28rem; }
+#dashboard-profiles-page .pf-field label { font-size:.72rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--text-muted,#6b7280); }
+#dashboard-profiles-page .pf-field .profile-input,
+#dashboard-profiles-page .pf-field .profile-textarea,
+#dashboard-profiles-page .pf-field .profile-select {
+    width:100%;
+    padding:.5rem .7rem;
+    font-size:.85rem;
+    border:1px solid var(--border-color,#d1d5db);
+    border-radius:7px;
+    background:var(--bg-card,#fff);
+    color:var(--text-primary,#111827);
+    transition:border-color .15s;
+}
+#dashboard-profiles-page .pf-field .profile-input:focus,
+#dashboard-profiles-page .pf-field .profile-textarea:focus,
+#dashboard-profiles-page .pf-field .profile-select:focus { outline:none; border-color:var(--color-primary,#6366f1); box-shadow:0 0 0 3px rgba(99,102,241,.12); }
+#dashboard-profiles-page .pf-field .profile-textarea { resize:vertical; min-height:72px; }
+#dashboard-profiles-page .pf-field .errorlist { list-style:none; margin:.2rem 0 0; padding:0; }
+#dashboard-profiles-page .pf-field .errorlist li { font-size:.75rem; color:#dc2626; }
+#dashboard-profiles-page .pf-field--full { grid-column:1/-1; }
+
+#dashboard-profiles-page .avatar-upload-row { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+#dashboard-profiles-page .avatar-thumb { width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid var(--border-color,#e5e7eb); }
+#dashboard-profiles-page .avatar-thumb-placeholder { width:56px; height:56px; border-radius:50%; background:var(--bg-secondary,#f3f4f6); display:flex; align-items:center; justify-content:center; font-size:1.6rem; color:var(--text-muted,#9ca3af); }
+
+#dashboard-profiles-page .btn-sm { padding:.35rem .75rem; font-size:.8rem; }
+#dashboard-profiles-page .pf-actions { display:flex; align-items:center; gap:.65rem; flex-wrap:wrap; padding-top:.5rem; border-top:1px solid var(--border-color,#f3f4f6); margin-top:.5rem; }
+
+#dashboard-profiles-page .panel-collapsible { display:block; }
+
+#dashboard-profiles-page .qr-setup-box { background:var(--bg-secondary,#f9fafb); border:1px solid var(--border-color,#e5e7eb); border-radius:10px; padding:1rem; display:flex; gap:1.2rem; align-items:flex-start; flex-wrap:wrap; }
+#dashboard-profiles-page .qr-setup-box img { width:140px; height:140px; border-radius:8px; border:1px solid var(--border-color,#e5e7eb); flex-shrink:0; }
+#dashboard-profiles-page .qr-setup-info { flex:1; min-width:180px; }
+#dashboard-profiles-page .qr-setup-info p { font-size:.82rem; color:var(--text-secondary,#374151); margin:.0 0 .6rem; }
+
+#dashboard-profiles-page .data-table { width:100%; border-collapse:collapse; font-size:.84rem; }
+#dashboard-profiles-page .data-table th { text-align:left; padding:.5rem .7rem; font-size:.69rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted,#6b7280); border-bottom:2px solid var(--border-color,#e5e7eb); white-space:nowrap; }
+#dashboard-profiles-page .data-table td { padding:.58rem .7rem; border-bottom:1px solid var(--border-color,#f3f4f6); color:var(--text-primary,#111827); vertical-align:middle; }
+#dashboard-profiles-page .data-table tbody tr:last-child td { border-bottom:none; }
+#dashboard-profiles-page .data-table tbody tr:hover { background:var(--bg-secondary,#f9fafb); }
+#dashboard-profiles-page .ua-cell { font-size:.76rem; color:var(--text-muted,#6b7280); word-break:break-all; max-width:280px; }
+#dashboard-profiles-page .table-responsive { overflow-x:auto; }
+#dashboard-profiles-page .empty-note { color:var(--text-muted,#9ca3af); font-size:.86rem; margin:0; }
+
+#dashboard-profiles-page .danger-zone { border-color:#fca5a5!important; }
+#dashboard-profiles-page .danger-zone .panel-header { background:#fff5f5; border-bottom-color:#fca5a5; }
+#dashboard-profiles-page .danger-zone .panel-header h3 { color:#991b1b; }
+
+#dashboard-profiles-page .recover-table td,
+#dashboard-profiles-page .recover-table th { white-space:nowrap; }
+
+#dashboard-profiles-page .panel-note {
+    font-size: .85rem;
+    color: var(--text-secondary,#374151);
+    margin-bottom: .9rem;
+    line-height: 1.45;
+}
+
+#dashboard-profiles-page .twofa-actions {
+    display: flex;
+    gap: .6rem;
+    flex-wrap: wrap;
+}
+
+#dashboard-profiles-page .twofa-actions form {
+    margin: 0;
+}
+
+#dashboard-profiles-page .danger-password-field {
+    max-width: 320px;
+}
+
+#dashboard-profiles-page .danger-confirm-label {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .83rem;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+#dashboard-profiles-page .users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: .8rem;
+}
+
+#dashboard-profiles-page .users-toolbar {
+    margin-bottom: .8rem;
+}
+
+#dashboard-profiles-page .users-search-input {
+    width: 100%;
+    padding: .56rem .72rem;
+    border: 1px solid var(--border-color,#d1d5db);
+    border-radius: 8px;
+    font-size: .85rem;
+    background: var(--bg-card,#fff);
+    color: var(--text-primary,#111827);
+}
+
+#dashboard-profiles-page .users-search-input:focus {
+    outline: none;
+    border-color: var(--color-primary,#2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+}
+
+#dashboard-profiles-page .users-empty {
+    display: none;
+    margin-top: .55rem;
+    color: var(--text-muted,#6b7280);
+    font-size: .84rem;
+}
+
+#dashboard-profiles-page .users-empty.is-visible {
+    display: block;
+}
+
+#dashboard-profiles-page .page-loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 4000;
+}
+
+#dashboard-profiles-page .page-loading-overlay.is-active {
+    display: flex;
+}
+
+#dashboard-profiles-page .page-loading-spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid #e5e7eb;
+    border-top-color: var(--color-primary, #2563eb);
+    border-radius: 50%;
+    animation: profileSpin .8s linear infinite;
+}
+
+@keyframes profileSpin {
+    to { transform: rotate(360deg); }
+}
+
+#dashboard-profiles-page .user-card {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .72rem;
+    border: 1px solid var(--border-color,#e5e7eb);
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    background: var(--bg-card,#fff);
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+
+#dashboard-profiles-page .user-card:hover {
+    border-color: var(--color-primary,#2563eb);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .08);
+    transform: translateY(-1px);
+}
+
+#dashboard-profiles-page .user-card.is-active {
+    border-color: var(--color-primary,#2563eb);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary,#2563eb) 20%, transparent);
+}
+
+#dashboard-profiles-page .user-card-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color,#e5e7eb);
+    flex-shrink: 0;
+}
+
+#dashboard-profiles-page .user-card-fallback {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary,#f3f4f6);
+    color: var(--text-muted,#6b7280);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+#dashboard-profiles-page .user-card-meta {
+    min-width: 0;
+}
+
+#dashboard-profiles-page .user-card-name {
+    margin: 0;
+    font-size: .84rem;
+    font-weight: 700;
+    color: var(--text-primary,#111827);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#dashboard-profiles-page .user-card-username,
+#dashboard-profiles-page .user-card-email {
+    margin: 0;
+    font-size: .74rem;
+    color: var(--text-muted,#6b7280);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 1024px) {
+    #dashboard-profiles-page .profiles-two-col { grid-template-columns:1fr; }
+}
+
+@media (max-width: 768px) {
+    #dashboard-profiles-page .profiles-info-grid { flex-direction:column; }
+    #dashboard-profiles-page .profile-info-list { grid-template-columns:1fr; }
+    #dashboard-profiles-page .pf-grid { grid-template-columns:1fr; }
+    #dashboard-profiles-page .profiles-card .panel-header,
+    #dashboard-profiles-page .profiles-card .panel-body { padding:.85rem; }
+    #dashboard-profiles-page .qr-setup-box img { width:112px; height:112px; }
+
+    #dashboard-profiles-page .twofa-actions {
+        flex-direction: column;
+    }
+
+    #dashboard-profiles-page .twofa-actions form,
+    #dashboard-profiles-page .twofa-actions .btn,
+    #dashboard-profiles-page .danger-password-field,
+    #dashboard-profiles-page .pf-actions .btn {
+        width: 100%;
+        max-width: none;
+    }
+
+    #dashboard-profiles-page .pf-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #dashboard-profiles-page .data-table,
+    #dashboard-profiles-page .data-table thead,
+    #dashboard-profiles-page .data-table tbody,
+    #dashboard-profiles-page .data-table tr,
+    #dashboard-profiles-page .data-table th,
+    #dashboard-profiles-page .data-table td {
+        display: block;
+        width: 100%;
+    }
+
+    #dashboard-profiles-page .data-table thead {
+        display: none;
+    }
+
+    #dashboard-profiles-page .data-table tr {
+        border: 1px solid var(--border-color,#e5e7eb);
+        border-radius: 10px;
+        margin-bottom: .75rem;
+        background: var(--bg-card,#fff);
+        overflow: hidden;
+    }
+
+    #dashboard-profiles-page .data-table td {
+        border-bottom: 1px solid var(--border-color,#f3f4f6);
+        padding: .58rem .72rem;
+        white-space: normal;
+        position: relative;
+    }
+
+    #dashboard-profiles-page .data-table td:last-child {
+        border-bottom: none;
+    }
+
+    #dashboard-profiles-page .data-table td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: .67rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--text-muted,#6b7280);
+        margin-bottom: .22rem;
+    }
+
+    #dashboard-profiles-page .ua-cell {
+        max-width: none;
+        word-break: break-word;
+    }
+}
+</style>
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">Users</li>
+<li class="breadcrumb-item active">Profiles</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-id-badge"></i> Profiles</h1>
+        <p>Manage account info, security settings, two-factor authentication, and access history.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<div id="dashboard-profiles-page">
+
+{% if messages %}
+<div class="messages-container" style="margin-bottom:1rem;">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" style="padding:.65rem 1rem; border-radius:8px; margin-bottom:.4rem; font-size:.87rem;
+        {% if 'success' in message.tags %}background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;
+        {% elif 'error' in message.tags %}background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;
+        {% elif 'warning' in message.tags %}background:#fef3c7;color:#92400e;border:1px solid #fcd34d;
+        {% else %}background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="profiles-shell">
+
+    <section class="panel-card profiles-card">
+        <div class="panel-header">
+            <h3><i class="fas fa-users"></i> All User Profiles</h3>
+        </div>
+        <div class="panel-body">
+            <div class="users-toolbar">
+                <input
+                    id="users-profile-search"
+                    class="users-search-input"
+                    type="search"
+                    placeholder="Search by name, username, or email"
+                    autocomplete="off"
+                >
+            </div>
+            <div class="users-grid">
+                {% for u in all_users %}
+                <a
+                    href="{% url 'dashboard:profiles_detail' user_id=u.id %}"
+                    class="user-card {% if u.id == profile_user.id %}is-active{% endif %}"
+                    data-user-search="{{ u.get_full_name|default:u.username|lower }} {{ u.username|lower }} {{ u.email|default:''|lower }}"
+                >
+                    {% if u.profile_picture %}
+                    <img class="user-card-avatar" src="{{ u.profile_picture.url }}" alt="{{ u.username }} avatar">
+                    {% else %}
+                    <div class="user-card-fallback"><i class="fas fa-user"></i></div>
+                    {% endif %}
+                    <div class="user-card-meta">
+                        <p class="user-card-name">{{ u.get_full_name|default:u.username }}</p>
+                        <p class="user-card-username">@{{ u.username }}</p>
+                        <p class="user-card-email">{{ u.email|default:"No email" }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            <p id="users-profile-empty" class="users-empty">No matching users found.</p>
+        </div>
+    </section>
+
+    <!-- ══ 1. Basic Information (read-only summary) ══════════════════════ -->
+    <section id="basic-info-section" class="panel-card profiles-card">
+        <div class="panel-header">
+            <h3><i class="fas fa-user"></i> Account Overview</h3>
+        </div>
+        <div class="panel-body profiles-info-grid">
+            <div class="profile-avatar-col">
+                {% if profile_user.profile_picture %}
+                    <img src="{{ profile_user.profile_picture.url }}" alt="Avatar" class="profile-avatar-lg">
+                {% else %}
+                    <div class="profile-avatar-placeholder"><i class="fas fa-user-circle"></i></div>
+                {% endif %}
+            </div>
+            <div class="profile-details-col">
+                <dl class="profile-info-list">
+                    <div class="info-row">
+                        <dt>Full Name</dt>
+                        <dd>{{ profile_user.get_full_name|default:"—" }}</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt>Username</dt>
+                        <dd>{{ profile_user.username }}</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt>Email</dt>
+                        <dd>
+                            {{ profile_user.email|default:"—" }}
+                            {% if profile_user.email %}
+                                {% if profile_user.email_verified %}<span class="badge badge-success">Verified</span>
+                                {% else %}<span class="badge badge-warning">Unverified</span>{% endif %}
+                            {% endif %}
+                        </dd>
+                    </div>
+                    <div class="info-row">
+                        <dt>Phone</dt>
+                        <dd>{{ profile_user.phone_number|default:"—" }}</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt>Location</dt>
+                        <dd>{{ display_location|default:"—" }}</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt>Member Since</dt>
+                        <dd>{{ profile_user.date_joined|date:"M d, Y" }}</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt>Last Login</dt>
+                        <dd>{{ profile_user.last_login|date:"M d, Y g:i A"|default:"—" }}</dd>
+                    </div>
+                    <div class="info-row">
+                        <dt>Status</dt>
+                        <dd>
+                            {% if profile_user.is_active %}<span class="badge badge-success">Active</span>
+                            {% else %}<span class="badge badge-danger">Deactivated</span>{% endif %}
+                            {% if profile_user.is_superuser %}<span class="badge badge-primary">Superuser</span>
+                            {% elif profile_user.is_staff %}<span class="badge badge-info">Staff</span>{% endif %}
+                        </dd>
+                    </div>
+                    <div class="info-row">
+                        <dt>Roles</dt>
+                        <dd>
+                            {% for g in groups %}<span class="badge badge-outline">{{ g.name }}</span>{% empty %}<span class="text-muted">None</span>{% endfor %}
+                        </dd>
+                    </div>
+                    <div class="info-row">
+                        <dt>2FA</dt>
+                        <dd>
+                            {% if profile_user.two_factor_enabled and active_2fa_method %}
+                                <span class="badge badge-success">On</span>
+                                {% if active_2fa_method == 'email' %}<span class="text-muted" style="font-size:.78rem;">Email code</span>
+                                {% else %}<span class="text-muted" style="font-size:.78rem;">Authenticator app</span>{% endif %}
+                            {% else %}
+                                <span class="badge badge-warning">Off</span>
+                            {% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ 2. Edit Profile Info ══════════════════════════════════════════ -->
+    <section class="panel-card profiles-card">
+        <div class="panel-header">
+            <h3><i class="fas fa-edit"></i> Edit Profile Information</h3>
+        </div>
+        <div class="panel-body">
+            <form method="post" enctype="multipart/form-data" class="pf-form" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_profile">
+
+                <!-- Avatar -->
+                <div class="pf-field">
+                    <label>Profile Picture</label>
+                    <div class="avatar-upload-row">
+                        {% if profile_user.profile_picture %}
+                            <img src="{{ profile_user.profile_picture.url }}" alt="Current avatar" class="avatar-thumb">
+                        {% else %}
+                            <div class="avatar-thumb-placeholder"><i class="fas fa-user"></i></div>
+                        {% endif %}
+                        {{ profile_form.profile_picture }}
+                    </div>
+                    {% if profile_form.profile_picture.errors %}<ul class="errorlist">{% for e in profile_form.profile_picture.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+
+                <div class="pf-grid">
+                    <div class="pf-field">
+                        <label>{{ profile_form.first_name.label }}</label>
+                        {{ profile_form.first_name }}
+                        {% if profile_form.first_name.errors %}<ul class="errorlist">{% for e in profile_form.first_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label>{{ profile_form.last_name.label }}</label>
+                        {{ profile_form.last_name }}
+                        {% if profile_form.last_name.errors %}<ul class="errorlist">{% for e in profile_form.last_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label>{{ profile_form.username.label }}</label>
+                        {{ profile_form.username }}
+                        {% if profile_form.username.errors %}<ul class="errorlist">{% for e in profile_form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label>{{ profile_form.email.label }}</label>
+                        {{ profile_form.email }}
+                        {% if profile_form.email.errors %}<ul class="errorlist">{% for e in profile_form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label>{{ profile_form.phone_number.label }}</label>
+                        {{ profile_form.phone_number }}
+                        {% if profile_form.phone_number.errors %}<ul class="errorlist">{% for e in profile_form.phone_number.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label>{{ profile_form.birth_date.label }}</label>
+                        {{ profile_form.birth_date }}
+                        {% if profile_form.birth_date.errors %}<ul class="errorlist">{% for e in profile_form.birth_date.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label>{{ profile_form.location.label }}</label>
+                        {{ profile_form.location }}
+                        {% if profile_form.location.errors %}<ul class="errorlist">{% for e in profile_form.location.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label>{{ profile_form.country.label }}</label>
+                        {{ profile_form.country }}
+                        {% if profile_form.country.errors %}<ul class="errorlist">{% for e in profile_form.country.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label>{{ profile_form.recovery_email.label }}</label>
+                        {{ profile_form.recovery_email }}
+                        {% if profile_form.recovery_email.errors %}<ul class="errorlist">{% for e in profile_form.recovery_email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label>{{ profile_form.recovery_phone.label }}</label>
+                        {{ profile_form.recovery_phone }}
+                        {% if profile_form.recovery_phone.errors %}<ul class="errorlist">{% for e in profile_form.recovery_phone.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label>{{ profile_form.primary_community.label }}</label>
+                        {{ profile_form.primary_community }}
+                        {% if profile_form.primary_community.errors %}<ul class="errorlist">{% for e in profile_form.primary_community.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label>{{ profile_form.secondary_community.label }}</label>
+                        {{ profile_form.secondary_community }}
+                        {% if profile_form.secondary_community.errors %}<ul class="errorlist">{% for e in profile_form.secondary_community.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field pf-field--full">
+                        <label>{{ profile_form.bio.label }}</label>
+                        {{ profile_form.bio }}
+                        {% if profile_form.bio.errors %}<ul class="errorlist">{% for e in profile_form.bio.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field pf-field--full">
+                        <label>{{ profile_form.address.label }}</label>
+                        {{ profile_form.address }}
+                        {% if profile_form.address.errors %}<ul class="errorlist">{% for e in profile_form.address.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                </div>
+
+                <div class="pf-actions">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    {% if not profile_user.email_verified and profile_user.email %}
+                    <button type="submit" name="action" value="resend_verification_email" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-envelope"></i> Resend Verification Email
+                    </button>
+                    {% endif %}
+                    {% for error in profile_form.non_field_errors %}
+                    <span style="font-size:.75rem;color:#dc2626;">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- ══ 3. Password & 2FA (two cols) ═════════════════════════════════ -->
+    <div class="profiles-two-col">
+
+        <!-- Password Change -->
+        <section class="panel-card profiles-card">
+            <div class="panel-header">
+                <h3><i class="fas fa-key"></i> Change Password</h3>
+            </div>
+                <div class="panel-body">
+                    {% if not viewing_self %}
+                    <p class="empty-note">Password changes are only available on your own account page.</p>
+                    {% else %}
+                <form method="post" class="pf-form" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="change_password">
+                    <div class="pf-field">
+                        <label>Current Password</label>
+                        {{ password_form.old_password }}
+                        {% if password_form.old_password.errors %}<ul class="errorlist">{% for e in password_form.old_password.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label>New Password</label>
+                        {{ password_form.new_password1 }}
+                        {% if password_form.new_password1.errors %}<ul class="errorlist">{% for e in password_form.new_password1.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label>Confirm New Password</label>
+                        {{ password_form.new_password2 }}
+                        {% if password_form.new_password2.errors %}<ul class="errorlist">{% for e in password_form.new_password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-actions">
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-lock"></i> Update Password</button>
+                        {% for e in password_form.non_field_errors %}<span style="font-size:.75rem;color:#dc2626;">{{ e }}</span>{% endfor %}
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Two-Factor Authentication -->
+        <section class="panel-card profiles-card">
+            <div class="panel-header">
+                <h3><i class="fas fa-shield-alt"></i> Two-Factor Authentication</h3>
+            </div>
+            <div class="panel-body">
+
+                {% if profile_user.two_factor_enabled and active_2fa_method %}
+                <!-- 2FA is ON — show status + disable -->
+                <dl class="profile-info-list" style="margin-bottom:1rem;">
+                    <div class="info-row">
+                        <dt>Status</dt>
+                        <dd><span class="badge badge-success">Enabled</span></dd>
+                    </div>
+                    <div class="info-row">
+                        <dt>Method</dt>
+                        <dd>
+                            {% if active_2fa_method == 'email' %}<i class="fas fa-envelope"></i> Email Code
+                            {% else %}<i class="fas fa-mobile-alt"></i> Authenticator App{% endif %}
+                        </dd>
+                    </div>
+                    {% if profile_user.two_factor_enabled_at %}
+                    <div class="info-row">
+                        <dt>Enabled Since</dt>
+                        <dd>{{ profile_user.two_factor_enabled_at|date:"M d, Y" }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="disable_2fa">
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-unlock"></i> Disable 2FA
+                    </button>
+                </form>
+
+                {% elif pending_totp_secret %}
+                <!-- App setup in progress — show QR -->
+                <div class="qr-setup-box">
+                    {% if totp_qr_data_uri %}
+                    <img src="{{ totp_qr_data_uri }}" alt="QR Code">
+                    {% endif %}
+                    <div class="qr-setup-info">
+                        <p>Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.), then enter the 6-digit code below to confirm.</p>
+                        <form method="post" class="pf-form" novalidate>
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="confirm_app_2fa_setup">
+                            <div class="pf-field">
+                                <label>Authenticator Code</label>
+                                {{ app_2fa_form.code }}
+                                {% if app_2fa_form.code.errors %}<ul class="errorlist">{% for e in app_2fa_form.code.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                            </div>
+                            <div class="pf-actions">
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-check"></i> Confirm Setup</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% else %}
+                <!-- 2FA is OFF — offer both methods -->
+                <p class="panel-note">
+                    Add an extra layer of security to your account by enabling two-factor authentication.
+                </p>
+                <div class="twofa-actions">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="enable_email_2fa">
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-envelope"></i> Enable via Email
+                        </button>
+                    </form>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="start_app_2fa_setup">
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-mobile-alt"></i> Set Up Authenticator App
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+            </div>
+        </section>
+
+    </div>
+
+    <!-- ══ 4. Danger Zone ════════════════════════════════════════════════ -->
+    <section class="panel-card profiles-card danger-zone">
+        <div class="panel-header">
+            <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+        </div>
+        <div class="panel-body">
+            {% if viewing_self %}
+                <p class="panel-note" style="margin-bottom:1rem;">
+                    Deactivating your account will immediately sign you out. The account will not be deleted but will be inaccessible until reactivated by an administrator.
+                </p>
+                <form method="post" class="pf-form" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="deactivate_account">
+                    <div class="pf-field danger-password-field">
+                        <label>Confirm Password</label>
+                        {{ deactivate_form.password }}
+                        {% if deactivate_form.password.errors %}<ul class="errorlist">{% for e in deactivate_form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-field">
+                        <label class="danger-confirm-label">
+                            {{ deactivate_form.confirm }}
+                            I understand my account will be deactivated
+                        </label>
+                        {% if deactivate_form.confirm.errors %}<ul class="errorlist">{% for e in deactivate_form.confirm.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    <div class="pf-actions">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="fas fa-user-slash"></i> Deactivate Account
+                        </button>
+                        {% for e in deactivate_form.non_field_errors %}<span style="font-size:.75rem;color:#dc2626;">{{ e }}</span>{% endfor %}
+                    </div>
+                </form>
+            {% else %}
+                <p class="panel-note" style="margin-bottom:1rem;">You are viewing another user. You can deactivate this account from here.</p>
+                <form method="post" style="margin:0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="deactivate_selected_account">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="fas fa-user-slash"></i> Deactivate {{ profile_user.username }}
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="panel-card profiles-card">
+        <div class="panel-header">
+            <h3><i class="fas fa-user-check"></i> Reactivate Deactivated Accounts</h3>
+        </div>
+        <div class="panel-body">
+            {% if deactivated_users %}
+            <div class="table-responsive">
+                <table class="data-table recover-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Joined</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in deactivated_users %}
+                        <tr>
+                            <td data-label="User">
+                                <strong>{{ u.get_full_name|default:u.username }}</strong>
+                                <div class="text-muted">@{{ u.username }}</div>
+                            </td>
+                            <td data-label="Email">{{ u.email|default:"—" }}</td>
+                            <td data-label="Joined">{{ u.date_joined|date:"M d, Y" }}</td>
+                            <td data-label="Action">
+                                <form method="post" style="margin:0;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="reactivate_account">
+                                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                                    <button type="submit" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-user-check"></i> Reactivate
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="empty-note">No deactivated accounts found.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ══ 6. Login History ══════════════════════════════════════════════ -->
+    <section class="panel-card profiles-card">
+        <div class="panel-header">
+            <h3><i class="fas fa-history"></i> Recent Login History</h3>
+        </div>
+        <div class="panel-body">
+            {% if login_activity %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Date &amp; Time</th><th>IP Address</th><th>Device</th><th>Browser / Agent</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in login_activity %}
+                        <tr>
+                            <td data-label="Date & Time" style="white-space:nowrap;">{{ entry.logged_in_at|date:"M d, Y g:i A" }}</td>
+                            <td data-label="IP Address"><code>{{ entry.ip_address|default:"—" }}</code></td>
+                            <td data-label="Device">{{ entry.device_label|default:"—" }}</td>
+                            <td data-label="Browser / Agent" class="ua-cell">{{ entry.user_agent|default:"—"|truncatechars:90 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="empty-note">No login activity recorded yet.</p>
+            {% endif %}
+        </div>
+    </section>
+
+</div>
+</div>
+
+<div id="profiles-loading-overlay" class="page-loading-overlay" aria-hidden="true">
+    <div class="page-loading-spinner" aria-label="Loading"></div>
+</div>
+
+<script>
+(function () {
+    var root = document.getElementById('dashboard-profiles-page');
+    if (!root) return;
+
+    // Keep refresh behavior consistent: always start at the absolute top of the page.
+    if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+    }
+
+    var forceScrollTop = function () {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+    };
+
+    // Run immediately, then again after browser restore hooks complete.
+    forceScrollTop();
+    window.addEventListener('load', function () {
+        forceScrollTop();
+        setTimeout(forceScrollTop, 0);
+    });
+    window.addEventListener('pageshow', function () {
+        forceScrollTop();
+        setTimeout(forceScrollTop, 0);
+    });
+
+    var searchInput = root.querySelector('#users-profile-search');
+    var userCards = root.querySelectorAll('.user-card[data-user-search]');
+    var emptyState = root.querySelector('#users-profile-empty');
+    var loadingOverlay = document.getElementById('profiles-loading-overlay');
+
+    var showLoading = function () {
+        if (loadingOverlay) {
+            loadingOverlay.classList.add('is-active');
+        }
+    };
+
+    // Replace refresh/navigation popups with a clean loading state.
+    window.onbeforeunload = null;
+    window.addEventListener('beforeunload', showLoading);
+
+    root.querySelectorAll('form').forEach(function (form) {
+        form.addEventListener('submit', function () {
+            showLoading();
+        });
+    });
+
+    root.querySelectorAll('a[href]').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+            if (event.ctrlKey || event.metaKey || event.shiftKey || event.button !== 0) {
+                return;
+            }
+            showLoading();
+        });
+    });
+
+    if (!searchInput || !userCards.length) return;
+
+    var filterUsers = function () {
+        var query = (searchInput.value || '').trim().toLowerCase();
+        var visibleCount = 0;
+
+        userCards.forEach(function (card) {
+            var searchable = card.getAttribute('data-user-search') || '';
+            var isVisible = !query || searchable.indexOf(query) !== -1;
+            card.style.display = isVisible ? '' : 'none';
+            if (isVisible) visibleCount += 1;
+        });
+
+        if (emptyState) {
+            if (visibleCount === 0) {
+                emptyState.classList.add('is-visible');
+            } else {
+                emptyState.classList.remove('is-visible');
+            }
+        }
+    };
+
+    searchInput.addEventListener('input', filterUsers);
+})();
+</script>
+
+{% endblock %}

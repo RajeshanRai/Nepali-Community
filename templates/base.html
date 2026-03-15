@@ -232,17 +232,19 @@
                 <div class="nav-divider"></div>
 
                 {% if user.is_authenticated %}
-                {% if user.is_staff %}
-                <a href="{% url 'dashboard:admin_overview' %}" class="nav-item nav-admin-link">
-                    <span>Admin Dashboard</span>
-                </a>
+                {% if user.is_superuser %}
+                <a href="{% url 'dashboard:profiles' %}" class="nav-item nav-profile-link">
+                {% else %}
+                <a href="{% url 'profile' %}" class="nav-item nav-profile-link">
                 {% endif %}
-                <form method="post" action="{% url 'logout' %}" class="nav-logout-form">
-                    {% csrf_token %}
-                    <button type="submit" class="nav-logout nav-item">
-                        <span>Logout</span>
-                    </button>
-                </form>
+                    <span class="nav-profile-avatar" aria-label="{{ user.username }} profile">
+                        {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.display_name }} profile picture">
+                        {% else %}
+                        <span>{{ user.initials }}</span>
+                        {% endif %}
+                    </span>
+                </a>
                 {% else %}
                 <a href="{% url 'login' %}" class="nav-item">
                     <span>Login</span>

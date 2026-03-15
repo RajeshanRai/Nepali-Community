@@ -19,8 +19,8 @@ from contacts.models import ContactMessage
 
 
 def staff_required(user):
-    """Check if user is staff or superuser"""
-    return user.is_active and (user.is_staff or user.is_superuser)
+    """Check if user is an active superuser"""
+    return user.is_active and user.is_superuser
 
 
 @require_http_methods(["GET"])

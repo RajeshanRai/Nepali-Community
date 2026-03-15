@@ -2,6 +2,308 @@
 
 {% block title %}Monthly Reports{% endblock %}
 
+{% block extra_css %}
+<style>
+    .mr-report-root,
+    .mr-report-root * {
+        box-sizing: border-box;
+    }
+
+    .mr-report-toolbar {
+        margin-bottom: 1rem;
+        padding: 0.95rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #ffffff;
+        display: flex;
+        align-items: end;
+        gap: 0.85rem;
+        flex-wrap: wrap;
+    }
+
+    .mr-report-field {
+        display: grid;
+        gap: 0.35rem;
+        min-width: 170px;
+    }
+
+    .mr-report-field label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .mr-report-field select {
+        height: 38px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 0 0.65rem;
+        font-size: 0.86rem;
+        color: #0f172a;
+        background: #fff;
+    }
+
+    .mr-report-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-left: auto;
+    }
+
+    .mr-report-btn {
+        height: 38px;
+        padding: 0 0.95rem;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #0f172a;
+        font-size: 0.84rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+
+    .mr-report-btn.mr-report-btn-primary {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+    }
+
+    .mr-report-caption {
+        margin: 0 0 0.9rem;
+        font-size: 0.86rem;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .mr-report-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .mr-report-metric {
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 1rem;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+    }
+
+    .mr-report-metric-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #64748b;
+        margin-bottom: 0.35rem;
+    }
+
+    .mr-report-metric-value {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 800;
+        line-height: 1.05;
+        color: #0f172a;
+    }
+
+    .mr-report-metric-meta {
+        margin-top: 0.45rem;
+        color: #475569;
+        font-size: 0.84rem;
+    }
+
+    .mr-report-change-row {
+        margin-top: 0.55rem;
+    }
+
+    .mr-report-change {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .mr-report-change-up {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .mr-report-change-down {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .mr-report-change-flat {
+        background: #e2e8f0;
+        color: #475569;
+    }
+
+    .mr-report-panels {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .mr-report-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .mr-report-card-body {
+        padding: 1rem;
+    }
+
+    .mr-report-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .mr-report-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 520px;
+    }
+
+    .mr-report-table th,
+    .mr-report-table td {
+        padding: 0.68rem 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+        font-size: 0.87rem;
+    }
+
+    .mr-report-table th {
+        color: #64748b;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .mr-report-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 64px;
+        padding: 0.23rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.77rem;
+        font-weight: 700;
+        background: rgba(14, 165, 233, 0.14);
+        color: #0369a1;
+    }
+
+    .mr-report-daily-list {
+        display: grid;
+        gap: 0.65rem;
+        margin-top: 0.75rem;
+    }
+
+    .mr-report-daily-row {
+        display: grid;
+        grid-template-columns: 64px 1fr;
+        gap: 0.7rem;
+        align-items: center;
+    }
+
+    .mr-report-day-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #475569;
+    }
+
+    .mr-report-day-bars {
+        display: grid;
+        gap: 0.28rem;
+    }
+
+    .mr-report-day-track {
+        height: 8px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        overflow: hidden;
+    }
+
+    .mr-report-day-reg { height: 100%; background: #0ea5e9; }
+    .mr-report-day-don { height: 100%; background: #22c55e; }
+    .mr-report-day-vol { height: 100%; background: #6366f1; }
+
+    .mr-report-legend {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        margin-top: 0.75rem;
+        font-size: 0.8rem;
+        color: #475569;
+        flex-wrap: wrap;
+    }
+
+    .mr-report-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.35rem;
+    }
+
+    .mr-report-dot-reg { background: #0ea5e9; }
+    .mr-report-dot-don { background: #22c55e; }
+    .mr-report-dot-vol { background: #6366f1; }
+
+    @media (max-width: 980px) {
+        .mr-report-panels {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .mr-report-toolbar {
+            align-items: stretch;
+            padding: 0.85rem;
+        }
+
+        .mr-report-field,
+        .mr-report-actions {
+            width: 100%;
+            min-width: 0;
+            margin-left: 0;
+        }
+
+        .mr-report-actions {
+            justify-content: space-between;
+        }
+
+        .mr-report-btn {
+            flex: 1;
+            justify-content: center;
+            padding: 0 0.55rem;
+            font-size: 0.77rem;
+        }
+
+        .mr-report-table {
+            min-width: 460px;
+        }
+
+        .mr-report-daily-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block breadcrumb_items %}
 <li class="breadcrumb-item">Reports</li>
 <li class="breadcrumb-item active">Monthly</li>
@@ -11,22 +313,189 @@
 <div class="page-header">
     <div class="page-header-content">
         <h1><i class="fas fa-chart-bar"></i> Monthly Reports</h1>
-        <p>View monthly analytics and reports</p>
-    </div>
-    <div class="page-header-actions">
-        <button class="btn btn-primary" onclick="exportData('pdf', '/dashboard/reports/export')">
-            <i class="fas fa-download"></i> Export PDF
-        </button>
+        <p>Detailed monthly analytics across events, registrations, donations, and community operations.</p>
     </div>
 </div>
 {% endblock %}
 
 {% block content %}
-<div class="content-card">
-    <div class="content-card-body empty-state-card">
-        <i class="fas fa-chart-line"></i>
-        <h3>Monthly Reports</h3>
-        <p>Detailed monthly analytics and export features coming soon.</p>
-    </div>
+<div class="mr-report-root">
+    <form method="get" class="mr-report-toolbar">
+        <div class="mr-report-field">
+            <label for="mr-month">Month</label>
+            <select id="mr-month" name="month">
+                {% for m in month_options %}
+                <option value="{{ m.value }}" {% if m.value == selected_month %}selected{% endif %}>{{ m.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mr-report-field">
+            <label for="mr-year">Year</label>
+            <select id="mr-year" name="year">
+                {% for y in year_options %}
+                <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mr-report-actions">
+            <button type="submit" class="mr-report-btn mr-report-btn-primary"><i class="fas fa-filter"></i> Apply</button>
+            <button type="submit" name="export" value="csv" class="mr-report-btn"><i class="fas fa-file-csv"></i> Export CSV</button>
+            <a href="{% url 'dashboard:reports_monthly' %}" class="mr-report-btn"><i class="fas fa-rotate-left"></i> Reset</a>
+        </div>
+    </form>
+
+    <p class="mr-report-caption">Showing report for: {{ selected_period_label }} (compared to {{ prev_period_label }})</p>
+
+    <section class="mr-report-grid">
+        <article class="mr-report-metric">
+            <span class="mr-report-metric-label">Programs</span>
+            <p class="mr-report-metric-value">{{ total_programs }}</p>
+            <p class="mr-report-metric-meta">{{ virtual_programs }} virtual and {{ onsite_programs }} on-site</p>
+            <div class="mr-report-change-row">
+                <span class="mr-report-change mr-report-change-{{ comparison_badges.programs.direction }}">{{ comparison_badges.programs.text }}</span>
+            </div>
+        </article>
+        <article class="mr-report-metric">
+            <span class="mr-report-metric-label">Registrations</span>
+            <p class="mr-report-metric-value">{{ total_registrations }}</p>
+            <p class="mr-report-metric-meta">Avg {{ avg_registrations_per_program }} per program</p>
+            <div class="mr-report-change-row">
+                <span class="mr-report-change mr-report-change-{{ comparison_badges.registrations.direction }}">{{ comparison_badges.registrations.text }}</span>
+            </div>
+        </article>
+        <article class="mr-report-metric">
+            <span class="mr-report-metric-label">Completed Donations</span>
+            <p class="mr-report-metric-value">{{ completed_donation_count }}</p>
+            <p class="mr-report-metric-meta">Total amount ${{ completed_donation_amount }}</p>
+            <div class="mr-report-change-row">
+                <span class="mr-report-change mr-report-change-{{ comparison_badges.donations_count.direction }}">{{ comparison_badges.donations_count.text }}</span>
+            </div>
+        </article>
+        <article class="mr-report-metric">
+            <span class="mr-report-metric-label">Recurring Share</span>
+            <p class="mr-report-metric-value">{{ recurring_donation_share }}%</p>
+            <p class="mr-report-metric-meta">{{ recurring_donation_count }} recurring completed donations</p>
+            <div class="mr-report-change-row">
+                <span class="mr-report-change mr-report-change-{{ comparison_badges.recurring_share.direction }}">{{ comparison_badges.recurring_share.text }}</span>
+            </div>
+        </article>
+        <article class="mr-report-metric">
+            <span class="mr-report-metric-label">Contact Messages</span>
+            <p class="mr-report-metric-value">{{ total_contacts }}</p>
+            <p class="mr-report-metric-meta">Inbound support and general inquiries</p>
+            <div class="mr-report-change-row">
+                <span class="mr-report-change mr-report-change-{{ comparison_badges.contacts.direction }}">{{ comparison_badges.contacts.text }}</span>
+            </div>
+        </article>
+        <article class="mr-report-metric">
+            <span class="mr-report-metric-label">Volunteer Requests</span>
+            <p class="mr-report-metric-value">{{ total_volunteer_requests }}</p>
+            <p class="mr-report-metric-meta">New volunteer interest captured this month</p>
+            <div class="mr-report-change-row">
+                <span class="mr-report-change mr-report-change-{{ comparison_badges.volunteer_requests.direction }}">{{ comparison_badges.volunteer_requests.text }}</span>
+            </div>
+        </article>
+        <article class="mr-report-metric">
+            <span class="mr-report-metric-label">Event Requests</span>
+            <p class="mr-report-metric-value">{{ total_event_requests }}</p>
+            <p class="mr-report-metric-meta">{{ pending_event_requests }} pending, {{ approved_event_requests }} approved</p>
+            <div class="mr-report-change-row">
+                <span class="mr-report-change mr-report-change-{{ comparison_badges.event_requests.direction }}">{{ comparison_badges.event_requests.text }}</span>
+            </div>
+        </article>
+        <article class="mr-report-metric">
+            <span class="mr-report-metric-label">Request Approval</span>
+            <p class="mr-report-metric-value">{{ event_request_approval_rate }}%</p>
+            <p class="mr-report-metric-meta">Based on approved vs rejected requests</p>
+            <div class="mr-report-change-row">
+                <span class="mr-report-change mr-report-change-{{ comparison_badges.approval_rate.direction }}">{{ comparison_badges.approval_rate.text }}</span>
+            </div>
+        </article>
+    </section>
+
+    <section class="mr-report-panels">
+        <article class="mr-report-card">
+            <div class="mr-report-card-body">
+                <h3>Program Type Breakdown</h3>
+                <div class="mr-report-table-wrap">
+                    <table class="mr-report-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Programs</th>
+                                <th>Registrations</th>
+                                <th>Avg/Program</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in program_type_summary %}
+                            <tr>
+                                <td>{{ row.label }}</td>
+                                <td>{{ row.total }}</td>
+                                <td>{{ row.registrations }}</td>
+                                <td><span class="mr-report-pill">{{ row.avg_registrations }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4">No program data for this month.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </article>
+
+        <article class="mr-report-card">
+            <div class="mr-report-card-body">
+                <h3>Top Programs by Registrations</h3>
+                <div class="mr-report-table-wrap">
+                    <table class="mr-report-table">
+                        <thead>
+                            <tr>
+                                <th>Program</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Registrations</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for program in top_programs %}
+                            <tr>
+                                <td>{{ program.title }}</td>
+                                <td>{{ program.date|date:"M d, Y" }}</td>
+                                <td>{{ program.get_event_type_display }}</td>
+                                <td><span class="mr-report-pill">{{ program.registrations_count }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4">No programs available for this month.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <article class="mr-report-card">
+        <div class="mr-report-card-body">
+            <h3>Daily Activity Timeline</h3>
+            <div class="mr-report-daily-list">
+                {% for row in daily_activity %}
+                <div class="mr-report-daily-row">
+                    <div class="mr-report-day-label">{{ row.date|date:"M d" }}</div>
+                    <div class="mr-report-day-bars">
+                        <div class="mr-report-day-track"><div class="mr-report-day-reg" style="width: {{ row.registrations_width }}%;"></div></div>
+                        <div class="mr-report-day-track"><div class="mr-report-day-don" style="width: {{ row.donations_width }}%;"></div></div>
+                        <div class="mr-report-day-track"><div class="mr-report-day-vol" style="width: {{ row.volunteer_width }}%;"></div></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="mr-report-legend">
+                <span><span class="mr-report-dot mr-report-dot-reg"></span>Registrations</span>
+                <span><span class="mr-report-dot mr-report-dot-don"></span>Completed Donations</span>
+                <span><span class="mr-report-dot mr-report-dot-vol"></span>Volunteer Requests</span>
+            </div>
+        </div>
+    </article>
 </div>
 {% endblock %}

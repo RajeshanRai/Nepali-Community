@@ -15,6 +15,11 @@ from dashboard.views.admin_panel import (
     admin_required,
 )
 
+from dashboard.views.member_profile import (
+    DashboardProfilesView,
+    dashboard_home,
+)
+
 # Import all CRUD operations from views_module temporarily
 # TODO: Extract these to crud.py
 from dashboard.views_module import (
@@ -104,11 +109,15 @@ from dashboard.views_module import (
     
     # Other
     notifications,
+    mark_all_notifications_read,
     settings_view,
 )
 
 # Define public API
 __all__ = [
+    'DashboardProfilesView',
+    'dashboard_home',
+
     # Main Dashboard & Admin Panel
     'DashboardView',
     'advanced_admin_panel',
@@ -201,5 +210,6 @@ __all__ = [
     
     # Other
     'notifications',
+    'mark_all_notifications_read',
     'settings_view',
 ]

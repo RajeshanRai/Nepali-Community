@@ -26,14 +26,14 @@ from faqs.models import FAQ, FAQCategory
 
 
 def staff_required(user):
-    """Check if user is staff or superuser"""
-    return user.is_active and (user.is_staff or user.is_superuser)
+    """Check if user is an active superuser"""
+    return user.is_active and user.is_superuser
 
 
 def admin_required(view_func):
-    """Decorator to require staff or superuser status"""
+    """Decorator to require superuser status"""
     def wrapped_view(request, *args, **kwargs):
-        if not (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
+        if not (request.user.is_authenticated and request.user.is_superuser):
             return redirect('login')
         return view_func(request, *args, **kwargs)
     return wrapped_view

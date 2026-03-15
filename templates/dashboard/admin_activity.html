@@ -1,27 +1,478 @@
 {% extends 'dashboard/admin_base.html' %}
 {% block title %}Recent Activity{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ac-page,
+    .ac-page * {
+        box-sizing: border-box;
+    }
+
+    .ac-page {
+        background:
+            radial-gradient(circle at 8% 4%, rgba(14, 165, 233, 0.10), transparent 36%),
+            radial-gradient(circle at 85% 6%, rgba(16, 185, 129, 0.08), transparent 34%),
+            radial-gradient(circle at 50% 100%, rgba(99, 102, 241, 0.08), transparent 42%);
+        border-radius: 18px;
+        padding: 1rem;
+    }
+
+    .ac-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .ac-stat {
+        background: linear-gradient(160deg, #ffffff, #f8fafc);
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 0.9rem;
+        box-shadow: 0 12px 25px rgba(15, 23, 42, 0.06);
+    }
+
+    .ac-stat-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.4rem;
+    }
+
+    .ac-stat-label {
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #64748b;
+        font-weight: 700;
+    }
+
+    .ac-stat-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+    }
+
+    .ac-stat-value {
+        margin: 0;
+        font-size: 1.7rem;
+        line-height: 1.1;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .ac-stat-meta {
+        margin-top: 0.35rem;
+        font-size: 0.8rem;
+        color: #475569;
+    }
+
+    .ac-sky { background: rgba(14, 165, 233, 0.14); color: #0369a1; }
+    .ac-emerald { background: rgba(16, 185, 129, 0.14); color: #047857; }
+    .ac-amber { background: rgba(245, 158, 11, 0.16); color: #b45309; }
+    .ac-violet { background: rgba(124, 58, 237, 0.14); color: #6d28d9; }
+
+    .ac-board {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 1rem;
+        align-items: start;
+    }
+
+    .ac-filter {
+        margin-bottom: 1rem;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+        padding: 0.85rem 1rem;
+    }
+
+    .ac-filter-row {
+        display: flex;
+        align-items: end;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .ac-filter-group {
+        display: grid;
+        gap: 0.35rem;
+    }
+
+    .ac-filter-label {
+        font-size: 0.72rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+    }
+
+    .ac-type-tabs {
+        display: inline-flex;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #f8fafc;
+    }
+
+    .ac-type-tabs input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .ac-tab {
+        padding: 0.42rem 0.8rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #475569;
+        cursor: pointer;
+        border-right: 1px solid #e2e8f0;
+        background: transparent;
+        user-select: none;
+    }
+
+    .ac-tab:last-child {
+        border-right: none;
+    }
+
+    .ac-type-tabs input:checked + .ac-tab {
+        background: #2563eb;
+        color: #ffffff;
+    }
+
+    .ac-date-input {
+        height: 36px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 0 0.6rem;
+        font-size: 0.82rem;
+        color: #0f172a;
+        min-width: 148px;
+    }
+
+    .ac-filter-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-left: auto;
+    }
+
+    .ac-btn {
+        height: 36px;
+        padding: 0 0.85rem;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #0f172a;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .ac-btn-primary {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #ffffff;
+    }
+
+    .ac-filter-meta {
+        margin: 0.6rem 0 0;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    .ac-panel,
+    .ac-timeline-wrap {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .ac-panel {
+        padding: 1rem;
+        position: sticky;
+        top: 1.2rem;
+    }
+
+    .ac-panel h3 {
+        margin: 0 0 0.5rem;
+        font-size: 0.95rem;
+        color: #0f172a;
+    }
+
+    .ac-panel p {
+        margin: 0;
+        font-size: 0.84rem;
+        color: #475569;
+        line-height: 1.5;
+    }
+
+    .ac-tag-list {
+        margin-top: 0.9rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+    }
+
+    .ac-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.22rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        color: #334155;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+    }
+
+    .ac-timeline-wrap {
+        overflow: hidden;
+    }
+
+    .ac-timeline-head {
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: linear-gradient(135deg, #f8fafc, #ffffff);
+    }
+
+    .ac-timeline-head h3 {
+        margin: 0;
+        font-size: 1rem;
+        color: #0f172a;
+    }
+
+    .ac-timeline {
+        padding: 0.4rem 1rem 1rem;
+    }
+
+    .ac-day-label {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        margin: 0.9rem 0 0.6rem;
+        padding: 0.35rem 0.7rem;
+        display: inline-flex;
+        border-radius: 999px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        font-size: 0.74rem;
+        font-weight: 700;
+        color: #475569;
+    }
+
+    .ac-item {
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        gap: 0.8rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+
+    .ac-item:last-child {
+        border-bottom: none;
+    }
+
+    .ac-item-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+    }
+
+    .ac-item-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+    }
+
+    .ac-item-type {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.16rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #475569;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+    }
+
+    .ac-item-title {
+        margin: 0.35rem 0 0.2rem;
+        font-size: 0.95rem;
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .ac-item-meta {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    .ac-item-user {
+        font-weight: 700;
+        color: #334155;
+    }
+
+    .ac-empty {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #64748b;
+    }
+
+    .ac-empty i {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+        color: #94a3b8;
+    }
+
+    @media (max-width: 980px) {
+        .ac-board {
+            grid-template-columns: 1fr;
+        }
+
+        .ac-panel {
+            position: static;
+        }
+
+        .ac-filter-actions {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .ac-btn {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block breadcrumb_items %}<li class="breadcrumb-item active">Activity</li>{% endblock %}
 {% block page_header %}<div class="page-header">
     <div class="page-header-content">
         <h1><i class="fas fa-history"></i> Recent Activity</h1>
-        <p>System activity log and audit trail</p>
+        <p>A live pulse of programs, volunteer applications, and event requests.</p>
     </div>
 </div>{% endblock %}
-{% block content %}<div class="content-card">
-    <div class="content-card-body">
-        <div class="activity-list">{% for activity in activities %}<div class="activity-item">
-                <div class="activity-icon">
-                    <i class="fas fa-{{ activity.type }}"></i>
+{% block content %}
+<div class="ac-page">
+    <form method="get" class="ac-filter">
+        <div class="ac-filter-row">
+            <div class="ac-filter-group">
+                <label class="ac-filter-label">Type</label>
+                <div class="ac-type-tabs">
+                    <input type="radio" id="ac-type-all" name="type" value="all" {% if selected_type == 'all' %}checked{% endif %}>
+                    <label for="ac-type-all" class="ac-tab">All</label>
+
+                    <input type="radio" id="ac-type-event" name="type" value="event" {% if selected_type == 'event' %}checked{% endif %}>
+                    <label for="ac-type-event" class="ac-tab">Programs</label>
+
+                    <input type="radio" id="ac-type-application" name="type" value="application" {% if selected_type == 'application' %}checked{% endif %}>
+                    <label for="ac-type-application" class="ac-tab">Volunteer</label>
+
+                    <input type="radio" id="ac-type-request" name="type" value="request" {% if selected_type == 'request' %}checked{% endif %}>
+                    <label for="ac-type-request" class="ac-tab">Requests</label>
                 </div>
-                <div class="activity-content"><strong>{{ activity.title }}</strong><br><small class="activity-meta">
-                        {% if activity.has_time %}
-                        {{ activity.date|date:"M d, Y H:i" }}
-                        {% else %}
-                        {{ activity.date|date:"M d, Y" }}
-                        {% endif %}
-                    </small></div>
-            </div>{% empty %}<div class="empty-state-card"><i class="fas fa-history"></i>
-                <p>No recent activity</p>
-            </div>{% endfor %}</div>
-    </div>
+            </div>
+
+            <div class="ac-filter-group">
+                <label class="ac-filter-label" for="ac-start-date">Start Date</label>
+                <input id="ac-start-date" type="date" name="start_date" value="{{ filter_start_date }}" class="ac-date-input">
+            </div>
+
+            <div class="ac-filter-group">
+                <label class="ac-filter-label" for="ac-end-date">End Date</label>
+                <input id="ac-end-date" type="date" name="end_date" value="{{ filter_end_date }}" class="ac-date-input">
+            </div>
+
+            <div class="ac-filter-actions">
+                <button type="submit" class="ac-btn ac-btn-primary"><i class="fas fa-filter"></i> Apply</button>
+                <a href="{% url 'dashboard:admin_activity' %}" class="ac-btn"><i class="fas fa-rotate-left"></i> Reset</a>
+            </div>
+        </div>
+        <p class="ac-filter-meta">Range: {{ filter_range_label }}</p>
+    </form>
+
+    <section class="ac-stats">
+        {% for card in summary_cards %}
+        <article class="ac-stat">
+            <div class="ac-stat-head">
+                <span class="ac-stat-label">{{ card.label }}</span>
+                <span class="ac-stat-icon ac-{{ card.tone }}"><i class="fas fa-{{ card.icon }}"></i></span>
+            </div>
+            <p class="ac-stat-value">{{ card.value }}</p>
+            <p class="ac-stat-meta">{{ card.meta }}</p>
+        </article>
+        {% endfor %}
+    </section>
+
+    <section class="ac-board">
+        <aside class="ac-panel">
+            <h3>Activity Lens</h3>
+            <p>{{ total_activities }} entries tracked, with {{ today_activities_count }} happening today.</p>
+            <div class="ac-tag-list">
+                <span class="ac-tag"><i class="fas fa-calendar-check"></i> Programs</span>
+                <span class="ac-tag"><i class="fas fa-hands-helping"></i> Volunteers</span>
+                <span class="ac-tag"><i class="fas fa-clipboard-list"></i> Requests</span>
+            </div>
+        </aside>
+
+        <div class="ac-timeline-wrap">
+            <div class="ac-timeline-head">
+                <h3>Chronological Stream</h3>
+            </div>
+            <div class="ac-timeline">
+                {% for activity in activities %}
+                {% ifchanged activity.activity_day %}
+                <div class="ac-day-label">{{ activity.activity_day|date:"l, M d, Y" }}</div>
+                {% endifchanged %}
+                <article class="ac-item">
+                    <div class="ac-item-icon ac-{{ activity.tone }}">
+                        <i class="fas fa-{{ activity.icon }}"></i>
+                    </div>
+                    <div>
+                        <div class="ac-item-head">
+                            <span class="ac-item-type">{{ activity.type_label }}</span>
+                            <span class="ac-item-meta">
+                                {% if activity.has_time %}
+                                {{ activity.date|date:"g:i A" }}
+                                {% else %}
+                                All day
+                                {% endif %}
+                            </span>
+                        </div>
+                        <p class="ac-item-title">{{ activity.title }}</p>
+                        <p class="ac-item-meta">Actor: <span class="ac-item-user">{{ activity.user|default:"System" }}</span></p>
+                    </div>
+                </article>
+                {% empty %}
+                <div class="ac-empty"><i class="fas fa-history"></i>
+                    <p>No recent activity yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
 </div>{% endblock %}

@@ -2,6 +2,7 @@ from django.views.generic import ListView, DetailView
 from django.db.models import F, Q
 from django.utils import timezone
 from .models import Announcement
+from users.tracking import track_recent_view
 
 
 class AnnouncementListView(ListView):
@@ -42,4 +43,11 @@ class AnnouncementDetailView(DetailView):
         # Increment view count
         Announcement.objects.filter(pk=obj.pk).update(views_count=F('views_count') + 1)
         obj.refresh_from_db()
+        track_recent_view(
+            self.request,
+            content_type='announcement',
+            object_id=obj.pk,
+            title=obj.title,
+            url=self.request.path,
+        )
         return obj

@@ -26,3 +26,16 @@ class MemberModerationAction(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.action}"
+
+
+class AdminNotificationState(models.Model):
+    user = models.OneToOneField(
+        'users.CustomUser',
+        on_delete=models.CASCADE,
+        related_name='admin_notification_state',
+    )
+    last_read_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Notification state for {self.user}"

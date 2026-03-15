@@ -1,5 +1,4 @@
 from django.urls import path
-from django.views.generic import RedirectView
 from . import views
 from . import api as dashboard_api
 
@@ -7,7 +6,9 @@ app_name = 'dashboard'
 
 
 urlpatterns = [
-    path('', RedirectView.as_view(pattern_name='dashboard:admin_overview', permanent=False), name='dashboard_home'),
+    path('', views.dashboard_home, name='dashboard_home'),
+    path('admin/users/profiles/', views.DashboardProfilesView.as_view(), name='profiles'),
+    path('admin/users/profiles/<int:user_id>/', views.DashboardProfilesView.as_view(), name='profiles_detail'),
         # ====== SIDEBAR ADMIN INTERFACE ======
         # Main Dashboard
         path('admin/overview/', views.admin_overview, name='admin_overview'),
@@ -42,6 +43,7 @@ urlpatterns = [
     
         # Notifications & Settings
         path('admin/notifications/', views.notifications, name='notifications'),
+        path('admin/notifications/mark-all-read/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
         path('admin/settings/', views.settings_view, name='settings'),
     
     

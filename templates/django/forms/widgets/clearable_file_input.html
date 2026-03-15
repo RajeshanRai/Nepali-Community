@@ -1,0 +1,13 @@
+{% if widget.is_initial %}<div class="cfn-wrap">
+  <div class="cfn-current">
+    <span class="cfn-label">{{ widget.initial_text }}:</span>
+    <a href="{{ widget.value.url }}" target="_blank" class="cfn-filename" title="{{ widget.value }}">{{ widget.value }}</a>
+  </div>
+  {% if not widget.required %}
+  <label class="cfn-clear-label">
+    <input type="checkbox" name="{{ widget.attrs.name }}-clear" id="{{ widget.clear_checkbox_id }}"{% if widget.attrs.disabled %} disabled{% endif %} class="cfn-clear-checkbox">
+    <span>{{ widget.clear_checkbox_label }}</span>
+  </label>
+  {% endif %}
+  <span class="cfn-change-label">{{ widget.input_text }}:</span>
+</div>{% endif %}<input type="{{ widget.input_type }}" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>

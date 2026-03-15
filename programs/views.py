@@ -11,6 +11,7 @@ from communities.models import Community
 from core.email_utils import send_notification_email, build_event_newsletter_html
 from .models import Program, EventRegistration, RequestEvent
 from .forms import GuestRegistrationForm, UserRegistrationForm, RequestEventForm
+from users.tracking import track_recent_view
 import json
 import re
 
@@ -401,6 +402,13 @@ class ProgramDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         program = self.get_object()
+        track_recent_view(
+            self.request,
+            content_type='program',
+            object_id=program.pk,
+            title=program.title,
+            url=self.request.path,
+        )
         
         # Check if user is registered
         if self.request.user.is_authenticated:

@@ -1,34 +1,502 @@
 {% extends 'dashboard/admin_base.html' %}
 {% block title %}Settings{% endblock %}
+
+{% block extra_css %}
+<style>
+    .settings-layout {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .settings-nav {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        position: sticky;
+        top: 1.5rem;
+    }
+
+    .settings-nav-title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--text-secondary);
+        padding: 0.75rem 1rem 0.4rem;
+    }
+
+    .settings-nav a {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.7rem 1rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-left: 3px solid transparent;
+        transition: background 0.15s, border-color 0.15s;
+    }
+
+    .settings-nav a:hover { background: var(--bg-light); }
+
+    .settings-nav a.active {
+        background: rgba(59, 130, 246, 0.07);
+        border-left-color: var(--primary-blue);
+        color: var(--primary-blue);
+        font-weight: 600;
+    }
+
+    .settings-nav a i { width: 16px; text-align: center; opacity: 0.75; }
+    .settings-nav a.active i { opacity: 1; }
+
+    .settings-section { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .settings-card {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .settings-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-light);
+    }
+
+    .settings-card-header i { font-size: 1rem; color: var(--primary-blue); width: 20px; text-align: center; }
+    .settings-card-header h3 { font-size: 1rem; font-weight: 700; margin: 0; color: var(--text-primary); }
+
+    .settings-card-body { padding: 1.5rem 1.25rem; }
+
+    .settings-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        max-width: 680px;
+    }
+
+    .settings-form-grid .span-2 { grid-column: span 2; }
+
+    .form-field { display: flex; flex-direction: column; gap: 0.35rem; }
+
+    .form-field label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .form-field .field-error { font-size: 0.8rem; color: #ef4444; margin-top: 0.25rem; }
+
+    .form-actions { display: flex; align-items: center; gap: 0.75rem; margin-top: 1.25rem; }
+
+    .btn-settings-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.55rem 1.25rem;
+        background: var(--primary-blue);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.18s;
+    }
+
+    .btn-settings-save:hover { background: #2563eb; }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .info-item {
+        background: var(--bg-light);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+    }
+
+    .info-item .info-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        margin-bottom: 0.3rem;
+    }
+
+    .info-item .info-value { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); word-break: break-all; }
+
+    .badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .badge-pill.on  { background: #dcfce7; color: #15803d; }
+    .badge-pill.off { background: #fee2e2; color: #b91c1c; }
+    .badge-pill.warn { background: #fef3c7; color: #92400e; }
+
+    .account-avatar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .avatar-circle {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-blue), #6366f1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        color: #fff;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .avatar-meta h4 { margin: 0 0 0.15rem; font-size: 1rem; font-weight: 700; }
+    .avatar-meta span { font-size: 0.82rem; color: var(--text-secondary); }
+
+    .avatar-meta .role-badge {
+        display: inline-block;
+        padding: 0.15rem 0.55rem;
+        background: rgba(59,130,246,0.1);
+        color: var(--primary-blue);
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-left: 0.4rem;
+    }
+
+    @media (max-width: 768px) {
+        .settings-layout { grid-template-columns: 1fr; }
+        .settings-form-grid { grid-template-columns: 1fr; }
+        .settings-form-grid .span-2 { grid-column: span 1; }
+        .settings-nav { position: static; }
+    }
+</style>
+{% endblock %}
+
 {% block breadcrumb_items %}<li class="breadcrumb-item active">Settings</li>{% endblock %}
-{% block page_header %}<div class="page-header">
+
+{% block page_header %}
+<div class="page-header">
     <div class="page-header-content">
-        <h1><i class="fas fa-cog"></i> System Settings</h1>
-        <p>Configure platform settings and preferences</p>
+        <h1><i class="fas fa-cog"></i> Settings</h1>
+        <p>Manage your account, platform configuration, and security preferences.</p>
     </div>
-</div>{% endblock %}
-{% block content %}<div class="content-card">
-    <div class="content-card-header">
-        <h3>General Settings</h3>
-    </div>
-    <div class="content-card-body">
-        <form class="form-max-600">
-            <div class="form-group">
-                <label for="site-name">Site Name</label>
-                <input id="site-name" class="form-control" type="text" value="Nepali Community of Vancouver">
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="settings-layout">
+
+    <!-- Sidebar nav -->
+    <nav class="settings-nav" aria-label="Settings navigation">
+        <p class="settings-nav-title">Settings</p>
+        <a href="#account" class="{% if active_section == 'account' %}active{% endif %}">
+            <i class="fas fa-user-circle"></i> My Account
+        </a>
+        <a href="#security" class="{% if active_section == 'security' %}active{% endif %}">
+            <i class="fas fa-lock"></i> Security
+        </a>
+        <a href="#platform"><i class="fas fa-server"></i> Platform Info</a>
+        <a href="#email"><i class="fas fa-envelope"></i> Email Config</a>
+    </nav>
+
+    <!-- Main content -->
+    <div class="settings-section">
+
+        <!-- MY ACCOUNT -->
+        <div class="settings-card" id="account">
+            <div class="settings-card-header">
+                <i class="fas fa-user-circle"></i>
+                <h3>My Account</h3>
             </div>
-            <div class="form-group">
-                <label for="admin-email">Admin Email</label>
-                <input id="admin-email" class="form-control" type="email" value="admin@nepalicommunity.ca">
+            <div class="settings-card-body">
+                <div class="account-avatar">
+                    <div class="avatar-circle">
+                        {% if request.user.first_name %}{{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}{% else %}{{ request.user.username|first|upper }}{% endif %}
+                    </div>
+                    <div class="avatar-meta">
+                        <h4>
+                            {{ request.user.get_full_name|default:request.user.username }}
+                            {% if request.user.is_superuser %}<span class="role-badge">Superuser</span>{% elif request.user.is_staff %}<span class="role-badge">Staff</span>{% endif %}
+                        </h4>
+                        <span>@{{ request.user.username }} &middot; Joined {{ request.user.date_joined|date:"N j, Y" }}</span>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_profile">
+                    <div class="settings-form-grid">
+                        <div class="form-field">
+                            <label for="{{ profile_form.first_name.id_for_label }}">First Name</label>
+                            {{ profile_form.first_name }}
+                            {% if profile_form.first_name.errors %}<p class="field-error">{{ profile_form.first_name.errors|join:", " }}</p>{% endif %}
+                        </div>
+                        <div class="form-field">
+                            <label for="{{ profile_form.last_name.id_for_label }}">Last Name</label>
+                            {{ profile_form.last_name }}
+                            {% if profile_form.last_name.errors %}<p class="field-error">{{ profile_form.last_name.errors|join:", " }}</p>{% endif %}
+                        </div>
+                        <div class="form-field">
+                            <label for="{{ profile_form.email.id_for_label }}">Email Address</label>
+                            {{ profile_form.email }}
+                            {% if profile_form.email.errors %}<p class="field-error">{{ profile_form.email.errors|join:", " }}</p>{% endif %}
+                        </div>
+                        <div class="form-field">
+                            <label for="{{ profile_form.phone_number.id_for_label }}">Phone Number</label>
+                            {{ profile_form.phone_number }}
+                            {% if profile_form.phone_number.errors %}<p class="field-error">{{ profile_form.phone_number.errors|join:", " }}</p>{% endif %}
+                        </div>
+                        <div class="form-field span-2">
+                            <label>Username</label>
+                            <input class="form-control" type="text" value="{{ request.user.username }}" disabled>
+                            <small style="color:var(--text-secondary);font-size:0.78rem;">Username cannot be changed here.</small>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-settings-save"><i class="fas fa-save"></i> Save Profile</button>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label class="checkbox-inline-label">
-                    <input type="checkbox" checked>
-                    <span>Enable email notifications</span>
-                </label>
+        </div>
+
+        <!-- CHANGE PASSWORD -->
+        <div class="settings-card" id="security">
+            <div class="settings-card-header">
+                <i class="fas fa-lock"></i>
+                <h3>Change Password</h3>
             </div>
-            <button type="button" class="btn btn-primary" onclick="showToast('Settings saved', 'success')">Save
-                Settings</button>
-        </form>
-    </div>
-</div>{% endblock %}
+            <div class="settings-card-body">
+                <form method="post" style="max-width:480px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="change_password">
+
+                    {% if password_form.non_field_errors %}
+                    <div style="margin-bottom:1rem;padding:0.75rem 1rem;background:#fee2e2;border-radius:8px;color:#b91c1c;font-size:0.875rem;">
+                        {{ password_form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <div class="form-field" style="margin-bottom:1rem;">
+                        <label for="{{ password_form.current_password.id_for_label }}">Current Password</label>
+                        {{ password_form.current_password }}
+                        {% if password_form.current_password.errors %}<p class="field-error">{{ password_form.current_password.errors|join:", " }}</p>{% endif %}
+                    </div>
+                    <div class="form-field" style="margin-bottom:1rem;">
+                        <label for="{{ password_form.new_password.id_for_label }}">New Password</label>
+                        {{ password_form.new_password }}
+                        {% if password_form.new_password.errors %}<p class="field-error">{{ password_form.new_password.errors|join:", " }}</p>{% endif %}
+                    </div>
+                    <div class="form-field" style="margin-bottom:1rem;">
+                        <label for="{{ password_form.confirm_password.id_for_label }}">Confirm New Password</label>
+                        {{ password_form.confirm_password }}
+                        {% if password_form.confirm_password.errors %}<p class="field-error">{{ password_form.confirm_password.errors|join:", " }}</p>{% endif %}
+                    </div>
+
+                    <ul style="font-size:0.8rem;color:var(--text-secondary);margin:0 0 1.25rem 1.2rem;line-height:1.8;">
+                        <li>At least 8 characters</li>
+                        <li>Cannot be entirely numeric</li>
+                        <li>Cannot be too similar to your username or email</li>
+                    </ul>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-settings-save"><i class="fas fa-key"></i> Change Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- SECURITY OVERVIEW -->
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Security Overview</h3>
+            </div>
+            <div class="settings-card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">HTTPS Redirect</div>
+                        <div class="info-value">
+                            {% if security_info.https_redirect %}<span class="badge-pill on"><i class="fas fa-check"></i> Enabled</span>
+                            {% else %}<span class="badge-pill warn"><i class="fas fa-exclamation-triangle"></i> Off (dev)</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">HSTS</div>
+                        <div class="info-value">
+                            {% if security_info.hsts_enabled %}<span class="badge-pill on"><i class="fas fa-check"></i> Active</span>
+                            {% else %}<span class="badge-pill warn"><i class="fas fa-exclamation-triangle"></i> Off</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">CSRF HttpOnly</div>
+                        <div class="info-value">
+                            {% if security_info.csrf_cookie_httponly %}<span class="badge-pill on"><i class="fas fa-check"></i> Yes</span>
+                            {% else %}<span class="badge-pill warn"><i class="fas fa-times"></i> No</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Session HttpOnly</div>
+                        <div class="info-value">
+                            {% if security_info.session_cookie_httponly %}<span class="badge-pill on"><i class="fas fa-check"></i> Yes</span>
+                            {% else %}<span class="badge-pill warn"><i class="fas fa-times"></i> No</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Session Lifetime</div>
+                        <div class="info-value">{{ security_info.session_cookie_age_days }} days</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">X-Frame-Options</div>
+                        <div class="info-value">{{ security_info.x_frame_options }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Last Login</div>
+                        <div class="info-value">{{ request.user.last_login|date:"N j, Y \a\t g:i A"|default:"—" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Account Status</div>
+                        <div class="info-value">
+                            {% if request.user.is_active %}<span class="badge-pill on"><i class="fas fa-check"></i> Active</span>
+                            {% else %}<span class="badge-pill off"><i class="fas fa-times"></i> Inactive</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLATFORM INFO -->
+        <div class="settings-card" id="platform">
+            <div class="settings-card-header">
+                <i class="fas fa-server"></i>
+                <h3>Platform Information</h3>
+            </div>
+            <div class="settings-card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Django Version</div>
+                        <div class="info-value">{{ platform_info.django_version }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Debug Mode</div>
+                        <div class="info-value">
+                            {% if platform_info.debug_mode %}<span class="badge-pill warn"><i class="fas fa-exclamation-triangle"></i> On (dev only)</span>
+                            {% else %}<span class="badge-pill on"><i class="fas fa-check"></i> Off</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Database</div>
+                        <div class="info-value">{{ platform_info.database_engine|title }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Time Zone</div>
+                        <div class="info-value">{{ platform_info.time_zone }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Timezone Support</div>
+                        <div class="info-value">
+                            {% if platform_info.use_tz %}<span class="badge-pill on"><i class="fas fa-check"></i> USE_TZ = True</span>
+                            {% else %}<span class="badge-pill warn">USE_TZ = False</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Language</div>
+                        <div class="info-value">{{ platform_info.language_code }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Allowed Hosts</div>
+                        <div class="info-value" style="font-size:0.82rem;">{{ platform_info.allowed_hosts }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Media Root</div>
+                        <div class="info-value" style="font-size:0.78rem;word-break:break-all;">{{ platform_info.media_root|default:"—" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EMAIL CONFIG -->
+        <div class="settings-card" id="email">
+            <div class="settings-card-header">
+                <i class="fas fa-envelope"></i>
+                <h3>Email Configuration</h3>
+            </div>
+            <div class="settings-card-body">
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin:0 0 1rem;">
+                    Email credentials are managed via environment variables. Sensitive values are masked below.
+                </p>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">SMTP Host</div>
+                        <div class="info-value">{{ email_info.host|default:"—" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">SMTP Port</div>
+                        <div class="info-value">{{ email_info.port|default:"—" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">TLS Encryption</div>
+                        <div class="info-value">
+                            {% if email_info.use_tls %}<span class="badge-pill on"><i class="fas fa-lock"></i> TLS Enabled</span>
+                            {% else %}<span class="badge-pill warn">TLS Off</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Sending Account</div>
+                        <div class="info-value">{{ email_info.user }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Default From</div>
+                        <div class="info-value" style="font-size:0.85rem;">{{ email_info.default_from|default:"—" }}</div>
+                    </div>
+                </div>
+                <p style="font-size:0.78rem;color:var(--text-secondary);margin:1rem 0 0;">
+                    To update email credentials, edit the <code>.env</code> file and restart the server.
+                </p>
+            </div>
+        </div>
+
+    </div><!-- /settings-section -->
+</div><!-- /settings-layout -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* Highlight active nav item on anchor click */
+document.querySelectorAll('.settings-nav a').forEach(function (link) {
+    link.addEventListener('click', function () {
+        document.querySelectorAll('.settings-nav a').forEach(function (l) { l.classList.remove('active'); });
+        link.classList.add('active');
+    });
+});
+</script>
+{% endblock %}

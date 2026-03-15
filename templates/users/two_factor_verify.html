@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Two-Factor Verification - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'users/auth.css' %}">
+<link rel="stylesheet" href="{% static 'users/two_factor.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-shell two-factor-shell">
+    <section class="auth-card two-factor-card" aria-labelledby="two-factor-title">
+        <aside class="auth-visual">
+            <div class="auth-brand" aria-label="Nepali Community of Vancouver">
+                <span class="auth-brand-mark" aria-hidden="true">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </span>
+                <span class="auth-brand-copy">
+                    <strong>Nepali Community</strong>
+                    <span>Vancouver, Canada</span>
+                </span>
+            </div>
+
+            <div class="auth-hero">
+                <div class="auth-kicker">
+                    <span class="auth-kicker-dot" aria-hidden="true"></span>
+                    Secure Sign-in
+                </div>
+                <h1 class="auth-display">Complete your <em>two-factor verification</em>.</h1>
+                <p class="auth-copy">
+                    {% if two_factor_method == 'email' %}
+                    Enter the 6-digit code sent to your email address.
+                    {% else %}
+                    Enter the current 6-digit code from your authenticator app.
+                    {% endif %}
+                </p>
+            </div>
+        </aside>
+
+        <div class="auth-form-panel">
+            <div class="auth-form-header">
+                <h2 id="two-factor-title">Verify identity</h2>
+                <p>Account: {{ pending_user.display_name }}</p>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="auth-alert {% if 'success' in message.tags %}auth-alert-success{% endif %}" role="status" aria-live="polite">
+                <i class="fas {% if 'success' in message.tags %}fa-check-circle{% elif 'error' in message.tags %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}" aria-hidden="true"></i>
+                <div>{{ message }}</div>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" class="auth-form" novalidate aria-labelledby="two-factor-title">
+                {% csrf_token %}
+                <div class="auth-field">
+                    <div class="auth-control{% if form.code.errors %} is-invalid{% endif %}" data-field>
+                        <span class="auth-input-icon" aria-hidden="true"><i class="fas fa-key"></i></span>
+                        {{ form.code }}
+                        <label class="auth-floating-label" for="{{ form.code.id_for_label }}">Verification code</label>
+                    </div>
+                    {% for error in form.code.errors %}
+                    <div class="auth-field-error"><i class="fas fa-exclamation-circle" aria-hidden="true"></i>{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="auth-submit">
+                    <span class="btn-text">Verify and sign in</span>
+                    <span class="btn-icon" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                </button>
+            </form>
+
+            {% if two_factor_method == 'email' %}
+            <form method="post" class="two-factor-resend-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="resend_email_code">
+                <button type="submit" class="auth-social-btn two-factor-resend-btn">
+                    <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                    <span>Resend code</span>
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

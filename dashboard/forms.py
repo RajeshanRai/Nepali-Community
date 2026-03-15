@@ -169,3 +169,62 @@ class PartnerForm(forms.ModelForm):
                 'placeholder': '{"facebook":"https://...","twitter":"https://...","linkedin":"https://...","instagram":"https://..."}'
             }),
         }
+
+
+class AdminProfileForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'email', 'phone_number']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'admin@example.com'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+1 (604) 000-0000'}),
+        }
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        qs = CustomUser.objects.filter(email__iexact=email).exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError('This email address is already used by another account.')
+        return email
+
+
+class AdminPasswordForm(forms.Form):
+    current_password = forms.CharField(
+        label='Current password',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter current password', 'autocomplete': 'current-password'}),
+    )
+    new_password = forms.CharField(
+        label='New password',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Min. 8 characters', 'autocomplete': 'new-password'}),
+    )
+    confirm_password = forms.CharField(
+        label='Confirm new password',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Repeat new password', 'autocomplete': 'new-password'}),
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_current_password(self):
+        password = self.cleaned_data.get('current_password')
+        if not self.user.check_password(password):
+            raise forms.ValidationError('Current password is incorrect.')
+        return password
+
+    def clean_new_password(self):
+        from django.contrib.auth.password_validation import validate_password
+        password = self.cleaned_data.get('new_password')
+        if password:
+            validate_password(password, self.user)
+        return password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get('new_password')
+        confirm_password = cleaned_data.get('confirm_password')
+        if new_password and confirm_password and new_password != confirm_password:
+            self.add_error('confirm_password', 'New passwords do not match.')
+        return cleaned_data

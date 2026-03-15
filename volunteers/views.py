@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.db import IntegrityError
 from .models import VolunteerOpportunity, VolunteerApplication, VolunteerRequest
 from .forms import VolunteerApplicationForm, VolunteerRequestForm
+from users.tracking import track_recent_view
 
 
 class VolunteerListView(ListView):
@@ -58,6 +59,13 @@ class VolunteerDetailView(DetailView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        track_recent_view(
+            self.request,
+            content_type='volunteer_opportunity',
+            object_id=self.object.pk,
+            title=self.object.title,
+            url=self.request.path,
+        )
         context['application_form'] = VolunteerApplicationForm()
         
         # Pre-fill form if user is authenticated

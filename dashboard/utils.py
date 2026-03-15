@@ -8,6 +8,7 @@ This module contains reusable helper functions for:
 """
 
 from datetime import datetime, date, time, timedelta
+from django.urls import reverse
 from django.utils import timezone
 from django.db.models import Count, Q
 
@@ -47,7 +48,136 @@ def normalize_activity_datetime(value):
     return dt_value
 
 
-def get_sidebar_counts():
+def get_dashboard_notifications(user=None, limit=18, dropdown_limit=6):
+    """
+    Build the live dashboard notifications feed.
+
+    Returns a shared notification payload so the navbar dropdown and
+    notifications page render the same items and counts.
+    """
+    from announcements.models import Announcement
+    from contacts.models import ContactMessage
+    from programs.models import RequestEvent
+    from volunteers.models import VolunteerApplication, VolunteerRequest
+    from dashboard.models import AdminNotificationState
+
+    now = timezone.now()
+    notifications_feed = []
+    last_read_at = None
+
+    if user and getattr(user, 'is_authenticated', False):
+        notification_state = AdminNotificationState.objects.filter(user=user).only('last_read_at').first()
+        if notification_state and notification_state.last_read_at:
+            last_read_at = notification_state.last_read_at
+
+    pending_projects = list(
+        RequestEvent.objects.filter(status='pending')
+        .select_related('community')
+        .order_by('-submitted_at')[:6]
+    )
+    pending_volunteer_applications = list(
+        VolunteerApplication.objects.filter(status='pending')
+        .select_related('opportunity')
+        .order_by('-applied_at')[:6]
+    )
+    pending_volunteer_requests = list(
+        VolunteerRequest.objects.filter(status='new')
+        .order_by('-created_at')[:6]
+    )
+    recent_contacts = list(ContactMessage.objects.order_by('-created_at')[:6])
+    recent_announcements = list(Announcement.objects.order_by('-created_at')[:4])
+
+    def push_notification(message, created_at, url, icon, bg_class, default_unread=True):
+        normalized_created_at = normalize_activity_datetime(created_at)
+        unread = default_unread if last_read_at is None else normalized_created_at > last_read_at
+        notifications_feed.append({
+            'message': message,
+            'created_at': normalized_created_at,
+            'url': url,
+            'icon': icon,
+            'bg_class': bg_class,
+            'unread': unread,
+        })
+
+    for req in pending_projects:
+        push_notification(
+            f'Project request pending review: {req.title}',
+            req.submitted_at,
+            reverse('dashboard:event_requests_list'),
+            'fas fa-clock',
+            'bg-warning',
+        )
+
+    for app in pending_volunteer_applications:
+        push_notification(
+            f'Volunteer application from {app.name} for {app.opportunity.title}',
+            app.applied_at,
+            reverse('dashboard:volunteers_applications'),
+            'fas fa-user-check',
+            'bg-success',
+        )
+
+    for volunteer_request in pending_volunteer_requests:
+        push_notification(
+            f'New volunteer request from {volunteer_request.name}',
+            volunteer_request.created_at,
+            reverse('dashboard:volunteers_applications'),
+            'fas fa-hands-helping',
+            'bg-info',
+        )
+
+    for contact in recent_contacts:
+        push_notification(
+            f'Contact message received: {contact.subject}',
+            contact.created_at,
+            reverse('dashboard:contact_messages_list'),
+            'fas fa-envelope-open-text',
+            'bg-danger',
+            default_unread=contact.created_at >= now - timedelta(days=7),
+        )
+
+    for announcement in recent_announcements:
+        push_notification(
+            f'Announcement published: {announcement.title}',
+            announcement.created_at,
+            reverse('dashboard:announcements_list'),
+            'fas fa-bullhorn',
+            'bg-primary',
+            default_unread=announcement.created_at >= now - timedelta(days=3),
+        )
+
+    notifications_feed = sorted(
+        notifications_feed,
+        key=lambda item: item['created_at'],
+        reverse=True,
+    )[:limit]
+    dropdown_notifications = notifications_feed[:dropdown_limit]
+
+    pending_projects_count = RequestEvent.objects.filter(status='pending').count()
+    pending_volunteer_applications_count = VolunteerApplication.objects.filter(status='pending').count()
+    pending_volunteer_requests_count = VolunteerRequest.objects.filter(status='new').count()
+    recent_contact_count = ContactMessage.objects.filter(
+        created_at__gte=now - timedelta(days=7)
+    ).count()
+
+    return {
+        'pending_projects_count': pending_projects_count,
+        'pending_applications_count': (
+            pending_volunteer_applications_count + pending_volunteer_requests_count
+        ),
+        'unread_notifications_count': sum(1 for item in notifications_feed if item['unread']),
+        'notifications_feed': notifications_feed,
+        'dropdown_notifications': dropdown_notifications,
+        'notification_totals': {
+            'project_requests': pending_projects_count,
+            'volunteer_applications': pending_volunteer_applications_count,
+            'volunteer_requests': pending_volunteer_requests_count,
+            'contact_messages': recent_contact_count,
+        },
+    }
+
+
+def get_sidebar_counts(user=None):
     """
     Get sidebar counts for pending projects and applications.
     
@@ -58,29 +188,12 @@ def get_sidebar_counts():
         dict: Contains pending_projects_count, pending_applications_count, 
               and unread_notifications_count
     """
-    from programs.models import RequestEvent
-    from volunteers.models import VolunteerApplication, VolunteerRequest
-    
-    # Use a single aggregated query to get all counts efficiently
-    pending_counts = RequestEvent.objects.aggregate(
-        pending_projects=Count('id', filter=Q(status='pending'))
-    )
-    
-    application_counts = VolunteerApplication.objects.aggregate(
-        pending_applications=Count('id', filter=Q(status='pending'))
-    )
-    
-    volunteer_request_counts = VolunteerRequest.objects.aggregate(
-        pending_requests=Count('id', filter=Q(status='new'))
-    )
-    
+    notification_data = get_dashboard_notifications(user=user, limit=6, dropdown_limit=6)
     return {
-        'pending_projects_count': pending_counts['pending_projects'],
-        'pending_applications_count': (
-            application_counts['pending_applications'] + 
-            volunteer_request_counts['pending_requests']
-        ),
-        'unread_notifications_count': 0,  # Placeholder for future notification system
+        'pending_projects_count': notification_data['pending_projects_count'],
+        'pending_applications_count': notification_data['pending_applications_count'],
+        'unread_notifications_count': notification_data['unread_notifications_count'],
+        'dropdown_notifications': notification_data['dropdown_notifications'],
     }
 
 

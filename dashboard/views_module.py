@@ -1,11 +1,11 @@
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Count, Sum, Q, Avg, Case, When, IntegerField
+from django.db.models import Count, Sum, Q, Avg, Case, When, IntegerField, Max
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.cache import cache_page
 from django.contrib import messages
@@ -13,6 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse, reverse_lazy
 from datetime import timedelta, datetime, date, time
 import json
+import csv
 
 from core.email_utils import (
     send_notification_email,
@@ -28,14 +29,16 @@ from contacts.models import ContactMessage
 from partners.models import Partner
 from volunteers.models import VolunteerApplication, VolunteerOpportunity, VolunteerRequest
 from announcements.models import Announcement
-from dashboard.models import MemberModerationAction
+from dashboard.models import MemberModerationAction, AdminNotificationState
 from faqs.models import FAQ, FAQCategory
 from .forms import (
     ProgramForm, RequestEventForm, VolunteerOpportunityForm,
-    AnnouncementForm, FAQForm, DonationForm, ContactMessageForm, CommunityForm, PartnerForm
+    AnnouncementForm, FAQForm, DonationForm, ContactMessageForm, CommunityForm, PartnerForm,
+    AdminProfileForm, AdminPasswordForm,
 )
 from .utils import (
     normalize_activity_datetime,
+    get_dashboard_notifications,
     get_month_date_range,
     get_months_ago,
     get_sidebar_counts,
@@ -45,8 +48,8 @@ from .utils import (
 
 
 def staff_required(user):
-    """Check if user is staff or superuser"""
-    return user.is_active and (user.is_staff or user.is_superuser)
+    """Check if user is an active superuser"""
+    return user.is_active and user.is_superuser
 
 
 def _active_member_emails():
@@ -58,9 +61,9 @@ def _active_member_emails():
 
 
 def admin_required(view_func):
-    """Decorator to require staff or superuser status"""
+    """Decorator to require superuser status"""
     def wrapped_view(request, *args, **kwargs):
-        if not (request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)):
+        if not (request.user.is_authenticated and request.user.is_superuser):
             return redirect('login')
         return view_func(request, *args, **kwargs)
     return wrapped_view
@@ -68,7 +71,7 @@ def admin_required(view_func):
 
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     """
-    Mixin for class‑based views that restricts access to active staff/superusers.
+    Mixin for class‑based views that restricts access to active superusers.
     """
     login_url = 'login'
 
@@ -2001,17 +2004,92 @@ def admin_analytics(request):
 @user_passes_test(staff_required, login_url='login')
 def admin_activity(request):
     """Recent activity page showing all system activities"""
-    # Get recent events, applications, requests
-    recent_events = Program.objects.all().order_by('-date')[:20]
-    recent_applications = VolunteerApplication.objects.all().order_by('-applied_at')[:20]
-    recent_requests = RequestEvent.objects.all().order_by('-submitted_at')[:20]
-    
+    activity_type_meta = {
+        'event': {
+            'icon': 'calendar-check',
+            'label': 'Program',
+            'tone': 'sky',
+        },
+        'application': {
+            'icon': 'hands-helping',
+            'label': 'Volunteer',
+            'tone': 'emerald',
+        },
+        'request': {
+            'icon': 'clipboard-list',
+            'label': 'Request',
+            'tone': 'amber',
+        },
+    }
+
+    selected_type = (request.GET.get('type') or 'all').strip().lower()
+    if selected_type not in {'all', 'event', 'application', 'request'}:
+        selected_type = 'all'
+
+    start_date = None
+    end_date = None
+    start_date_raw = (request.GET.get('start_date') or '').strip()
+    end_date_raw = (request.GET.get('end_date') or '').strip()
+
+    if start_date_raw:
+        try:
+            start_date = datetime.strptime(start_date_raw, '%Y-%m-%d').date()
+        except ValueError:
+            start_date = None
+            start_date_raw = ''
+
+    if end_date_raw:
+        try:
+            end_date = datetime.strptime(end_date_raw, '%Y-%m-%d').date()
+        except ValueError:
+            end_date = None
+            end_date_raw = ''
+
+    if start_date and end_date and start_date > end_date:
+        start_date, end_date = end_date, start_date
+        start_date_raw = start_date.isoformat()
+        end_date_raw = end_date.isoformat()
+
+    # Get recent events, applications, requests (filter-aware)
+    recent_events_qs = Program.objects.all()
+    recent_applications_qs = VolunteerApplication.objects.all()
+    recent_requests_qs = RequestEvent.objects.all()
+
+    if start_date:
+        recent_events_qs = recent_events_qs.filter(date__gte=start_date)
+        recent_applications_qs = recent_applications_qs.filter(applied_at__date__gte=start_date)
+        recent_requests_qs = recent_requests_qs.filter(submitted_at__date__gte=start_date)
+
+    if end_date:
+        recent_events_qs = recent_events_qs.filter(date__lte=end_date)
+        recent_applications_qs = recent_applications_qs.filter(applied_at__date__lte=end_date)
+        recent_requests_qs = recent_requests_qs.filter(submitted_at__date__lte=end_date)
+
+    if selected_type in {'all', 'event'}:
+        recent_events = recent_events_qs.order_by('-date')[:60]
+    else:
+        recent_events = []
+
+    if selected_type in {'all', 'application'}:
+        recent_applications = recent_applications_qs.order_by('-applied_at')[:60]
+    else:
+        recent_applications = []
+
+    if selected_type in {'all', 'request'}:
+        recent_requests = recent_requests_qs.order_by('-submitted_at')[:60]
+    else:
+        recent_requests = []
+
     # Combine and sort by date
     activities = []
     
     for event in recent_events:
+        meta = activity_type_meta['event']
         activities.append({
             'type': 'event',
+            'type_label': meta['label'],
+            'icon': meta['icon'],
+            'tone': meta['tone'],
             'title': f'Event created: {event.title}',
             'date': event.date,
             'user': 'System',
@@ -2019,8 +2097,12 @@ def admin_activity(request):
         })
     
     for app in recent_applications:
+        meta = activity_type_meta['application']
         activities.append({
             'type': 'application',
+            'type_label': meta['label'],
+            'icon': meta['icon'],
+            'tone': meta['tone'],
             'title': f'Volunteer application: {app.opportunity.title}',
             'date': app.applied_at,
             'user': app.applicant.username if app.applicant else app.name,
@@ -2028,8 +2110,12 @@ def admin_activity(request):
         })
     
     for req in recent_requests:
+        meta = activity_type_meta['request']
         activities.append({
             'type': 'request',
+            'type_label': meta['label'],
+            'icon': meta['icon'],
+            'tone': meta['tone'],
             'title': f'Event request: {req.title}',
             'date': req.submitted_at,
             'user': req.requester.username if req.requester else req.requester_name,
@@ -2046,10 +2132,78 @@ def admin_activity(request):
         return (date.min, time.min)
 
     activities.sort(key=_activity_sort_key, reverse=True)
-    activities = activities[:50]
+    activities = activities[:80]
+
+    today_date = timezone.localdate()
+    for activity in activities:
+        value = activity.get('date')
+        if isinstance(value, datetime):
+            activity_day = timezone.localtime(value).date() if timezone.is_aware(value) else value.date()
+        elif isinstance(value, date):
+            activity_day = value
+        else:
+            activity_day = date.min
+        activity['activity_day'] = activity_day
+
+    type_counts = {
+        'event': 0,
+        'application': 0,
+        'request': 0,
+    }
+    for activity in activities:
+        if activity['type'] in type_counts:
+            type_counts[activity['type']] += 1
+
+    today_activities_count = sum(1 for activity in activities if activity.get('activity_day') == today_date)
+
+    filter_range_label = 'All dates'
+    if start_date and end_date:
+        filter_range_label = f"{start_date.strftime('%b %d, %Y')} to {end_date.strftime('%b %d, %Y')}"
+    elif start_date:
+        filter_range_label = f"From {start_date.strftime('%b %d, %Y')}"
+    elif end_date:
+        filter_range_label = f"Up to {end_date.strftime('%b %d, %Y')}"
+
+    summary_cards = [
+        {
+            'label': 'Today',
+            'value': today_activities_count,
+            'icon': 'bolt',
+            'tone': 'violet',
+            'meta': 'Activities in the last 24 hours',
+        },
+        {
+            'label': 'Programs',
+            'value': type_counts['event'],
+            'icon': 'calendar-check',
+            'tone': 'sky',
+            'meta': 'Recent program postings',
+        },
+        {
+            'label': 'Volunteer Apps',
+            'value': type_counts['application'],
+            'icon': 'hands-helping',
+            'tone': 'emerald',
+            'meta': 'Volunteer applications received',
+        },
+        {
+            'label': 'Event Requests',
+            'value': type_counts['request'],
+            'icon': 'clipboard-list',
+            'tone': 'amber',
+            'meta': 'Community event requests submitted',
+        },
+    ]
     
     context = {
         'activities': activities,
+        'summary_cards': summary_cards,
+        'total_activities': len(activities),
+        'today_activities_count': today_activities_count,
+        'selected_type': selected_type,
+        'filter_start_date': start_date_raw,
+        'filter_end_date': end_date_raw,
+        'filter_range_label': filter_range_label,
         # sidebar counts are injected via context processor
     }
     return render(request, 'dashboard/admin_activity.html', context)
@@ -2098,9 +2252,7 @@ def projects_rejected(request):
     projects = RequestEvent.objects.filter(status='rejected').order_by('-submitted_at')
     context = {
         'projects': projects,
-        'pending_projects_count': RequestEvent.objects.filter(status='pending').count(),
-        'pending_applications_count': VolunteerApplication.objects.filter(status='pending').count(),
-        'unread_notifications_count': 0,
+        **get_sidebar_counts(request.user),
     }
     return render(request, 'dashboard/projects/rejected.html', context)
 
@@ -2296,7 +2448,7 @@ def user_warn(request, user_id):
     target_user = get_object_or_404(CustomUser, pk=user_id)
     reason = request.POST.get('reason', '').strip() or 'Community guideline warning issued.'
 
-    MemberModerationAction.objects.create(
+    warning_action = MemberModerationAction.objects.create(
         user=target_user,
         action='warn',
         reason=reason,
@@ -2325,15 +2477,40 @@ def user_warn(request, user_id):
             ),
         )
 
-    return JsonResponse({'success': True, 'message': 'Warning recorded successfully.'})
+    warned_at_local = timezone.localtime(warning_action.created_at)
+    return JsonResponse({
+        'success': True,
+        'message': 'Warning recorded successfully.',
+        'warned_at_iso': warned_at_local.isoformat(),
+        'warned_at_display': warned_at_local.strftime('%b %d, %Y %I:%M %p'),
+    })
 
 
 @user_passes_test(staff_required, login_url='login')
 def users_roles(request):
     """User roles and permissions management"""
-    users = CustomUser.objects.all().order_by('-date_joined')
+    users = CustomUser.objects.annotate(
+        registration_count=Count('eventregistration', distinct=True),
+        last_warned_at=Max('moderation_actions__created_at', filter=Q(moderation_actions__action='warn')),
+    ).order_by('-date_joined')
+
+    total_users = users.count()
+    superusers_count = users.filter(is_superuser=True).count()
+    staff_count = users.filter(is_staff=True, is_superuser=False).count()
+    members_count = users.filter(is_staff=False, is_superuser=False).count()
+    verified_count = users.filter(is_verified_member=True).count()
+    community_rep_count = users.filter(is_community_rep=True).count()
+    inactive_count = users.filter(is_active=False).count()
+
     context = {
         'users': users,
+        'total_users': total_users,
+        'superusers_count': superusers_count,
+        'staff_count': staff_count,
+        'members_count': members_count,
+        'verified_count': verified_count,
+        'community_rep_count': community_rep_count,
+        'inactive_count': inactive_count,
         # sidebar counts injected via context processor
     }
     return render(request, 'dashboard/users/roles.html', context)
@@ -2451,10 +2628,265 @@ def category_delete(request, pk):
 @user_passes_test(staff_required, login_url='login')
 def reports_monthly(request):
     """Monthly reports"""
+    today = timezone.now().date()
+
+    try:
+        selected_year = int(request.GET.get('year', today.year))
+    except (TypeError, ValueError):
+        selected_year = today.year
+
+    try:
+        selected_month = int(request.GET.get('month', today.month))
+    except (TypeError, ValueError):
+        selected_month = today.month
+
+    if selected_month < 1 or selected_month > 12:
+        selected_month = today.month
+
+    if selected_year < 2020 or selected_year > (today.year + 2):
+        selected_year = today.year
+
+    month_start = date(selected_year, selected_month, 1)
+    if selected_month == 12:
+        next_month = date(selected_year + 1, 1, 1)
+    else:
+        next_month = date(selected_year, selected_month + 1, 1)
+    month_end = next_month - timedelta(days=1)
+
+    if selected_month == 1:
+        prev_month = 12
+        prev_year = selected_year - 1
+    else:
+        prev_month = selected_month - 1
+        prev_year = selected_year
+    prev_month_start = date(prev_year, prev_month, 1)
+    prev_month_end = month_start - timedelta(days=1)
+
+    def pct(part, whole):
+        return round((part / whole) * 100, 1) if whole else 0
+
+    programs_qs = Program.objects.filter(date__gte=month_start, date__lte=month_end)
+    registrations_qs = EventRegistration.objects.filter(registered_at__date__gte=month_start, registered_at__date__lte=month_end)
+    donations_qs = Donation.objects.filter(created_at__date__gte=month_start, created_at__date__lte=month_end)
+    completed_donations_qs = donations_qs.filter(status='completed')
+    contacts_qs = ContactMessage.objects.filter(created_at__date__gte=month_start, created_at__date__lte=month_end)
+    volunteer_requests_qs = VolunteerRequest.objects.filter(created_at__date__gte=month_start, created_at__date__lte=month_end)
+    request_events_qs = RequestEvent.objects.filter(submitted_at__date__gte=month_start, submitted_at__date__lte=month_end)
+
+    total_programs = programs_qs.count()
+    virtual_programs = programs_qs.filter(is_virtual=True).count()
+    onsite_programs = total_programs - virtual_programs
+    total_registrations = registrations_qs.count()
+    avg_registrations_per_program = round(total_registrations / total_programs, 1) if total_programs else 0
+
+    completed_donation_count = completed_donations_qs.count()
+    completed_donation_amount = completed_donations_qs.aggregate(total=Sum('amount'))['total'] or 0
+    recurring_donation_count = completed_donations_qs.filter(is_recurring=True).count()
+    recurring_donation_share = pct(recurring_donation_count, completed_donation_count)
+
+    total_contacts = contacts_qs.count()
+    total_volunteer_requests = volunteer_requests_qs.count()
+
+    total_event_requests = request_events_qs.count()
+    approved_event_requests = request_events_qs.filter(status='approved').count()
+    rejected_event_requests = request_events_qs.filter(status='rejected').count()
+    pending_event_requests = request_events_qs.filter(status='pending').count()
+    event_request_approval_rate = pct(approved_event_requests, approved_event_requests + rejected_event_requests)
+
+    event_type_labels = dict(Program.EVENT_TYPES)
+    program_type_summary = list(
+        programs_qs.values('event_type').annotate(
+            total=Count('id'),
+            registrations=Count('registrations'),
+        ).order_by('-total', 'event_type')
+    )
+    for row in program_type_summary:
+        row['label'] = event_type_labels.get(row['event_type'], row['event_type'].title())
+        row['avg_registrations'] = round(row['registrations'] / row['total'], 1) if row['total'] else 0
+
+    top_programs = programs_qs.annotate(
+        registrations_count=Count('registrations')
+    ).order_by('-registrations_count', 'date', 'title')[:8]
+
+    registrations_by_day = {
+        row['registered_at__date']: row['total']
+        for row in registrations_qs.values('registered_at__date').annotate(total=Count('id'))
+    }
+    donations_by_day = {
+        row['created_at__date']: row['total']
+        for row in completed_donations_qs.values('created_at__date').annotate(total=Count('id'))
+    }
+    volunteer_by_day = {
+        row['created_at__date']: row['total']
+        for row in volunteer_requests_qs.values('created_at__date').annotate(total=Count('id'))
+    }
+
+    daily_activity = []
+    day_cursor = month_start
+    while day_cursor <= month_end:
+        daily_activity.append({
+            'date': day_cursor,
+            'registrations': registrations_by_day.get(day_cursor, 0),
+            'donations': donations_by_day.get(day_cursor, 0),
+            'volunteer_requests': volunteer_by_day.get(day_cursor, 0),
+        })
+        day_cursor += timedelta(days=1)
+
+    max_daily_volume = max(
+        [row['registrations'] for row in daily_activity] +
+        [row['donations'] for row in daily_activity] +
+        [row['volunteer_requests'] for row in daily_activity] +
+        [1]
+    )
+    for row in daily_activity:
+        row['registrations_width'] = round((row['registrations'] / max_daily_volume) * 100, 1)
+        row['donations_width'] = round((row['donations'] / max_daily_volume) * 100, 1)
+        row['volunteer_width'] = round((row['volunteer_requests'] / max_daily_volume) * 100, 1)
+
+    month_options = [
+        {'value': 1, 'label': 'January'}, {'value': 2, 'label': 'February'}, {'value': 3, 'label': 'March'},
+        {'value': 4, 'label': 'April'}, {'value': 5, 'label': 'May'}, {'value': 6, 'label': 'June'},
+        {'value': 7, 'label': 'July'}, {'value': 8, 'label': 'August'}, {'value': 9, 'label': 'September'},
+        {'value': 10, 'label': 'October'}, {'value': 11, 'label': 'November'}, {'value': 12, 'label': 'December'},
+    ]
+    year_options = list(range(today.year - 4, today.year + 1))
+
+    selected_month_label = next((opt['label'] for opt in month_options if opt['value'] == selected_month), month_start.strftime('%B'))
+    selected_period_label = f"{selected_month_label} {selected_year}"
+    prev_period_label = f"{prev_month_start.strftime('%B')} {prev_year}"
+
+    prev_programs_qs = Program.objects.filter(date__gte=prev_month_start, date__lte=prev_month_end)
+    prev_registrations_qs = EventRegistration.objects.filter(registered_at__date__gte=prev_month_start, registered_at__date__lte=prev_month_end)
+    prev_donations_qs = Donation.objects.filter(created_at__date__gte=prev_month_start, created_at__date__lte=prev_month_end)
+    prev_completed_donations_qs = prev_donations_qs.filter(status='completed')
+    prev_contacts_qs = ContactMessage.objects.filter(created_at__date__gte=prev_month_start, created_at__date__lte=prev_month_end)
+    prev_volunteer_requests_qs = VolunteerRequest.objects.filter(created_at__date__gte=prev_month_start, created_at__date__lte=prev_month_end)
+    prev_request_events_qs = RequestEvent.objects.filter(submitted_at__date__gte=prev_month_start, submitted_at__date__lte=prev_month_end)
+
+    prev_total_programs = prev_programs_qs.count()
+    prev_total_registrations = prev_registrations_qs.count()
+    prev_completed_donation_count = prev_completed_donations_qs.count()
+    prev_completed_donation_amount = prev_completed_donations_qs.aggregate(total=Sum('amount'))['total'] or 0
+    prev_recurring_donation_count = prev_completed_donations_qs.filter(is_recurring=True).count()
+    prev_recurring_donation_share = pct(prev_recurring_donation_count, prev_completed_donation_count)
+    prev_total_contacts = prev_contacts_qs.count()
+    prev_total_volunteer_requests = prev_volunteer_requests_qs.count()
+    prev_total_event_requests = prev_request_events_qs.count()
+    prev_approved_event_requests = prev_request_events_qs.filter(status='approved').count()
+    prev_rejected_event_requests = prev_request_events_qs.filter(status='rejected').count()
+    prev_event_request_approval_rate = pct(prev_approved_event_requests, prev_approved_event_requests + prev_rejected_event_requests)
+
+    def build_change_badge(current_value, previous_value):
+        current = float(current_value)
+        previous = float(previous_value)
+        if previous == 0:
+            if current == 0:
+                return {'direction': 'flat', 'text': '0.0% vs prev'}
+            return {'direction': 'up', 'text': 'New vs prev'}
+
+        delta_pct = ((current - previous) / previous) * 100
+        if abs(delta_pct) < 0.05:
+            direction = 'flat'
+        elif delta_pct > 0:
+            direction = 'up'
+        else:
+            direction = 'down'
+        sign = '+' if delta_pct > 0 else ''
+        return {'direction': direction, 'text': f"{sign}{round(delta_pct, 1)}% vs prev"}
+
+    comparison_badges = {
+        'programs': build_change_badge(total_programs, prev_total_programs),
+        'registrations': build_change_badge(total_registrations, prev_total_registrations),
+        'donations_count': build_change_badge(completed_donation_count, prev_completed_donation_count),
+        'donations_amount': build_change_badge(completed_donation_amount, prev_completed_donation_amount),
+        'recurring_share': build_change_badge(recurring_donation_share, prev_recurring_donation_share),
+        'contacts': build_change_badge(total_contacts, prev_total_contacts),
+        'volunteer_requests': build_change_badge(total_volunteer_requests, prev_total_volunteer_requests),
+        'event_requests': build_change_badge(total_event_requests, prev_total_event_requests),
+        'approval_rate': build_change_badge(event_request_approval_rate, prev_event_request_approval_rate),
+    }
+
+    if request.GET.get('export') == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="monthly_report_{selected_year}_{selected_month:02d}.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Monthly Analytics Report'])
+        writer.writerow(['Period', selected_period_label])
+        writer.writerow([])
+
+        writer.writerow(['Summary Metrics'])
+        writer.writerow(['Metric', 'Current', f'Previous ({prev_period_label})', 'Change'])
+        writer.writerow(['Programs', total_programs, prev_total_programs, comparison_badges['programs']['text']])
+        writer.writerow(['Virtual Programs', virtual_programs, '', ''])
+        writer.writerow(['On-site Programs', onsite_programs, '', ''])
+        writer.writerow(['Registrations', total_registrations, prev_total_registrations, comparison_badges['registrations']['text']])
+        writer.writerow(['Avg Registrations Per Program', avg_registrations_per_program, '', ''])
+        writer.writerow(['Completed Donations', completed_donation_count, prev_completed_donation_count, comparison_badges['donations_count']['text']])
+        writer.writerow(['Completed Donation Amount', completed_donation_amount, prev_completed_donation_amount, comparison_badges['donations_amount']['text']])
+        writer.writerow(['Recurring Donation Share (%)', recurring_donation_share, prev_recurring_donation_share, comparison_badges['recurring_share']['text']])
+        writer.writerow(['Contact Messages', total_contacts, prev_total_contacts, comparison_badges['contacts']['text']])
+        writer.writerow(['Volunteer Requests', total_volunteer_requests, prev_total_volunteer_requests, comparison_badges['volunteer_requests']['text']])
+        writer.writerow(['Event Requests', total_event_requests, prev_total_event_requests, comparison_badges['event_requests']['text']])
+        writer.writerow(['Event Request Approval Rate (%)', event_request_approval_rate, prev_event_request_approval_rate, comparison_badges['approval_rate']['text']])
+        writer.writerow([])
+
+        writer.writerow(['Program Type Breakdown'])
+        writer.writerow(['Type', 'Programs', 'Registrations', 'Avg Registrations'])
+        for row in program_type_summary:
+            writer.writerow([row['label'], row['total'], row['registrations'], row['avg_registrations']])
+        writer.writerow([])
+
+        writer.writerow(['Top Programs by Registrations'])
+        writer.writerow(['Program', 'Date', 'Type', 'Registrations'])
+        for program in top_programs:
+            writer.writerow([
+                program.title,
+                program.date.isoformat() if program.date else '',
+                program.get_event_type_display(),
+                program.registrations_count,
+            ])
+        writer.writerow([])
+
+        writer.writerow(['Daily Activity'])
+        writer.writerow(['Date', 'Registrations', 'Donations', 'Volunteer Requests'])
+        for row in daily_activity:
+            writer.writerow([
+                row['date'].isoformat(),
+                row['registrations'],
+                row['donations'],
+                row['volunteer_requests'],
+            ])
+        return response
+
     context = {
-        'pending_projects_count': RequestEvent.objects.filter(status='pending').count(),
-        'pending_applications_count': VolunteerApplication.objects.filter(status='pending').count(),
-        'unread_notifications_count': 0,
+        'selected_month': selected_month,
+        'selected_year': selected_year,
+        'selected_period_label': selected_period_label,
+        'prev_period_label': prev_period_label,
+        'month_options': month_options,
+        'year_options': year_options,
+        'total_programs': total_programs,
+        'virtual_programs': virtual_programs,
+        'onsite_programs': onsite_programs,
+        'total_registrations': total_registrations,
+        'avg_registrations_per_program': avg_registrations_per_program,
+        'completed_donation_count': completed_donation_count,
+        'completed_donation_amount': completed_donation_amount,
+        'recurring_donation_count': recurring_donation_count,
+        'recurring_donation_share': recurring_donation_share,
+        'total_contacts': total_contacts,
+        'total_volunteer_requests': total_volunteer_requests,
+        'total_event_requests': total_event_requests,
+        'approved_event_requests': approved_event_requests,
+        'rejected_event_requests': rejected_event_requests,
+        'pending_event_requests': pending_event_requests,
+        'event_request_approval_rate': event_request_approval_rate,
+        'program_type_summary': program_type_summary,
+        'top_programs': top_programs,
+        'daily_activity': daily_activity,
+        'comparison_badges': comparison_badges,
+        **get_sidebar_counts(request.user),
     }
     return render(request, 'dashboard/reports/monthly.html', context)
 
@@ -2462,10 +2894,285 @@ def reports_monthly(request):
 @user_passes_test(staff_required, login_url='login')
 def reports_volunteers(request):
     """Volunteer activity report"""
+    today = timezone.now().date()
+    month_start = today.replace(day=1)
+
+    start_date = None
+    end_date = None
+    start_date_raw = (request.GET.get('start_date') or '').strip()
+    end_date_raw = (request.GET.get('end_date') or '').strip()
+
+    if start_date_raw:
+        try:
+            start_date = datetime.strptime(start_date_raw, '%Y-%m-%d').date()
+        except ValueError:
+            start_date = None
+            start_date_raw = ''
+
+    if end_date_raw:
+        try:
+            end_date = datetime.strptime(end_date_raw, '%Y-%m-%d').date()
+        except ValueError:
+            end_date = None
+            end_date_raw = ''
+
+    if start_date and end_date and start_date > end_date:
+        start_date, end_date = end_date, start_date
+        start_date_raw = start_date.isoformat()
+        end_date_raw = end_date.isoformat()
+
+    opportunities_qs = VolunteerOpportunity.objects.all()
+    applications_qs = VolunteerApplication.objects.all()
+    requests_qs = VolunteerRequest.objects.all()
+
+    if start_date:
+        opportunities_qs = opportunities_qs.filter(created_at__date__gte=start_date)
+        applications_qs = applications_qs.filter(applied_at__date__gte=start_date)
+        requests_qs = requests_qs.filter(created_at__date__gte=start_date)
+
+    if end_date:
+        opportunities_qs = opportunities_qs.filter(created_at__date__lte=end_date)
+        applications_qs = applications_qs.filter(applied_at__date__lte=end_date)
+        requests_qs = requests_qs.filter(created_at__date__lte=end_date)
+
+    def pct(part, whole):
+        return round((part / whole) * 100, 1) if whole else 0
+
+    total_opportunities = opportunities_qs.count()
+    open_opportunities = opportunities_qs.filter(status='open').count()
+    filled_opportunities = opportunities_qs.filter(status='filled').count()
+    closed_opportunities = opportunities_qs.filter(status='closed').count()
+
+    positions_totals = opportunities_qs.aggregate(
+        total_needed=Sum('positions_needed'),
+        total_filled=Sum('positions_filled'),
+    )
+    total_positions_needed = positions_totals['total_needed'] or 0
+    total_positions_filled = positions_totals['total_filled'] or 0
+    capacity_fill_rate = pct(total_positions_filled, total_positions_needed)
+
+    total_applications = applications_qs.count()
+    pending_applications = applications_qs.filter(status='pending').count()
+    approved_applications = applications_qs.filter(status='approved').count()
+    rejected_applications = applications_qs.filter(status='rejected').count()
+    withdrawn_applications = applications_qs.filter(status='withdrawn').count()
+    reviewed_applications = approved_applications + rejected_applications
+    application_review_rate = pct(reviewed_applications, total_applications)
+    approval_rate = pct(approved_applications, reviewed_applications)
+
+    total_requests = requests_qs.count()
+    new_requests = requests_qs.filter(status='new').count()
+    reviewed_requests = requests_qs.filter(status='reviewed').count()
+    contacted_requests = requests_qs.filter(status='contacted').count()
+    closed_requests = requests_qs.filter(status='closed').count()
+    request_followup_rate = pct(contacted_requests + closed_requests, total_requests)
+
+    opportunity_status_rows = [
+        {'label': 'Open opportunities', 'value': open_opportunities},
+        {'label': 'Filled opportunities', 'value': filled_opportunities},
+        {'label': 'Closed opportunities', 'value': closed_opportunities},
+    ]
+    max_opportunity_value = max([row['value'] for row in opportunity_status_rows] + [1])
+    for row in opportunity_status_rows:
+        row['width'] = round((row['value'] / max_opportunity_value) * 100, 1) if max_opportunity_value else 0
+
+    application_status_rows = [
+        {'label': 'Pending', 'value': pending_applications},
+        {'label': 'Approved', 'value': approved_applications},
+        {'label': 'Rejected', 'value': rejected_applications},
+        {'label': 'Withdrawn', 'value': withdrawn_applications},
+    ]
+    max_application_value = max([row['value'] for row in application_status_rows] + [1])
+    for row in application_status_rows:
+        row['width'] = round((row['value'] / max_application_value) * 100, 1) if max_application_value else 0
+
+    request_status_rows = [
+        {'label': 'New requests', 'value': new_requests},
+        {'label': 'Reviewed', 'value': reviewed_requests},
+        {'label': 'Contacted', 'value': contacted_requests},
+        {'label': 'Closed', 'value': closed_requests},
+    ]
+    max_request_value = max([row['value'] for row in request_status_rows] + [1])
+    for row in request_status_rows:
+        row['width'] = round((row['value'] / max_request_value) * 100, 1) if max_request_value else 0
+
+    category_labels = dict(VolunteerOpportunity.CATEGORY_CHOICES)
+    category_summary = list(
+        opportunities_qs.values('category').annotate(
+            total=Count('id'),
+            open_count=Count('id', filter=Q(status='open')),
+            positions_needed=Sum('positions_needed'),
+            positions_filled=Sum('positions_filled'),
+        ).order_by('-total', 'category')
+    )
+    for row in category_summary:
+        row['label'] = category_labels.get(row['category'], row['category'].title())
+        row['positions_needed'] = row['positions_needed'] or 0
+        row['positions_filled'] = row['positions_filled'] or 0
+        row['fill_rate'] = pct(row['positions_filled'], row['positions_needed'])
+
+    application_count_filter = Q()
+    if start_date:
+        application_count_filter &= Q(applications__applied_at__date__gte=start_date)
+    if end_date:
+        application_count_filter &= Q(applications__applied_at__date__lte=end_date)
+
+    top_opportunities = opportunities_qs.annotate(
+        applications_count=Count('applications', filter=application_count_filter)
+    ).order_by('-applications_count', '-created_at')[:8]
+
+    recent_applications = applications_qs.select_related('opportunity').order_by('-applied_at')[:10]
+
+    if start_date or end_date:
+        monthly_start = (start_date or get_months_ago(5).date()).replace(day=1)
+        monthly_end = (end_date or today).replace(day=1)
+    else:
+        monthly_start = get_months_ago(5).date().replace(day=1)
+        monthly_end = month_start
+
+    applications_by_month = {
+        row['month'].strftime('%Y-%m'): row['total']
+        for row in applications_qs.filter(applied_at__date__gte=monthly_start)
+        .annotate(month=TruncMonth('applied_at'))
+        .values('month')
+        .annotate(total=Count('id'))
+        .order_by('month')
+        if row['month']
+    }
+    requests_by_month = {
+        row['month'].strftime('%Y-%m'): row['total']
+        for row in requests_qs.filter(created_at__date__gte=monthly_start)
+        .annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(total=Count('id'))
+        .order_by('month')
+        if row['month']
+    }
+
+    month_anchors = []
+    anchor = monthly_start
+    while anchor <= monthly_end and len(month_anchors) < 24:
+        month_anchors.append(anchor)
+        anchor = get_months_ago(-1, datetime.combine(anchor, time.min)).date().replace(day=1)
+
+    monthly_activity = []
+    for month_anchor in month_anchors:
+        month_key = month_anchor.strftime('%Y-%m')
+        monthly_activity.append({
+            'label': month_anchor.strftime('%b %Y'),
+            'applications': applications_by_month.get(month_key, 0),
+            'requests': requests_by_month.get(month_key, 0),
+        })
+
+    max_monthly_volume = max(
+        [row['applications'] for row in monthly_activity] +
+        [row['requests'] for row in monthly_activity] +
+        [1]
+    )
+    for row in monthly_activity:
+        row['applications_width'] = round((row['applications'] / max_monthly_volume) * 100, 1)
+        row['requests_width'] = round((row['requests'] / max_monthly_volume) * 100, 1)
+
+    filter_label = 'All time'
+    if start_date and end_date:
+        filter_label = f"{start_date.strftime('%b %d, %Y')} to {end_date.strftime('%b %d, %Y')}"
+    elif start_date:
+        filter_label = f"From {start_date.strftime('%b %d, %Y')}"
+    elif end_date:
+        filter_label = f"Up to {end_date.strftime('%b %d, %Y')}"
+
+    if request.GET.get('export') == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="volunteer_analytics.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Volunteer Analytics Report'])
+        writer.writerow(['Date Filter', filter_label])
+        writer.writerow([])
+
+        writer.writerow(['Key Metrics'])
+        writer.writerow(['Metric', 'Value'])
+        writer.writerow(['Total Opportunities', total_opportunities])
+        writer.writerow(['Open Opportunities', open_opportunities])
+        writer.writerow(['Filled Opportunities', filled_opportunities])
+        writer.writerow(['Closed Opportunities', closed_opportunities])
+        writer.writerow(['Total Positions Needed', total_positions_needed])
+        writer.writerow(['Total Positions Filled', total_positions_filled])
+        writer.writerow(['Capacity Fill Rate (%)', capacity_fill_rate])
+        writer.writerow(['Total Applications', total_applications])
+        writer.writerow(['Pending Applications', pending_applications])
+        writer.writerow(['Approved Applications', approved_applications])
+        writer.writerow(['Rejected Applications', rejected_applications])
+        writer.writerow(['Withdrawn Applications', withdrawn_applications])
+        writer.writerow(['Application Review Rate (%)', application_review_rate])
+        writer.writerow(['Approval Rate (%)', approval_rate])
+        writer.writerow(['Total Volunteer Requests', total_requests])
+        writer.writerow(['Request Follow-up Rate (%)', request_followup_rate])
+        writer.writerow([])
+
+        writer.writerow(['Category Breakdown'])
+        writer.writerow(['Category', 'Total Opportunities', 'Open Opportunities', 'Positions Needed', 'Positions Filled', 'Fill Rate (%)'])
+        for row in category_summary:
+            writer.writerow([
+                row['label'],
+                row['total'],
+                row['open_count'],
+                row['positions_needed'],
+                row['positions_filled'],
+                row['fill_rate'],
+            ])
+
+        writer.writerow([])
+        writer.writerow(['Top Opportunities'])
+        writer.writerow(['Opportunity', 'Status', 'Applications'])
+        for opportunity in top_opportunities:
+            writer.writerow([
+                opportunity.title,
+                opportunity.get_status_display(),
+                opportunity.applications_count,
+            ])
+
+        writer.writerow([])
+        writer.writerow(['Monthly Activity'])
+        writer.writerow(['Month', 'Applications', 'Volunteer Requests'])
+        for month in monthly_activity:
+            writer.writerow([month['label'], month['applications'], month['requests']])
+
+        return response
+
     context = {
-        'pending_projects_count': RequestEvent.objects.filter(status='pending').count(),
-        'pending_applications_count': VolunteerApplication.objects.filter(status='pending').count(),
-        'unread_notifications_count': 0,
+        'total_opportunities': total_opportunities,
+        'open_opportunities': open_opportunities,
+        'filled_opportunities': filled_opportunities,
+        'closed_opportunities': closed_opportunities,
+        'total_positions_needed': total_positions_needed,
+        'total_positions_filled': total_positions_filled,
+        'capacity_fill_rate': capacity_fill_rate,
+        'total_applications': total_applications,
+        'pending_applications': pending_applications,
+        'approved_applications': approved_applications,
+        'rejected_applications': rejected_applications,
+        'withdrawn_applications': withdrawn_applications,
+        'reviewed_applications': reviewed_applications,
+        'application_review_rate': application_review_rate,
+        'approval_rate': approval_rate,
+        'total_requests': total_requests,
+        'new_requests': new_requests,
+        'reviewed_requests': reviewed_requests,
+        'contacted_requests': contacted_requests,
+        'closed_requests': closed_requests,
+        'request_followup_rate': request_followup_rate,
+        'opportunity_status_rows': opportunity_status_rows,
+        'application_status_rows': application_status_rows,
+        'request_status_rows': request_status_rows,
+        'category_summary': category_summary,
+        'top_opportunities': top_opportunities,
+        'recent_applications': recent_applications,
+        'monthly_activity': monthly_activity,
+        'filter_start_date': start_date_raw,
+        'filter_end_date': end_date_raw,
+        'filter_label': filter_label,
+        **get_sidebar_counts(request.user),
     }
     return render(request, 'dashboard/reports/volunteers.html', context)
 
@@ -2473,33 +3180,205 @@ def reports_volunteers(request):
 @user_passes_test(staff_required, login_url='login')
 def reports_projects(request):
     """Project success rate report"""
+    today = timezone.now().date()
+
+    total_requests = RequestEvent.objects.count()
+    pending_requests = RequestEvent.objects.filter(status='pending').count()
+    approved_requests = RequestEvent.objects.filter(status='approved').count()
+    rejected_requests = RequestEvent.objects.filter(status='rejected').count()
+    resolved_requests = approved_requests + rejected_requests
+
+    approved_with_program = RequestEvent.objects.filter(
+        status='approved',
+        created_program__isnull=False,
+    ).count()
+    completed_programs = Program.objects.filter(
+        request_event__status='approved',
+        date__lt=today,
+    ).count()
+    active_upcoming_programs = Program.objects.filter(
+        request_event__status='approved',
+        date__gte=today,
+    ).count()
+    approved_registrations = EventRegistration.objects.filter(
+        program__request_event__status='approved'
+    ).count()
+
+    def pct(part, whole):
+        return round((part / whole) * 100, 1) if whole else 0
+
+    approval_rate = pct(approved_requests, resolved_requests)
+    conversion_rate = pct(approved_with_program, approved_requests)
+    completion_rate = pct(completed_programs, approved_with_program)
+    rejection_rate = pct(rejected_requests, resolved_requests)
+    avg_registrations = round(approved_registrations / approved_with_program, 1) if approved_with_program else 0
+
+    outcome_rows = [
+        {'label': 'Pending review', 'value': pending_requests},
+        {'label': 'Approved requests', 'value': approved_requests},
+        {'label': 'Rejected requests', 'value': rejected_requests},
+        {'label': 'Converted to programs', 'value': approved_with_program},
+        {'label': 'Completed programs', 'value': completed_programs},
+    ]
+    max_outcome_value = max([row['value'] for row in outcome_rows] + [1])
+    for row in outcome_rows:
+        row['width'] = round((row['value'] / max_outcome_value) * 100, 1) if max_outcome_value else 0
+
+    event_type_labels = dict(RequestEvent.EVENT_TYPE_CHOICES)
+    event_type_summary = list(
+        RequestEvent.objects.values('event_type').annotate(
+            total=Count('id'),
+            approved=Count('id', filter=Q(status='approved')),
+            rejected=Count('id', filter=Q(status='rejected')),
+        ).order_by('-total', 'event_type')
+    )
+    for row in event_type_summary:
+        row['label'] = event_type_labels.get(row['event_type'], row['event_type'].title())
+        row['success_rate'] = pct(row['approved'], row['approved'] + row['rejected'])
+
+    community_summary = list(
+        RequestEvent.objects.exclude(community__isnull=True)
+        .values('community__name')
+        .annotate(
+            total=Count('id'),
+            approved=Count('id', filter=Q(status='approved')),
+        )
+        .order_by('-approved', '-total')[:6]
+    )
+    for row in community_summary:
+        row['success_rate'] = pct(row['approved'], row['total'])
+
+    recent_requests = RequestEvent.objects.select_related('community', 'created_program').order_by('-submitted_at')[:8]
+
     context = {
-        'pending_projects_count': RequestEvent.objects.filter(status='pending').count(),
-        'pending_applications_count': VolunteerApplication.objects.filter(status='pending').count(),
-        'unread_notifications_count': 0,
+        'total_requests': total_requests,
+        'pending_requests': pending_requests,
+        'approved_requests': approved_requests,
+        'rejected_requests': rejected_requests,
+        'approved_with_program': approved_with_program,
+        'completed_programs': completed_programs,
+        'active_upcoming_programs': active_upcoming_programs,
+        'approval_rate': approval_rate,
+        'conversion_rate': conversion_rate,
+        'completion_rate': completion_rate,
+        'rejection_rate': rejection_rate,
+        'avg_registrations': avg_registrations,
+        'outcome_rows': outcome_rows,
+        'event_type_summary': event_type_summary,
+        'community_summary': community_summary,
+        'recent_requests': recent_requests,
+        **get_sidebar_counts(request.user),
     }
     return render(request, 'dashboard/reports/projects.html', context)
 
 
 # ====== NOTIFICATIONS & SETTINGS ======
 
+@require_http_methods(['POST'])
+@user_passes_test(staff_required, login_url='login')
+def mark_all_notifications_read(request):
+    """Mark the current dashboard notification feed as read for this admin user."""
+    notification_state, _ = AdminNotificationState.objects.get_or_create(user=request.user)
+    notification_state.last_read_at = timezone.now()
+    notification_state.save(update_fields=['last_read_at', 'updated_at'])
+
+    if is_ajax_request(request):
+        return success_json_response(
+            'All notifications marked as read.',
+            extra_data={'unread_notifications_count': 0},
+        )
+
+    messages.success(request, 'All notifications marked as read.')
+    return redirect('dashboard:notifications')
+
+
 @user_passes_test(staff_required, login_url='login')
 def notifications(request):
     """Notifications page"""
-    context = {
-        'pending_projects_count': RequestEvent.objects.filter(status='pending').count(),
-        'pending_applications_count': VolunteerApplication.objects.filter(status='pending').count(),
-        'unread_notifications_count': 0,
-    }
+    context = get_dashboard_notifications(user=request.user, limit=18, dropdown_limit=6)
     return render(request, 'dashboard/notifications.html', context)
 
 
 @user_passes_test(staff_required, login_url='login')
 def settings_view(request):
-    """Settings page"""
+    """Settings page — profile update, password change, and platform info."""
+    from django.conf import settings as django_settings
+    import django
+
+    profile_form = AdminProfileForm(instance=request.user)
+    password_form = AdminPasswordForm(user=request.user)
+    active_section = 'account'
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'update_profile':
+            active_section = 'account'
+            profile_form = AdminProfileForm(request.POST, instance=request.user)
+            if profile_form.is_valid():
+                profile_form.save()
+                messages.success(request, 'Profile updated successfully.')
+                return redirect('dashboard:settings')
+
+        elif action == 'change_password':
+            active_section = 'security'
+            password_form = AdminPasswordForm(user=request.user, data=request.POST)
+            if password_form.is_valid():
+                request.user.set_password(password_form.cleaned_data['new_password'])
+                request.user.save()
+                from django.contrib.auth import update_session_auth_hash
+                update_session_auth_hash(request, request.user)
+                messages.success(request, 'Password changed successfully. You are still logged in.')
+                return redirect('dashboard:settings')
+
+    # Mask sensitive values before sending to template
+    email_host = getattr(django_settings, 'EMAIL_HOST', '')
+    email_user = getattr(django_settings, 'EMAIL_HOST_USER', '')
+    email_port = getattr(django_settings, 'EMAIL_PORT', '')
+    email_use_tls = getattr(django_settings, 'EMAIL_USE_TLS', False)
+    default_from_email = getattr(django_settings, 'DEFAULT_FROM_EMAIL', '')
+
+    def _mask(value):
+        """Show only first 3 chars + asterisks — never expose full secrets."""
+        s = str(value)
+        return (s[:3] + '*' * max(len(s) - 3, 4)) if len(s) > 3 else '***'
+
+    platform_info = {
+        'django_version': django.get_version(),
+        'time_zone': getattr(django_settings, 'TIME_ZONE', 'UTC'),
+        'language_code': getattr(django_settings, 'LANGUAGE_CODE', 'en-us'),
+        'debug_mode': getattr(django_settings, 'DEBUG', False),
+        'database_engine': django_settings.DATABASES['default']['ENGINE'].split('.')[-1],
+        'allowed_hosts': ', '.join(getattr(django_settings, 'ALLOWED_HOSTS', [])),
+        'use_tz': getattr(django_settings, 'USE_TZ', True),
+        'media_root': str(getattr(django_settings, 'MEDIA_ROOT', '')),
+        'static_root': str(getattr(django_settings, 'STATIC_ROOT', '')),
+    }
+
+    email_info = {
+        'host': email_host,
+        'port': email_port,
+        'use_tls': email_use_tls,
+        'user': _mask(email_user) if email_user else '—',
+        'default_from': default_from_email,
+    }
+
+    security_info = {
+        'csrf_cookie_httponly': getattr(django_settings, 'CSRF_COOKIE_HTTPONLY', False),
+        'session_cookie_httponly': getattr(django_settings, 'SESSION_COOKIE_HTTPONLY', False),
+        'session_cookie_age_days': getattr(django_settings, 'SESSION_COOKIE_AGE', 1209600) // 86400,
+        'https_redirect': getattr(django_settings, 'SECURE_SSL_REDIRECT', False),
+        'hsts_enabled': bool(getattr(django_settings, 'SECURE_HSTS_SECONDS', 0)),
+        'x_frame_options': getattr(django_settings, 'X_FRAME_OPTIONS', 'SAMEORIGIN'),
+    }
+
     context = {
-        'pending_projects_count': RequestEvent.objects.filter(status='pending').count(),
-        'pending_applications_count': VolunteerApplication.objects.filter(status='pending').count(),
-        'unread_notifications_count': 0,
+        'profile_form': profile_form,
+        'password_form': password_form,
+        'active_section': active_section,
+        'platform_info': platform_info,
+        'email_info': email_info,
+        'security_info': security_info,
+        **get_sidebar_counts(request.user),
     }
     return render(request, 'dashboard/settings.html', context)

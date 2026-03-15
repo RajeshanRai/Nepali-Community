@@ -130,10 +130,56 @@
         mountUi();
         const loader = qs('ncvGlobalLoading');
         const text = qs('ncvGlobalLoadingText');
+        const loadingBox = loader ? loader.querySelector('.ncv-ui-loading__box') : null;
+        const spinner = loader ? loader.querySelector('.ncv-ui-spinner') : null;
         if (!loader) return;
 
         if (message && text) {
             text.textContent = message;
+        }
+
+        if (spinner) {
+            const orbitDuration = Math.round(760 + Math.random() * 520);
+            const pulseDuration = Math.round(1200 + Math.random() * 760);
+            const loaderPalettes = [
+                {
+                    accent: '#ff7a00',
+                    accentLight: '#ff9f3f',
+                    border: 'rgba(255, 154, 73, 0.55)',
+                    shadow: 'rgba(35, 22, 10, 0.30)'
+                },
+                {
+                    accent: '#ff6b35',
+                    accentLight: '#ff8f63',
+                    border: 'rgba(255, 133, 92, 0.52)',
+                    shadow: 'rgba(36, 20, 16, 0.30)'
+                },
+                {
+                    accent: '#e85d04',
+                    accentLight: '#f48c42',
+                    border: 'rgba(240, 132, 69, 0.52)',
+                    shadow: 'rgba(36, 20, 10, 0.30)'
+                },
+                {
+                    accent: '#f97316',
+                    accentLight: '#fb923c',
+                    border: 'rgba(251, 146, 60, 0.54)',
+                    shadow: 'rgba(41, 24, 12, 0.30)'
+                }
+            ];
+            const palette = loaderPalettes[Math.floor(Math.random() * loaderPalettes.length)];
+
+            spinner.style.setProperty('--ncv-ui-orbit-duration', `${orbitDuration}ms`);
+            spinner.style.setProperty('--ncv-ui-pulse-duration', `${pulseDuration}ms`);
+            spinner.style.setProperty('--ncv-ui-loader-accent', palette.accent);
+            spinner.style.setProperty('--ncv-ui-loader-accent-light', palette.accentLight);
+
+            if (loadingBox) {
+                loadingBox.style.setProperty('--ncv-ui-loader-accent', palette.accent);
+                loadingBox.style.setProperty('--ncv-ui-loader-accent-light', palette.accentLight);
+                loadingBox.style.setProperty('--ncv-ui-loader-border', palette.border);
+                loadingBox.style.setProperty('--ncv-ui-loader-shadow', palette.shadow);
+            }
         }
 
         loader.classList.remove('ncv-ui-hidden');

@@ -104,6 +104,11 @@
             <!-- Users Section -->
             <div class="nav-section">
                 <div class="nav-section-title">USERS</div>
+                <a href="{% url 'dashboard:profiles' %}" data-tooltip="Profiles"
+                    class="nav-item {% if request.resolver_match.url_name == 'profiles' %}active{% endif %}">
+                    <i class="fas fa-id-badge"></i>
+                    <span>Profiles</span>
+                </a>
                 <a href="{% url 'dashboard:users_all' %}" data-tooltip="All Users"
                     class="nav-item {% if 'users' in request.path %}active{% endif %}">
                     <i class="fas fa-user"></i>
@@ -217,27 +222,29 @@
                     <div class="dropdown-menu notifications-menu" id="notificationsMenu">
                         <div class="dropdown-header">
                             <h4>Notifications</h4>
-                            <a href="#" class="mark-all-read">Mark all as read</a>
+                            {% if unread_notifications_count %}
+                            <a href="{% url 'dashboard:mark_all_notifications_read' %}" class="mark-all-read" id="markAllNotificationsRead">Mark all as read</a>
+                            {% endif %}
                         </div>
                         <div class="notifications-list">
-                            <a href="#" class="notification-item unread">
-                                <div class="notification-icon bg-success">
-                                    <i class="fas fa-check"></i>
+                            {% if dropdown_notifications %}
+                                {% for item in dropdown_notifications %}
+                                <a href="{{ item.url }}" class="notification-item {% if item.unread %}unread{% endif %}">
+                                    <div class="notification-icon {{ item.bg_class }}">
+                                        <i class="{{ item.icon }}"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <p class="notification-text">{{ item.message }}</p>
+                                        <span class="notification-time">{{ item.created_at|timesince }} ago</span>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            {% else %}
+                                <div class="notifications-empty-state">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <p>No live notifications right now.</p>
                                 </div>
-                                <div class="notification-content">
-                                    <p class="notification-text">New volunteer application received</p>
-                                    <span class="notification-time">5 minutes ago</span>
-                                </div>
-                            </a>
-                            <a href="#" class="notification-item">
-                                <div class="notification-icon bg-warning">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <div class="notification-content">
-                                    <p class="notification-text">Project pending approval</p>
-                                    <span class="notification-time">2 hours ago</span>
-                                </div>
-                            </a>
+                            {% endif %}
                         </div>
                         <div class="dropdown-footer">
                             <a href="{% url 'dashboard:notifications' %}">View all notifications</a>
@@ -261,9 +268,9 @@
                                 <span>{{ request.user.email }}</span>
                             </div>
                         </div>
-                        <a href="#" class="dropdown-item">
+                        <a href="{% url 'dashboard:profiles' %}" class="dropdown-item">
                             <i class="fas fa-user"></i>
-                            My Profile
+                            My Profiles
                         </a>
                         <a href="{% url 'dashboard:settings' %}" class="dropdown-item">
                             <i class="fas fa-cog"></i>
@@ -331,12 +338,69 @@
     {% block extra_js %}{% endblock %}
 
     <script>
+        function getCsrfToken() {
+            const csrfCookie = document.cookie
+                .split('; ')
+                .find((row) => row.startsWith('csrftoken='));
+            return csrfCookie ? decodeURIComponent(csrfCookie.split('=')[1]) : '';
+        }
+
+        function initNotificationActions() {
+            const markAllReadLink = document.getElementById('markAllNotificationsRead');
+            if (!markAllReadLink) {
+                return;
+            }
+
+            markAllReadLink.addEventListener('click', async function (event) {
+                event.preventDefault();
+
+                if (markAllReadLink.dataset.loading === 'true') {
+                    return;
+                }
+
+                markAllReadLink.dataset.loading = 'true';
+                const originalText = markAllReadLink.textContent;
+                markAllReadLink.textContent = 'Marking...';
+
+                try {
+                    const response = await fetch(markAllReadLink.href, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCsrfToken(),
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || 'Unable to mark notifications as read.');
+                    }
+
+                    document.querySelectorAll('#notificationsMenu .notification-item.unread').forEach((item) => {
+                        item.classList.remove('unread');
+                    });
+
+                    const notificationBadge = document.querySelector('.notification-badge');
+                    if (notificationBadge) {
+                        notificationBadge.remove();
+                    }
+
+                    markAllReadLink.remove();
+                } catch (error) {
+                    markAllReadLink.textContent = originalText;
+                } finally {
+                    delete markAllReadLink.dataset.loading;
+                }
+            });
+        }
+
         // Initialize sidebar
         document.addEventListener('DOMContentLoaded', function () {
             initSidebar();
             initDropdowns();
             initGlobalSearch();
             initRouteHighlights();
+            initNotificationActions();
         });
     </script>
 </body>

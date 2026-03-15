@@ -1,16 +1,541 @@
 {% extends 'dashboard/admin_base.html' %}
+
 {% block title %}Volunteer Activity Report{% endblock %}
-{% block breadcrumb_items %}<li class="breadcrumb-item">Reports</li>
-<li class="breadcrumb-item active">Volunteers</li>{% endblock %}
-{% block page_header %}<div class="page-header">
+
+{% block extra_css %}
+<style>
+    .va-report-root,
+    .va-report-root * {
+        box-sizing: border-box;
+    }
+
+    .va-report-root .va-report-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .va-report-root .va-report-metric {
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 1rem;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+    }
+
+    .va-report-root .va-report-metric-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #64748b;
+        margin-bottom: 0.35rem;
+    }
+
+    .va-report-root .va-report-metric-value {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 800;
+        line-height: 1.05;
+        color: #0f172a;
+    }
+
+    .va-report-root .va-report-metric-meta {
+        margin-top: 0.45rem;
+        color: #475569;
+        font-size: 0.84rem;
+    }
+
+    .va-report-root .va-report-panels {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .va-report-root .va-report-funnel-list {
+        display: grid;
+        gap: 0.85rem;
+    }
+
+    .va-report-root .va-report-funnel-row {
+        display: grid;
+        grid-template-columns: 110px 1fr auto;
+        gap: 0.7rem;
+        align-items: center;
+    }
+
+    .va-report-root .va-report-funnel-label,
+    .va-report-root .va-report-funnel-value {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .va-report-root .va-report-funnel-track {
+        height: 10px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        overflow: hidden;
+    }
+
+    .va-report-root .va-report-funnel-fill {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #06b6d4, #3b82f6);
+    }
+
+    .va-report-root .va-report-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .va-report-root .va-report-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 520px;
+    }
+
+    .va-report-root .va-report-table th,
+    .va-report-root .va-report-table td {
+        padding: 0.68rem 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+        font-size: 0.87rem;
+    }
+
+    .va-report-root .va-report-table th {
+        color: #64748b;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .va-report-root .va-report-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 64px;
+        padding: 0.23rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.77rem;
+        font-weight: 700;
+        background: rgba(14, 165, 233, 0.14);
+        color: #0369a1;
+    }
+
+    .va-report-root .va-report-chart-rows {
+        display: grid;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    .va-report-root .va-report-chart-row {
+        display: grid;
+        grid-template-columns: 86px 1fr;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .va-report-root .va-report-chart-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #475569;
+    }
+
+    .va-report-root .va-report-dual-bars {
+        display: grid;
+        gap: 0.35rem;
+    }
+
+    .va-report-root .va-report-dual-track {
+        height: 9px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        overflow: hidden;
+    }
+
+    .va-report-root .va-report-bar-applications {
+        height: 100%;
+        background: linear-gradient(90deg, #06b6d4, #22d3ee);
+    }
+
+    .va-report-root .va-report-bar-requests {
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb, #60a5fa);
+    }
+
+    .va-report-root .va-report-legend-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 0.75rem;
+        font-size: 0.8rem;
+        color: #475569;
+    }
+
+    .va-report-root .va-report-legend-swatch {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.35rem;
+    }
+
+    .va-report-root .va-report-swatch-applications { background: #06b6d4; }
+    .va-report-root .va-report-swatch-requests { background: #2563eb; }
+
+    .va-report-root .va-report-toolbar {
+        margin-bottom: 1rem;
+        padding: 0.95rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #ffffff;
+        display: flex;
+        align-items: end;
+        gap: 0.85rem;
+        flex-wrap: wrap;
+    }
+
+    .va-report-root .va-report-toolbar-field {
+        display: grid;
+        gap: 0.35rem;
+        min-width: 170px;
+    }
+
+    .va-report-root .va-report-toolbar-field label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .va-report-root .va-report-toolbar-field input {
+        height: 38px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 0 0.65rem;
+        font-size: 0.86rem;
+        color: #0f172a;
+    }
+
+    .va-report-root .va-report-toolbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-left: auto;
+    }
+
+    .va-report-root .va-report-toolbar-btn {
+        height: 38px;
+        padding: 0 0.95rem;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #0f172a;
+        font-size: 0.84rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+
+    .va-report-root .va-report-toolbar-btn.va-report-toolbar-btn-primary {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+    }
+
+    .va-report-root .va-report-filter-caption {
+        margin: 0 0 0.85rem;
+        font-size: 0.84rem;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .va-report-root .va-report-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .va-report-root .va-report-card-body {
+        padding: 1rem;
+    }
+
+    .va-report-root .va-report-two-column {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 1100px) {
+        .va-report-root .va-report-panels { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 680px) {
+        .va-report-root .va-report-toolbar {
+            align-items: stretch;
+            padding: 0.85rem;
+        }
+
+        .va-report-root .va-report-toolbar-field,
+        .va-report-root .va-report-toolbar-actions {
+            width: 100%;
+            min-width: 0;
+            margin-left: 0;
+        }
+
+        .va-report-root .va-report-toolbar-actions {
+            justify-content: space-between;
+        }
+
+        .va-report-root .va-report-toolbar-btn {
+            flex: 1;
+            justify-content: center;
+            padding: 0 0.6rem;
+            font-size: 0.78rem;
+        }
+
+        .va-report-root .va-report-funnel-row { grid-template-columns: 1fr; }
+        .va-report-root .va-report-chart-row { grid-template-columns: 1fr; }
+        .va-report-root .va-report-table { min-width: 480px; }
+
+        .va-report-root .va-report-two-column {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">Reports</li>
+<li class="breadcrumb-item active">Volunteers</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
     <div class="page-header-content">
-        <h1><i class="fas fa-user-chart"></i> Volunteer Activity Report</h1>
-        <p>Track volunteer engagement and activity</p>
+        <h1><i class="fas fa-user-chart"></i> Volunteer Analytics</h1>
+        <p>Track opportunity capacity, applications pipeline, and volunteer request follow-up.</p>
     </div>
-</div>{% endblock %}
-{% block content %}<div class="content-card">
-    <div class="content-card-body empty-state-card"><i class="fas fa-users-cog"></i>
-        <h3>Volunteer Analytics</h3>
-        <p>Comprehensive volunteer activity reports coming soon.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="va-report-root">
+<form method="get" class="va-report-toolbar">
+    <div class="va-report-toolbar-field">
+        <label for="filter-start-date">Start Date</label>
+        <input id="filter-start-date" type="date" name="start_date" value="{{ filter_start_date }}">
     </div>
-</div>{% endblock %}
+    <div class="va-report-toolbar-field">
+        <label for="filter-end-date">End Date</label>
+        <input id="filter-end-date" type="date" name="end_date" value="{{ filter_end_date }}">
+    </div>
+    <div class="va-report-toolbar-actions">
+        <button type="submit" class="va-report-toolbar-btn va-report-toolbar-btn-primary"><i class="fas fa-filter"></i> Apply Filter</button>
+        <button type="submit" name="export" value="csv" class="va-report-toolbar-btn"><i class="fas fa-file-csv"></i> Export CSV</button>
+        <a href="{% url 'dashboard:reports_volunteers' %}" class="va-report-toolbar-btn"><i class="fas fa-rotate-left"></i> Reset</a>
+    </div>
+</form>
+
+<p class="va-report-filter-caption">Current range: {{ filter_label }}</p>
+
+<section class="va-report-grid">
+    <article class="va-report-metric">
+        <span class="va-report-metric-label">Total Opportunities</span>
+        <p class="va-report-metric-value">{{ total_opportunities }}</p>
+        <p class="va-report-metric-meta">{{ open_opportunities }} currently open for volunteers</p>
+    </article>
+    <article class="va-report-metric">
+        <span class="va-report-metric-label">Capacity Fill Rate</span>
+        <p class="va-report-metric-value">{{ capacity_fill_rate }}%</p>
+        <p class="va-report-metric-meta">{{ total_positions_filled }} of {{ total_positions_needed }} positions filled</p>
+    </article>
+    <article class="va-report-metric">
+        <span class="va-report-metric-label">Applications</span>
+        <p class="va-report-metric-value">{{ total_applications }}</p>
+        <p class="va-report-metric-meta">{{ pending_applications }} pending and {{ reviewed_applications|default:0 }} reviewed</p>
+    </article>
+    <article class="va-report-metric">
+        <span class="va-report-metric-label">Approval Rate</span>
+        <p class="va-report-metric-value">{{ approval_rate }}%</p>
+        <p class="va-report-metric-meta">Among reviewed applications</p>
+    </article>
+    <article class="va-report-metric">
+        <span class="va-report-metric-label">Volunteer Requests</span>
+        <p class="va-report-metric-value">{{ total_requests }}</p>
+        <p class="va-report-metric-meta">{{ request_followup_rate }}% received follow-up</p>
+    </article>
+</section>
+
+<section class="va-report-panels">
+    <article class="va-report-card">
+        <div class="va-report-card-body">
+            <h3>Opportunity Status</h3>
+            <div class="va-report-funnel-list">
+                {% for row in opportunity_status_rows %}
+                <div class="va-report-funnel-row">
+                    <div class="va-report-funnel-label">{{ row.label }}</div>
+                    <div class="va-report-funnel-track"><div class="va-report-funnel-fill" style="width: {{ row.width }}%;"></div></div>
+                    <div class="va-report-funnel-value">{{ row.value }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </article>
+
+    <article class="va-report-card">
+        <div class="va-report-card-body">
+            <h3>Application Pipeline</h3>
+            <div class="va-report-funnel-list">
+                {% for row in application_status_rows %}
+                <div class="va-report-funnel-row">
+                    <div class="va-report-funnel-label">{{ row.label }}</div>
+                    <div class="va-report-funnel-track"><div class="va-report-funnel-fill" style="width: {{ row.width }}%;"></div></div>
+                    <div class="va-report-funnel-value">{{ row.value }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </article>
+
+    <article class="va-report-card">
+        <div class="va-report-card-body">
+            <h3>Volunteer Request Flow</h3>
+            <div class="va-report-funnel-list">
+                {% for row in request_status_rows %}
+                <div class="va-report-funnel-row">
+                    <div class="va-report-funnel-label">{{ row.label }}</div>
+                    <div class="va-report-funnel-track"><div class="va-report-funnel-fill" style="width: {{ row.width }}%;"></div></div>
+                    <div class="va-report-funnel-value">{{ row.value }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </article>
+</section>
+
+<article class="va-report-card" style="margin-bottom: 1rem;">
+    <div class="va-report-card-body">
+        <h3>Monthly Activity</h3>
+        <div class="va-report-chart-rows">
+            {% for month in monthly_activity %}
+            <div class="va-report-chart-row">
+                <div class="va-report-chart-label">{{ month.label }}</div>
+                <div class="va-report-dual-bars">
+                    <div class="va-report-dual-track">
+                        <div class="va-report-bar-applications" style="width: {{ month.applications_width }}%;"></div>
+                    </div>
+                    <div class="va-report-dual-track">
+                        <div class="va-report-bar-requests" style="width: {{ month.requests_width }}%;"></div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="va-report-legend-row">
+            <span><span class="va-report-legend-swatch va-report-swatch-applications"></span>Applications</span>
+            <span><span class="va-report-legend-swatch va-report-swatch-requests"></span>Volunteer Requests</span>
+        </div>
+    </div>
+</article>
+
+<section class="va-report-panels va-report-two-column">
+    <article class="va-report-card">
+        <div class="va-report-card-body">
+            <h3>Category Breakdown</h3>
+            <div class="va-report-table-wrap">
+            <table class="va-report-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Total</th>
+                        <th>Open</th>
+                        <th>Fill Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in category_summary %}
+                    <tr>
+                        <td>{{ row.label }}</td>
+                        <td>{{ row.total }}</td>
+                        <td>{{ row.open_count }}</td>
+                        <td><span class="va-report-pill">{{ row.fill_rate }}%</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4">No opportunity categories available yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </article>
+
+    <article class="va-report-card">
+        <div class="va-report-card-body">
+            <h3>Top Opportunities by Applications</h3>
+            <div class="va-report-table-wrap">
+            <table class="va-report-table">
+                <thead>
+                    <tr>
+                        <th>Opportunity</th>
+                        <th>Status</th>
+                        <th>Applications</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for opportunity in top_opportunities %}
+                    <tr>
+                        <td>{{ opportunity.title }}</td>
+                        <td>{{ opportunity.get_status_display }}</td>
+                        <td><span class="va-report-pill">{{ opportunity.applications_count }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3">No opportunities have been created yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </article>
+</section>
+
+<article class="va-report-card">
+    <div class="va-report-card-body">
+        <h3>Recent Volunteer Applications</h3>
+        <div class="va-report-table-wrap">
+        <table class="va-report-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Opportunity</th>
+                    <th>Status</th>
+                    <th>Applied</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in recent_applications %}
+                <tr>
+                    <td>{{ application.name }}</td>
+                    <td>{{ application.opportunity.title }}</td>
+                    <td><span class="va-report-pill">{{ application.get_status_display }}</span></td>
+                    <td>{{ application.applied_at|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No volunteer applications yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+</article>
+</div>
+{% endblock %}

@@ -1,15 +1,222 @@
 {% extends 'dashboard/admin_base.html' %}
+
 {% block title %}Notifications{% endblock %}
+
+{% block extra_css %}
+<style>
+    .notification-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .notification-stat-card {
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 1rem;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+    }
+
+    .notification-stat-card .label {
+        display: block;
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #64748b;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+    }
+
+    .notification-stat-card .value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.1;
+        margin: 0;
+    }
+
+    .notifications-page-list {
+        max-height: none;
+    }
+
+    .notifications-page-list .notification-item {
+        padding: 1rem 1.1rem;
+    }
+
+    .notification-icon.bg-info { background: #0ea5e9; }
+    .notification-icon.bg-danger { background: #ef4444; }
+    .notification-icon.bg-primary { background: #6366f1; }
+
+    .notification-text {
+        line-height: 1.45;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .page-header-actions {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-outline-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 1rem;
+        border: 1.5px solid var(--primary-blue);
+        border-radius: 8px;
+        color: var(--primary-blue);
+        background: transparent;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.18s, color 0.18s;
+        cursor: pointer;
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--primary-blue);
+        color: #ffffff;
+    }
+
+    .btn-outline-primary .badge-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 5px;
+        border-radius: 10px;
+        background: var(--primary-blue);
+        color: #ffffff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        line-height: 1;
+        transition: background 0.18s;
+    }
+
+    .btn-outline-primary:hover .badge-count {
+        background: rgba(255,255,255,0.25);
+    }
+</style>
+{% endblock %}
+
 {% block breadcrumb_items %}<li class="breadcrumb-item active">Notifications</li>{% endblock %}
+
 {% block page_header %}<div class="page-header">
     <div class="page-header-content">
         <h1><i class="fas fa-bell"></i> Notifications</h1>
-        <p>System notifications and alerts</p>
+        <p>Live operational alerts from requests, volunteer activity, contact messages, and announcements.</p>
     </div>
-</div>{% endblock %}
-{% block content %}<div class="content-card">
-    <div class="content-card-body empty-state-card"><i class="fas fa-bell-slash"></i>
-        <h3>No Notifications</h3>
-        <p>You're all caught up! Notification system with real-time alerts coming soon.</p>
+    {% if unread_notifications_count %}
+    <div class="page-header-actions">
+        <a href="{% url 'dashboard:mark_all_notifications_read' %}"
+           class="btn btn-outline-primary btn-sm"
+           id="markAllNotificationsReadPage">
+            <i class="fas fa-check-double"></i> Mark all as read
+            <span class="badge-count">{{ unread_notifications_count }}</span>
+        </a>
     </div>
+    {% endif %}
 </div>{% endblock %}
+
+{% block content %}
+<section class="notification-stats-grid">
+    <article class="notification-stat-card">
+        <span class="label">Pending Projects</span>
+        <p class="value">{{ notification_totals.project_requests }}</p>
+    </article>
+    <article class="notification-stat-card">
+        <span class="label">Volunteer Applications</span>
+        <p class="value">{{ notification_totals.volunteer_applications }}</p>
+    </article>
+    <article class="notification-stat-card">
+        <span class="label">Volunteer Requests</span>
+        <p class="value">{{ notification_totals.volunteer_requests }}</p>
+    </article>
+    <article class="notification-stat-card">
+        <span class="label">Recent Contact Messages</span>
+        <p class="value">{{ notification_totals.contact_messages }}</p>
+    </article>
+</section>
+
+<div class="content-card">
+    <div class="content-card-body" style="padding: 0;">
+        {% if notifications_feed %}
+        <div class="notifications-list notifications-page-list">
+            {% for item in notifications_feed %}
+            <a href="{{ item.url }}" class="notification-item {% if item.unread %}unread{% endif %}">
+                <div class="notification-icon {{ item.bg_class }}">
+                    <i class="{{ item.icon }}"></i>
+                </div>
+                <div class="notification-content">
+                    <p class="notification-text">{{ item.message }}</p>
+                    <span class="notification-time">{{ item.created_at|timesince }} ago</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="content-card-body empty-state-card">
+            <i class="fas fa-bell-slash"></i>
+            <h3>No Notifications</h3>
+            <p>There are currently no live alerts to review.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    function getCsrfToken() {
+        const cookie = document.cookie.split('; ').find((r) => r.startsWith('csrftoken='));
+        return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
+    }
+
+    const markAllBtn = document.getElementById('markAllNotificationsReadPage');
+    if (!markAllBtn) return;
+
+    markAllBtn.addEventListener('click', async function (event) {
+        event.preventDefault();
+        if (markAllBtn.dataset.loading === 'true') return;
+
+        markAllBtn.dataset.loading = 'true';
+        const icon = markAllBtn.querySelector('i');
+        if (icon) icon.className = 'fas fa-spinner fa-spin';
+
+        try {
+            const response = await fetch(markAllBtn.href, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.message || 'Request failed');
+
+            document.querySelectorAll('.notification-item.unread').forEach((item) => {
+                item.classList.remove('unread');
+            });
+
+            markAllBtn.closest('.page-header-actions')?.remove();
+        } catch (err) {
+            if (icon) icon.className = 'fas fa-check-double';
+        } finally {
+            delete markAllBtn.dataset.loading;
+        }
+    });
+}());
+</script>
+{% endblock %}

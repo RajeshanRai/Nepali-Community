@@ -5,7 +5,6 @@ These processors add common sidebar data to all template contexts,
 eliminating the need to manually add these counts in every view.
 """
 
-from django.utils.html import mark_safe
 from .utils import get_sidebar_counts
 
 
@@ -14,7 +13,7 @@ def sidebar_counts(request):
     Add sidebar counts to the context for all authenticated admin users.
     
     This context processor is called for every template render when
-    the user is authenticated and is a staff/superuser.
+    the user is authenticated and is a superuser.
     
     To enable, add this to TEMPLATES settings:
     
@@ -32,11 +31,11 @@ def sidebar_counts(request):
     if not request.user.is_authenticated:
         return {}
     
-    if not (request.user.is_staff or request.user.is_superuser):
+    if not request.user.is_superuser:
         return {}
     
     # Use the optimized utility function
-    return get_sidebar_counts()
+    return get_sidebar_counts(request.user)
 
 
 def admin_info(request):
@@ -50,5 +49,5 @@ def admin_info(request):
         return {}
     
     return {
-        'is_admin': request.user.is_staff or request.user.is_superuser,
+        'is_admin': request.user.is_superuser,
     }
