@@ -21,6 +21,8 @@
                 {% if announcement.is_pinned %}
                 <span class="pinned-badge"><i class="fas fa-thumbtack"></i> Pinned</span>
                 {% endif %}
+                <span class="category-badge category-{{ announcement.category }}">{{ announcement.get_category_display }}</span>
+                <span class="priority-badge priority-{{ announcement.priority }}">{{ announcement.get_priority_display }}</span>
             </div>
             <h1 class="detail-title">{{ announcement.title }}</h1>
             <div class="detail-meta-row">

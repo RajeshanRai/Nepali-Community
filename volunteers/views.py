@@ -76,6 +76,11 @@ class VolunteerApplyView(CreateView):
     model = VolunteerApplication
     form_class = VolunteerApplicationForm
     template_name = 'volunteers/apply.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
     
     def form_valid(self, form):
         opportunity = get_object_or_404(VolunteerOpportunity, pk=self.kwargs['pk'])
@@ -88,6 +93,10 @@ class VolunteerApplyView(CreateView):
         form.instance.opportunity = opportunity
         if self.request.user.is_authenticated:
             form.instance.applicant = self.request.user
+            form.instance.name = self.request.user.get_full_name() or self.request.user.username
+            form.instance.email = (self.request.user.email or '').strip()
+            if not form.instance.phone:
+                form.instance.phone = (getattr(self.request.user, 'phone_number', '') or '').strip()
 
         # Prevent duplicate application (same email for same opportunity)
         submitted_email = (form.cleaned_data.get('email') or '').strip()
@@ -117,4 +126,13 @@ class VolunteerApplyView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['opportunity'] = get_object_or_404(VolunteerOpportunity, pk=self.kwargs['pk'])
+
+        if self.request.user.is_authenticated:
+            profile_phone = (getattr(self.request.user, 'phone_number', '') or '').strip()
+            context['prefilled_name'] = self.request.user.get_full_name() or self.request.user.username
+            context['prefilled_email'] = (self.request.user.email or '').strip()
+            context['needs_phone'] = not bool(profile_phone)
+        else:
+            context['needs_phone'] = True
+
         return context

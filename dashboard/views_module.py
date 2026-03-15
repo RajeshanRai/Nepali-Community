@@ -14,18 +14,25 @@ from django.urls import reverse, reverse_lazy
 from datetime import timedelta, datetime, date, time
 import json
 
+from core.email_utils import (
+    send_notification_email,
+    build_branded_email_html,
+    build_event_newsletter_html,
+    build_security_alert_html,
+)
 from users.models import CustomUser
 from programs.models import Program, EventRegistration, RequestEvent
 from donations.models import Donation
 from communities.models import Community
 from contacts.models import ContactMessage
+from partners.models import Partner
 from volunteers.models import VolunteerApplication, VolunteerOpportunity, VolunteerRequest
 from announcements.models import Announcement
 from dashboard.models import MemberModerationAction
 from faqs.models import FAQ, FAQCategory
 from .forms import (
     ProgramForm, RequestEventForm, VolunteerOpportunityForm,
-    AnnouncementForm, FAQForm, DonationForm, ContactMessageForm, CommunityForm
+    AnnouncementForm, FAQForm, DonationForm, ContactMessageForm, CommunityForm, PartnerForm
 )
 from .utils import (
     normalize_activity_datetime,
@@ -33,12 +40,21 @@ from .utils import (
     get_months_ago,
     get_sidebar_counts,
     is_ajax_request,
+    success_json_response,
 )
 
 
 def staff_required(user):
     """Check if user is staff or superuser"""
     return user.is_active and (user.is_staff or user.is_superuser)
+
+
+def _active_member_emails():
+    return list(
+        CustomUser.objects.filter(is_active=True)
+        .exclude(email='')
+        .values_list('email', flat=True)
+    )
 
 
 def admin_required(view_func):
@@ -578,6 +594,29 @@ def event_create(request):
         form = ProgramForm(request.POST, request.FILES)
         if form.is_valid():
             event = form.save()
+            send_notification_email(
+                subject=f'New Event: {event.title}',
+                message=(
+                    f"A new event has been published.\n\n"
+                    f"Title: {event.title}\n"
+                    f"Date: {event.date}\n"
+                    f"Location: {event.location or 'TBA'}\n"
+                ),
+                recipients=_active_member_emails(),
+                html_message=build_event_newsletter_html(
+                    title='A New Community Event Is Live',
+                    greeting='Hello Community Member,',
+                    summary='A new event is now open for registrations.',
+                    event_name=event.title,
+                    event_date=event.date.strftime('%B %d, %Y'),
+                    venue_text=event.location or 'Venue details will be shared shortly.',
+                    category_text=event.get_event_type_display() if hasattr(event, 'get_event_type_display') else (event.event_type or 'Community Event'),
+                    detail_points=[
+                        'Reserve your place early to avoid missing this session.',
+                        'Invite your friends and family to join the community event.',
+                    ],
+                ),
+            )
             messages.success(request, f'Event "{event.title}" has been created successfully.')
             return redirect('dashboard:event_list')
     else:
@@ -593,8 +632,35 @@ def event_edit(request, pk):
     if request.method == 'POST':
         form = ProgramForm(request.POST, request.FILES, instance=event)
         if form.is_valid():
-            form.save()
-            messages.success(request, f'Event "{event.title}" has been updated successfully.')
+            updated_event = form.save()
+            send_update_email = request.POST.get('send_update_email') == 'on'
+            if send_update_email:
+                send_notification_email(
+                    subject=f'Event Updated: {updated_event.title}',
+                    message=(
+                        f"An event has been updated.\n\n"
+                        f"Title: {updated_event.title}\n"
+                        f"Date: {updated_event.date}\n"
+                        f"Location: {updated_event.location or 'TBA'}\n"
+                    ),
+                    recipients=_active_member_emails(),
+                    html_message=build_event_newsletter_html(
+                        title='Community Event Updated',
+                        greeting='Hello Community Member,',
+                        summary=f"Important updates were made to {updated_event.title}.",
+                        event_name=updated_event.title,
+                        event_date=updated_event.date.strftime('%B %d, %Y'),
+                        venue_text=updated_event.location or 'Venue details will be shared shortly.',
+                        category_text=updated_event.get_event_type_display() if hasattr(updated_event, 'get_event_type_display') else (updated_event.event_type or 'Community Event'),
+                        detail_points=[
+                            'Please review the latest event details before attending.',
+                            'Your registration remains valid if you already signed up.',
+                        ],
+                    ),
+                )
+                messages.success(request, f'Event "{event.title}" has been updated and members were notified.')
+            else:
+                messages.success(request, f'Event "{event.title}" has been updated without sending an email update.')
             return redirect('dashboard:event_list')
     else:
         form = ProgramForm(instance=event)
@@ -742,6 +808,29 @@ def volunteer_application_approve(request, pk):
         opportunity.status = 'filled'
     
     opportunity.save()
+
+    send_notification_email(
+        subject=f'Volunteer application approved: {opportunity.title}',
+        message=(
+            f"Hi {application.name},\n\n"
+            f"Your volunteer application has been approved.\n"
+            f"Opportunity: {opportunity.title}\n"
+            f"Category: {opportunity.get_category_display()}\n"
+            f"Start Date: {opportunity.start_date or 'TBA'}\n"
+            f"Time Commitment: {opportunity.time_commitment or 'TBA'}\n\n"
+            "Thank you for volunteering with us."
+        ),
+        recipients=[application.email],
+        html_message=build_branded_email_html(
+            title='Volunteer Application Approved',
+            greeting=f'Hi {application.name},',
+            intro=f"Great news, your application for {opportunity.title} has been approved.",
+            paragraphs=[
+                f"You are joining the {opportunity.get_category_display()} stream, and we are excited to have your support.",
+                f"Your expected start window is {opportunity.start_date or 'to be announced'}, with a commitment pattern of {opportunity.time_commitment or 'to be confirmed'}.",
+            ],
+        ),
+    )
     
     return JsonResponse({'success': True, 'message': 'Application approved'})
 
@@ -923,6 +1012,30 @@ def event_request_approve(request, pk):
         event_request.approved_by = request.user
         event_request.approved_at = timezone.now()
         event_request.save()
+
+        send_notification_email(
+            subject=f'New Event: {program.title}',
+            message=(
+                f"A new event has been published.\n\n"
+                f"Title: {program.title}\n"
+                f"Date: {program.date}\n"
+                f"Location: {program.location or 'TBA'}\n"
+            ),
+            recipients=_active_member_emails(),
+            html_message=build_event_newsletter_html(
+                title='A New Community Event Is Available',
+                greeting='Hello Community Member,',
+                summary='A newly approved event is now available for community registration.',
+                event_name=program.title,
+                event_date=program.date.strftime('%B %d, %Y'),
+                venue_text=program.location or 'Venue details will be shared shortly.',
+                category_text=program.get_event_type_display() if hasattr(program, 'get_event_type_display') else (program.event_type or 'Community Event'),
+                detail_points=[
+                    'Early registration is encouraged so we can plan seating and resources well.',
+                    'Share this update with your network to support participation.',
+                ],
+            ),
+        )
         
         return JsonResponse({
             'success': True, 
@@ -1009,6 +1122,27 @@ def announcement_create(request):
             announcement = form.save(commit=False)
             announcement.created_by = request.user
             announcement.save()
+            if announcement.is_active:
+                send_notification_email(
+                    subject=f'New Announcement: {announcement.title}',
+                    message=(
+                        f"A new announcement was posted.\n\n"
+                        f"Title: {announcement.title}\n"
+                        f"Category: {announcement.get_category_display()}\n"
+                        f"Priority: {announcement.get_priority_display()}\n\n"
+                        f"{announcement.content[:500]}"
+                    ),
+                    recipients=_active_member_emails(),
+                    html_message=build_branded_email_html(
+                        title='New Community Announcement',
+                        greeting='Hello Community Member,',
+                        intro=f"A new announcement titled {announcement.title} has been published.",
+                        paragraphs=[
+                            f"This update is categorized under {announcement.get_category_display()} with {announcement.get_priority_display()} priority.",
+                            announcement.content[:500],
+                        ],
+                    ),
+                )
             return redirect('dashboard:announcements_list')
     else:
         form = AnnouncementForm()
@@ -1023,7 +1157,33 @@ def announcement_edit(request, pk):
     if request.method == 'POST':
         form = AnnouncementForm(request.POST, instance=announcement)
         if form.is_valid():
-            form.save()
+            updated = form.save()
+            send_update_email = request.POST.get('send_update_email') == 'on'
+            if updated.is_active and send_update_email:
+                send_notification_email(
+                    subject=f'Announcement Updated: {updated.title}',
+                    message=(
+                        f"An announcement has been updated.\n\n"
+                        f"Title: {updated.title}\n"
+                        f"Category: {updated.get_category_display()}\n"
+                        f"Priority: {updated.get_priority_display()}\n"
+                    ),
+                    recipients=_active_member_emails(),
+                    html_message=build_branded_email_html(
+                        title='Announcement Updated',
+                        greeting='Hello Community Member,',
+                        intro=f"An announcement has been updated: {updated.title}.",
+                        paragraphs=[
+                            f"The update remains in {updated.get_category_display()} and is currently marked as {updated.get_priority_display()} priority.",
+                            'Please review the latest details in your dashboard.',
+                        ],
+                    ),
+                )
+                messages.success(request, 'Announcement updated and members were notified.')
+            elif not updated.is_active:
+                messages.success(request, 'Announcement updated. No update email sent because it is not active.')
+            else:
+                messages.success(request, 'Announcement updated without sending an email update.')
             return redirect('dashboard:announcements_list')
     else:
         form = AnnouncementForm(instance=announcement)
@@ -1214,6 +1374,93 @@ donations_list = DonationListView.as_view()
 donation_create = DonationCreateView.as_view()
 donation_edit = DonationUpdateView.as_view()
 donation_delete = DonationDeleteView.as_view()
+
+
+
+# ====== PARTNER MANAGEMENT ======
+
+class PartnerListView(StaffRequiredMixin, ListView):
+    model = Partner
+    template_name = 'dashboard/partners/list.html'
+    context_object_name = 'partners'
+    ordering = ['name']
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        search = self.request.GET.get('search', '').strip()
+        if search:
+            qs = qs.filter(
+                Q(name__icontains=search)
+                | Q(description__icontains=search)
+                | Q(website__icontains=search)
+            )
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        qs = self.object_list
+        context['search'] = self.request.GET.get('search', '').strip()
+        context['total_partners'] = qs.count()
+        context['with_website_count'] = qs.exclude(website='').count()
+        context['with_logo_count'] = qs.filter(logo__isnull=False).exclude(logo='').count()
+        context['with_social_count'] = qs.exclude(social_links={}).count()
+        return context
+
+
+class PartnerCreateView(StaffRequiredMixin, CreateView):
+    model = Partner
+    form_class = PartnerForm
+    template_name = 'dashboard/partners/form.html'
+    success_url = reverse_lazy('dashboard:partners_list')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f'Partner "{self.object.name}" created successfully.')
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Create Partner'
+        return context
+
+
+class PartnerUpdateView(StaffRequiredMixin, UpdateView):
+    model = Partner
+    form_class = PartnerForm
+    template_name = 'dashboard/partners/form.html'
+    success_url = reverse_lazy('dashboard:partners_list')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f'Partner "{self.object.name}" updated successfully.')
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Edit Partner'
+        return context
+
+
+class PartnerDeleteView(StaffRequiredMixin, DeleteView):
+    model = Partner
+    template_name = 'dashboard/partners/confirm_delete.html'
+    success_url = reverse_lazy('dashboard:partners_list')
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        partner_name = self.object.name
+        if is_ajax_request(request):
+            self.object.delete()
+            return success_json_response(f'Partner "{partner_name}" deleted successfully.')
+        messages.success(request, f'Partner "{partner_name}" deleted successfully.')
+        return super().delete(request, *args, **kwargs)
+
+
+# compatibility wrappers for function-style imports
+partners_list = PartnerListView.as_view()
+partner_create = PartnerCreateView.as_view()
+partner_edit = PartnerUpdateView.as_view()
+partner_delete = PartnerDeleteView.as_view()
 
 
 
@@ -1452,6 +1699,17 @@ def admin_overview(request):
             ]
         },
         {
+            'title': 'Partners',
+            'icon': 'fas fa-handshake',
+            'count': Partner.objects.count(),
+            'description': 'Manage partner profiles shown on the public directory.',
+            'links': [
+                {'label': 'Create', 'url': reverse('dashboard:partner_create')},
+                {'label': 'Read', 'url': reverse('dashboard:partners_list')},
+                {'label': 'Update/Delete', 'url': reverse('dashboard:partners_list')},
+            ]
+        },
+        {
             'title': 'Contact Messages',
             'icon': 'fas fa-envelope-open-text',
             'count': ContactMessage.objects.count(),
@@ -1557,7 +1815,184 @@ def admin_overview(request):
 @user_passes_test(staff_required, login_url='login')
 def admin_analytics(request):
     """Analytics page with detailed charts and statistics"""
+    today = timezone.now().date()
+
+    # Monthly trend series for the last 12 months.
+    month_labels = []
+    monthly_users = []
+    monthly_registrations = []
+    monthly_volunteer_apps = []
+    monthly_donations = []
+    monthly_donors = []
+
+    for i in range(12):
+        month_start, month_end = get_month_date_range(i)
+        month_labels.insert(0, month_start.strftime('%b %Y'))
+
+        monthly_users.insert(0, CustomUser.objects.filter(
+            date_joined__date__range=(month_start, month_end)
+        ).count())
+
+        monthly_registrations.insert(0, EventRegistration.objects.filter(
+            registered_at__date__range=(month_start, month_end)
+        ).count())
+
+        monthly_volunteer_apps.insert(0, VolunteerApplication.objects.filter(
+            applied_at__date__range=(month_start, month_end)
+        ).count())
+
+        monthly_donations.insert(0, float(
+            Donation.objects.filter(
+                created_at__date__range=(month_start, month_end),
+                status='completed',
+            ).aggregate(total=Sum('amount'))['total'] or 0
+        ))
+
+        monthly_donors.insert(0, Donation.objects.filter(
+            created_at__date__range=(month_start, month_end),
+            status='completed',
+        ).exclude(
+            Q(user__isnull=True) & Q(donor_email='')
+        ).count())
+
+    # CRM funnel style counts.
+    total_users = CustomUser.objects.count()
+    users_with_event_registration = CustomUser.objects.filter(eventregistration__isnull=False).distinct().count()
+    users_with_volunteer_application = CustomUser.objects.filter(volunteer_applications__isnull=False).distinct().count()
+    users_with_donation = CustomUser.objects.filter(donation__isnull=False).distinct().count()
+
+    # Request status distribution.
+    request_labels = ['Pending', 'Approved', 'Rejected']
+    request_values = [
+        RequestEvent.objects.filter(status='pending').count(),
+        RequestEvent.objects.filter(status='approved').count(),
+        RequestEvent.objects.filter(status='rejected').count(),
+    ]
+
+    # Strategic conversion and planning datasets.
+    def pct(numerator, denominator):
+        if denominator <= 0:
+            return 0
+        return round((numerator / denominator) * 100, 1)
+
+    conversion_labels = ['User -> Participant', 'Participant -> Volunteer', 'Participant -> Donor']
+    conversion_values = [
+        pct(users_with_event_registration, total_users),
+        pct(users_with_volunteer_application, users_with_event_registration),
+        pct(users_with_donation, users_with_event_registration),
+    ]
+
+    planning_labels = []
+    planning_events = []
+    planning_registrations = []
+
+    for i in range(12):
+        month_start, month_end = get_month_date_range(-i)
+        # get_month_date_range may return datetime values; normalize to date for safe comparisons.
+        if hasattr(month_start, 'date'):
+            month_start = month_start.date()
+        if hasattr(month_end, 'date'):
+            month_end = month_end.date()
+
+        planning_labels.append(month_start.strftime('%b %Y'))
+
+        effective_start = max(month_start, today)
+        planning_events.append(Program.objects.filter(
+            date__range=(effective_start, month_end)
+        ).count())
+
+        planning_registrations.append(EventRegistration.objects.filter(
+            program__date__range=(effective_start, month_end)
+        ).count())
+
+    volunteer_pipeline_labels = ['Pending', 'Approved', 'Rejected', 'Withdrawn']
+    volunteer_pipeline_values = [
+        VolunteerApplication.objects.filter(status='pending').count(),
+        VolunteerApplication.objects.filter(status='approved').count(),
+        VolunteerApplication.objects.filter(status='rejected').count(),
+        VolunteerApplication.objects.filter(status='withdrawn').count(),
+    ]
+
+    # KPI cards with weekly micro-visualization bars.
+    def weekly_counts(model, dt_field, weeks=8, extra_filters=None):
+        values = []
+        now = timezone.now()
+        filters = extra_filters or {}
+        for week_idx in range(weeks):
+            end_dt = now - timedelta(days=7 * week_idx)
+            start_dt = end_dt - timedelta(days=6)
+            query = {f'{dt_field}__date__range': (start_dt.date(), end_dt.date())}
+            query.update(filters)
+            values.insert(0, model.objects.filter(**query).count())
+        return values
+
+    registrations_weekly = weekly_counts(EventRegistration, 'registered_at')
+    volunteer_weekly = weekly_counts(VolunteerApplication, 'applied_at')
+    announcements_weekly = weekly_counts(Announcement, 'created_at')
+    donations_weekly = weekly_counts(Donation, 'created_at', extra_filters={'status': 'completed'})
+
+    def growth_delta(series):
+        if len(series) < 2 or series[-2] == 0:
+            if series and series[-1] > 0:
+                return 100
+            return 0
+        return round(((series[-1] - series[-2]) / series[-2]) * 100)
+
+    kpi_cards = [
+        {
+            'title': 'Event Registrations',
+            'value': EventRegistration.objects.count(),
+            'delta': growth_delta(registrations_weekly),
+            'trend': registrations_weekly,
+        },
+        {
+            'title': 'Volunteer Applications',
+            'value': VolunteerApplication.objects.count(),
+            'delta': growth_delta(volunteer_weekly),
+            'trend': volunteer_weekly,
+        },
+        {
+            'title': 'Announcements Published',
+            'value': Announcement.objects.count(),
+            'delta': growth_delta(announcements_weekly),
+            'trend': announcements_weekly,
+        },
+        {
+            'title': 'Completed Donations',
+            'value': Donation.objects.filter(status='completed').count(),
+            'delta': growth_delta(donations_weekly),
+            'trend': donations_weekly,
+        },
+    ]
+
     context = {
+        'month_labels': json.dumps(month_labels),
+        'monthly_users': json.dumps(monthly_users),
+        'monthly_registrations': json.dumps(monthly_registrations),
+        'monthly_volunteer_apps': json.dumps(monthly_volunteer_apps),
+        'monthly_donations': json.dumps(monthly_donations),
+        'monthly_donors': json.dumps(monthly_donors),
+        'crm_funnel_labels': json.dumps(['Registered Users', 'Event Participants', 'Volunteer Applicants', 'Donors']),
+        'crm_funnel_values': json.dumps([
+            total_users,
+            users_with_event_registration,
+            users_with_volunteer_application,
+            users_with_donation,
+        ]),
+        'conversion_labels': json.dumps(conversion_labels),
+        'conversion_values': json.dumps(conversion_values),
+        'request_labels': json.dumps(request_labels),
+        'request_values': json.dumps(request_values),
+        'planning_labels': json.dumps(planning_labels),
+        'planning_events': json.dumps(planning_events),
+        'planning_registrations': json.dumps(planning_registrations),
+        'volunteer_pipeline_labels': json.dumps(volunteer_pipeline_labels),
+        'volunteer_pipeline_values': json.dumps(volunteer_pipeline_values),
+        'range_presets': json.dumps(['30d', '90d', '6m', '12m']),
+        'default_range': '6m',
+        'kpi_cards': kpi_cards,
+        'active_users_30d': CustomUser.objects.filter(last_login__date__gte=today - timedelta(days=30)).count(),
+        'open_volunteer_roles': VolunteerOpportunity.objects.filter(status='open').count(),
         # sidebar counts injected via context processor
     }
     return render(request, 'dashboard/admin_analytics.html', context)
@@ -1825,6 +2260,28 @@ def user_toggle_ban(request, user_id):
         created_by=request.user,
     )
 
+    if target_user.email:
+        send_notification_email(
+            subject='Account status update',
+            message=(
+                f"Hi {target_user.get_full_name() or target_user.username},\n\n"
+                f"Your account status was updated by the admin team.\n"
+                f"Current status: {'Active' if target_user.is_active else 'Suspended'}\n\n"
+                "If you believe this is a mistake, contact support."
+            ),
+            recipients=[target_user.email],
+            html_message=build_security_alert_html(
+                title='Account Status Update',
+                greeting=f"Hi {target_user.get_full_name() or target_user.username},",
+                severity_label='Status Change Notice',
+                summary=f"Your account status is now {'Active' if target_user.is_active else 'Suspended'}.",
+                action_items=[
+                    'If this change was expected, no action is required.',
+                    'If this appears incorrect, contact support for immediate review.',
+                ],
+            ),
+        )
+
     return JsonResponse({
         'success': True,
         'message': f"User {'unbanned' if target_user.is_active else 'banned'} successfully.",
@@ -1845,6 +2302,28 @@ def user_warn(request, user_id):
         reason=reason,
         created_by=request.user,
     )
+
+    if target_user.email:
+        send_notification_email(
+            subject='Account warning notice',
+            message=(
+                f"Hi {target_user.get_full_name() or target_user.username},\n\n"
+                "A warning has been issued on your account.\n"
+                f"Reason: {reason}\n\n"
+                "Please follow community guidelines to avoid restrictions."
+            ),
+            recipients=[target_user.email],
+            html_message=build_security_alert_html(
+                title='Account Warning Notice',
+                greeting=f"Hi {target_user.get_full_name() or target_user.username},",
+                severity_label='Warning',
+                summary='A warning was issued on your account following moderation review.',
+                action_items=[
+                    reason,
+                    'Please follow community guidelines to avoid further restrictions.',
+                ],
+            ),
+        )
 
     return JsonResponse({'success': True, 'message': 'Warning recorded successfully.'})
 

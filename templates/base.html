@@ -126,22 +126,36 @@
 
 <body>
     <!-- top navbar -->
-    <div class="top-navbar" role="navigation" aria-label="Top social navigation">
+    <div class="top-navbar" role="region" aria-label="Top community highlights">
         <div class="left">
             <a href="/">
                 <i class="fas fa-seedling"></i>
                 Nepal Community in Vancouver
             </a>
         </div>
-        <div class="center">
-            &nbsp;
+        <div class="center top-navbar-center">
+            <div class="top-navbar-kicker">
+                <span class="top-navbar-pulse" aria-hidden="true"></span>
+                Live community pulse
+            </div>
+            <div class="top-navbar-rotator" aria-live="polite" data-topbar-rotator>
+                {% for item in top_bar_rotator_items %}
+                <div class="top-navbar-rotator-item{% if forloop.first %} is-active{% endif %}">
+                    <span class="top-navbar-rotator-label">{{ item.kicker }}</span>
+                    <span class="top-navbar-rotator-text">{{ item.text }}</span>
+                </div>
+                {% endfor %}
+            </div>
         </div>
-        <div class="right">
-            <a href="#" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
-            <a href="#" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
-            <a href="#" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
-            <a href="#" aria-label="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a>
-            <a href="#" aria-label="Discord"><i class="fab fa-discord" aria-hidden="true"></i></a>
+        <div class="right top-navbar-right">
+            <div class="top-navbar-pill">
+                <i class="fas fa-calendar-days" aria-hidden="true"></i>
+                <span>{{ top_bar_event_pill }}</span>
+            </div>
+            <div class="top-navbar-pill accent">
+                <i class="fas fa-hands-helping" aria-hidden="true"></i>
+                <span>{{ top_bar_donation_pill }}</span>
+            </div>
         </div>
     </div>
     <!-- Mobile menu overlay -->
@@ -165,19 +179,15 @@
             <!-- Navigation Items -->
             <div class="nav-menu-items">
                 <a href="{% url 'home' %}" class="nav-item">
-                    <i class="fas fa-home"></i>
                     <span>Home</span>
                 </a>
                 <a href="{% url 'about' %}" class="nav-item">
-                    <i class="fas fa-info-circle"></i>
                     <span>About Us</span>
                 </a>
                 <a href="{% url 'announcement_list' %}" class="nav-item">
-                    <i class="fas fa-bullhorn"></i>
                     <span>Announcements</span>
                 </a>
                 <a href="{% url 'contact' %}" class="nav-item">
-                    <i class="fas fa-envelope"></i>
                     <span>Contact</span>
                 </a>
 
@@ -186,7 +196,6 @@
                 <div class="dropdown">
                     <a href="{% url 'program_list' %}" class="nav-item" aria-expanded="false" aria-haspopup="true"
                         aria-controls="programsDropdown">
-                        <i class="fas fa-calendar-alt"></i>
                         <span>Programs & Events</span>
                         <i class="fas fa-chevron-down dropdown-chevron" aria-hidden="true"></i>
                     </a>
@@ -202,7 +211,6 @@
                 <div class="dropdown">
                     <a href="{% url 'community_list' %}" class="nav-item" aria-expanded="false" aria-haspopup="true"
                         aria-controls="communitiesDropdown">
-                        <i class="fas fa-users"></i>
                         <span>Communities</span>
                         <i class="fas fa-chevron-down dropdown-chevron" aria-hidden="true"></i>
                     </a>
@@ -212,14 +220,12 @@
                     </div>
                 </div>
                 <a href="{% url 'volunteer_list' %}" class="nav-item">
-                    <i class="fas fa-hands-helping"></i>
                     <span>Volunteer</span>
                 </a>
 
                 <div class="nav-divider"></div>
 
                 <a href="{% url 'donation' %}" class="nav-item nav-item-donate">
-                    <i class="fas fa-heart"></i>
                     <span>Donate</span>
                 </a>
 
@@ -228,20 +234,17 @@
                 {% if user.is_authenticated %}
                 {% if user.is_staff %}
                 <a href="{% url 'dashboard:admin_overview' %}" class="nav-item nav-admin-link">
-                    <i class="fas fa-chart-line"></i>
                     <span>Admin Dashboard</span>
                 </a>
                 {% endif %}
                 <form method="post" action="{% url 'logout' %}" class="nav-logout-form">
                     {% csrf_token %}
                     <button type="submit" class="nav-logout nav-item">
-                        <i class="fas fa-sign-out-alt"></i>
                         <span>Logout</span>
                     </button>
                 </form>
                 {% else %}
                 <a href="{% url 'login' %}" class="nav-item">
-                    <i class="fas fa-sign-in-alt"></i>
                     <span>Login</span>
                 </a>
                 {% endif %}
@@ -256,14 +259,14 @@
 
     {% block content %}{% endblock %}
 
-    <footer>
+    <footer class="site-footer">
         <div class="container footer-columns">
             <!-- Column 1: Organization -->
             <div class="footer-column">
-                <h4><i class="fas fa-mountain"></i> Nepal Community</h4>
-                <p>Nepali Community of Vancouver</p>
-                <p style="font-size: 0.9rem;">Preserving heritage, building futures.</p>
-                <p style="margin-top: 1rem; font-size: 0.85rem;">EST. 1998</p>
+                <h4 class="footer-brand-title"> Nepal Community</h4>
+                <p class="footer-brand-name">Nepali Community of Vancouver</p>
+                <p class="footer-brand-tagline">Preserving heritage, building futures.</p>
+                <p class="footer-brand-est">EST. 1998</p>
             </div>
 
             <!-- Column 2: Communities -->
@@ -312,27 +315,36 @@
 
             <!-- Column 6: Social -->
             <div class="footer-column">
-                <h5>Follow Us</h5>
-                <div style="display: flex; gap: 1rem; font-size: 1.5rem; margin: 1rem 0;">
-                    <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
-                    <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
-                    <a href="#" title="Discord"><i class="fab fa-discord"></i></a>
+                <h5 class="footer-contact-heading">Contact</h5>
+                <div class="footer-contact-card">
+                    <p class="footer-contact-line">
+                        <i class="fas fa-phone-alt" aria-hidden="true"></i>
+                        <a href="tel:+16041234567">+1 (604) 123-4567</a>
+                    </p>
+                    <p class="footer-contact-line">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                        <a href="mailto:info@nepalivc.ca">info@nepalivc.ca</a>
+                    </p>
+                    <p class="footer-contact-line">
+                        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        <span>Vancouver, BC</span>
+                    </p>
                 </div>
-                <h5 style="margin-top: 1.5rem;">Contact</h5>
-                <p style="font-size: 0.9rem;">
-                    📞 +1 (604) 123-4567<br>
-                    📧 info@nepalivc.ca<br>
-                    📍 Vancouver, BC
-                </p>
+                <h5 class="footer-follow-heading">Follow Us</h5>
+                <div class="footer-social-links" aria-label="Social media links">
+                    <a href="#" title="Facebook" class="footer-social--facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" title="Instagram" class="footer-social--instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" title="Twitter" class="footer-social--twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" title="YouTube" class="footer-social--youtube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" title="Discord" class="footer-social--discord"><i class="fab fa-discord"></i></a>
+                </div>
             </div>
         </div>
 
         <div class="footer-bottom">
-            <p style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <p class="footer-bottom-row">
                 <span>&copy; 2026 Nepali Community of Vancouver. All rights reserved.</span>
-                <span style="display: flex; gap: 1.5rem; font-size: 0.9rem;">
+                <span class="footer-legal-links">
                     <a href="{% url 'privacy_policy' %}">Privacy Policy</a> |
                     <a href="{% url 'terms_of_use' %}">Terms of Use</a> |
                     <a href="{% url 'accessibility' %}">Accessibility</a>

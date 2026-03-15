@@ -73,9 +73,13 @@
                 aria-label="Read announcement: {{ announcement.title }}"></a>
             <div class="card-top-accent"></div>
             <div class="card-header">
-                {% if announcement.is_pinned %}
-                <span class="pinned-dot" title="Pinned"><i class="fas fa-thumbtack"></i></span>
-                {% endif %}
+                <div class="badge-stack">
+                    {% if announcement.is_pinned %}
+                    <span class="pinned-badge"><i class="fas fa-thumbtack"></i> Pinned</span>
+                    {% endif %}
+                    <span class="category-badge category-{{ announcement.category }}">{{ announcement.get_category_display }}</span>
+                    <span class="priority-badge priority-{{ announcement.priority }}">{{ announcement.get_priority_display }}</span>
+                </div>
             </div>
 
             <h2 class="announcement-subject">{{ announcement.title }}</h2>

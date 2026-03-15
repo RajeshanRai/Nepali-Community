@@ -12,6 +12,8 @@ from announcements.models import Announcement
 from django.db.models.functions import TruncMonth
 from datetime import timedelta
 from django.db.models import Prefetch
+from communities.models import Community
+from volunteers.models import VolunteerApplication
 
 
 class HomeView(TemplateView):
@@ -24,6 +26,11 @@ class HomeView(TemplateView):
         # show next few upcoming programs on homepage
         upcoming = Program.objects.filter(date__gte=now.date()).order_by('date')[:5]
         context['upcoming_programs'] = upcoming
+
+        # community and volunteer counts for metric cards
+        context['total_communities'] = Community.objects.count()
+        context['total_volunteers'] = VolunteerApplication.objects.filter(status='approved').count()
+        context['total_members'] = CustomUser.objects.filter(is_active=True).count()
 
         # latest announcements for homepage
         context['latest_announcements'] = Announcement.objects.filter(

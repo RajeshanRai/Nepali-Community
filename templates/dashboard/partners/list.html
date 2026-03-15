@@ -1,0 +1,259 @@
+{% extends 'dashboard/admin_base.html' %}
+
+{% block title %}Partners{% endblock %}
+
+{% block extra_css %}
+<style>
+    .partners-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .partners-stat-card {
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 0.95rem 1rem;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+    }
+
+    .partners-stat-label {
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #64748b;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+
+    .partners-stat-value {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+
+    .partners-list-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 0.95rem;
+    }
+
+    .partner-admin-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        background: #fff;
+        padding: 1rem;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+    }
+
+    .partner-admin-head {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+    }
+
+    .partner-admin-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .partner-admin-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .partner-admin-name {
+        margin: 0;
+        font-size: 1rem;
+        color: #0f172a;
+    }
+
+    .partner-admin-meta {
+        margin: 0.1rem 0 0;
+        font-size: 0.82rem;
+        color: #64748b;
+    }
+
+    .partner-admin-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .partner-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.55rem;
+        border-radius: 999px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 0.75rem;
+        line-height: 1;
+    }
+
+    .partner-admin-actions {
+        display: flex;
+        gap: 0.45rem;
+        margin-top: auto;
+        padding-top: 0.2rem;
+    }
+
+    .partner-admin-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    @media (max-width: 640px) {
+        .partner-admin-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">Partners</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-handshake"></i> Partners</h1>
+        <p>Manage partner directory entries shown on the public partners page.</p>
+    </div>
+    <div class="page-header-actions">
+        <a href="{% url 'dashboard:partner_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Partner
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="partners-stats-grid">
+    <div class="partners-stat-card">
+        <span class="partners-stat-label">Total</span>
+        <div class="partners-stat-value">{{ total_partners }}</div>
+    </div>
+    <div class="partners-stat-card">
+        <span class="partners-stat-label">With Website</span>
+        <div class="partners-stat-value">{{ with_website_count }}</div>
+    </div>
+    <div class="partners-stat-card">
+        <span class="partners-stat-label">With Logo</span>
+        <div class="partners-stat-value">{{ with_logo_count }}</div>
+    </div>
+    <div class="partners-stat-card">
+        <span class="partners-stat-label">With Social Links</span>
+        <div class="partners-stat-value">{{ with_social_count }}</div>
+    </div>
+</div>
+
+<div class="content-card">
+    <div class="content-card-header">
+        <form method="GET" class="search-form">
+            <div class="search-input-group">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" placeholder="Search name, description, website..." value="{{ search }}">
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter"></i> Filter</button>
+            {% if search %}
+            <a href="{% url 'dashboard:partners_list' %}" class="btn btn-sm btn-secondary">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="content-card-body">
+        {% if partners %}
+        <div class="partners-list-grid">
+            {% for partner in partners %}
+            <article class="partner-admin-card">
+                <div class="partner-admin-head">
+                    <div class="partner-admin-logo">
+                        {% if partner.logo %}
+                        <img src="{{ partner.logo.url }}" alt="{{ partner.name }}">
+                        {% else %}
+                        {{ partner.name|slice:":1"|upper }}{{ partner.name|slice:"1:2"|upper }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3 class="partner-admin-name">{{ partner.name }}</h3>
+                        <p class="partner-admin-meta">
+                            ID #{{ partner.pk }}
+                            {% if partner.partnership_since %}
+                            | Since {{ partner.partnership_since|date:"Y" }}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="partner-admin-links">
+                    {% if partner.website %}
+                    <a class="partner-chip" href="{{ partner.website }}" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-globe"></i> Website
+                    </a>
+                    {% endif %}
+                    {% if partner.social_links.facebook %}<span class="partner-chip"><i class="fab fa-facebook-f"></i> Facebook</span>{% endif %}
+                    {% if partner.social_links.twitter %}<span class="partner-chip"><i class="fab fa-twitter"></i> Twitter</span>{% endif %}
+                    {% if partner.social_links.linkedin %}<span class="partner-chip"><i class="fab fa-linkedin-in"></i> LinkedIn</span>{% endif %}
+                    {% if partner.social_links.instagram %}<span class="partner-chip"><i class="fab fa-instagram"></i> Instagram</span>{% endif %}
+                    {% if not partner.website and not partner.social_links.facebook and not partner.social_links.twitter and not partner.social_links.linkedin and not partner.social_links.instagram %}
+                    <span class="partner-chip"><i class="fas fa-info-circle"></i> No links yet</span>
+                    {% endif %}
+                </div>
+
+                <div class="partner-admin-actions">
+                    <a href="{% url 'dashboard:partner_edit' partner.pk %}" class="btn btn-secondary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <button
+                        type="button"
+                        class="btn btn-danger js-partner-delete"
+                        data-delete-url="{% url 'dashboard:partner_delete' partner.pk %}"
+                        data-partner-name="{{ partner.name|escapejs }}"
+                        >
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">No partners found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.js-partner-delete').forEach((button) => {
+        button.addEventListener('click', () => {
+            confirmDelete({
+                url: button.dataset.deleteUrl,
+                itemName: button.dataset.partnerName,
+                itemType: 'partner'
+            });
+        });
+    });
+</script>
+{% endblock %}

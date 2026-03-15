@@ -62,6 +62,12 @@ from dashboard.views_module import (
     donation_create,
     donation_edit,
     donation_delete,
+
+    # Partner Management
+    partners_list,
+    partner_create,
+    partner_edit,
+    partner_delete,
     
     # Contact Management
     contact_messages_list,
@@ -153,6 +159,12 @@ __all__ = [
     'donation_create',
     'donation_edit',
     'donation_delete',
+
+    # Partner Management
+    'partners_list',
+    'partner_create',
+    'partner_edit',
+    'partner_delete',
     
     # Contact Management
     'contact_messages_list',

@@ -12,9 +12,29 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def _load_env_file(file_path: Path) -> None:
+    """Load KEY=VALUE pairs from a local .env file into process environment."""
+    if not file_path.exists():
+        return
+
+    for raw_line in file_path.read_text(encoding='utf-8').splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        key, value = line.split('=', 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key:
+            os.environ.setdefault(key, value)
+
+
+_load_env_file(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -107,6 +127,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.site_chrome',
                 # Dashboard context processors for sidebar counts
                 'dashboard.context_processors.sidebar_counts',
                 'dashboard.context_processors.admin_info',
@@ -210,6 +231,22 @@ DATA_UPLOAD_MAX_NUMBER_FILES = 100  # Allow up to 100 files per request (default
 
 # custom user model
 AUTH_USER_MODEL = 'users.CustomUser'
+
+# Email configuration (SMTP)
+def _required_env(name: str) -> str:
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        raise ImproperlyConfigured(f'Missing required environment variable: {name}')
+    return value.strip()
+
+
+EMAIL_BACKEND = _required_env('EMAIL_BACKEND')
+EMAIL_HOST = _required_env('EMAIL_HOST')
+EMAIL_PORT = int(_required_env('EMAIL_PORT'))
+EMAIL_USE_TLS = _required_env('EMAIL_USE_TLS').lower() in ('true', '1', 'yes')
+EMAIL_HOST_USER = _required_env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = _required_env('EMAIL_HOST_PASSWORD').replace(' ', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER).strip()
 
 # authentication route settings
 LOGIN_URL = '/users/login/'

@@ -10,92 +10,137 @@
 {% block content %}
 <section class="partners-hero">
     <div class="partners-container">
-        <div class="partners-hero-content">
-            <span class="partners-badge">
-                <i class="fas fa-handshake"></i>
-                Partnership Network
-            </span>
-            <h1 class="partners-title">Our Trusted Partners</h1>
-            <p class="partners-subtitle">
-                Collaborating with organizations and businesses that share our vision of preserving
-                Nepali culture and supporting our community in Vancouver.
-            </p>
+        <div class="partners-hero-content partners-hero-grid">
+            <div>
+                <span class="partners-badge">
+                    <i class="fas fa-handshake"></i>
+                    Partnership Network
+                </span>
+                <h1 class="partners-title">Community Partners Who Help Culture Travel Further</h1>
+                <p class="partners-subtitle">
+                    Explore the organizations, associations, and local allies helping Nepali families stay connected,
+                    visible, and supported across Vancouver and beyond.
+                </p>
+                <div class="partners-hero-actions">
+                    <a href="#partners-feed" class="partners-action-btn partners-action-primary">
+                        <i class="fas fa-compass"></i> Explore Partners
+                    </a>
+                    <a href="{% url 'contact' %}" class="partners-action-btn partners-action-secondary">
+                        <i class="fas fa-envelope-open-text"></i> Become a Partner
+                    </a>
+                </div>
+            </div>
+
+            <div class="partners-showcase" aria-hidden="true">
+                <div class="partners-orb orb-one"></div>
+                <div class="partners-orb orb-two"></div>
+                <div class="partners-showcase-card primary-card">
+                    <span class="showcase-label">Active Network</span>
+                    <strong>{{ partners|length }}</strong>
+                    <span class="showcase-copy">Trusted partners supporting community programs</span>
+                </div>
+                <div class="partners-showcase-card accent-card">
+                    <span>Culture</span>
+                    <span>Family Support</span>
+                    <span>Local Impact</span>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
 <section class="partners-list-section">
     <div class="partners-container">
+        <div class="partners-section-head" id="partners-feed">
+            <h2><i class="fas fa-network-wired"></i> Partner Directory</h2>
+            <p>Built on the same scale as our community directory, with a stronger editorial layout and cleaner partner signals.</p>
+        </div>
+
         {% if partners %}
         <div class="partners-grid">
             {% for partner in partners %}
-            <article class="partner-card" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|add:'50' }}">
-                <div class="partner-card-inner">
+            <article class="partner-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:'100' }}" data-partner-idx="{{ forloop.counter0 }}">
+                <div class="partner-card-header">
                     {% if partner.logo %}
                     <div class="partner-logo">
                         <img src="{{ partner.logo.url }}" alt="{{ partner.name }}" loading="lazy">
                     </div>
                     {% else %}
                     <div class="partner-logo partner-logo-placeholder">
-                        <i class="fas fa-building"></i>
+                        <span class="partner-initials">{{ partner.name|slice:":1"|upper }}{{ partner.name|slice:"1:2"|upper }}</span>
                     </div>
                     {% endif %}
 
-                    <div class="partner-content">
+                    <div class="partner-meta">
+                        <span class="partner-brow">Community Partner</span>
                         <h2 class="partner-name">{{ partner.name }}</h2>
-
-                        {% if partner.partnership_since %}
-                        <p class="partner-since">
-                            <i class="fas fa-calendar-alt"></i>
-                            Partner since {{ partner.partnership_since|date:"Y" }}
-                        </p>
-                        {% endif %}
-
-                        {% if partner.description %}
-                        <p class="partner-description">
-                            {{ partner.description|truncatewords:25 }}
-                        </p>
-                        {% endif %}
-
-                        <div class="partner-actions">
-                            {% if partner.website %}
-                            <a href="{{ partner.website }}" target="_blank" rel="noopener noreferrer"
-                                class="partner-link">
-                                <i class="fas fa-external-link-alt"></i>
-                                Visit Website
-                            </a>
+                        <div class="partner-stats">
+                            {% if partner.partnership_since %}
+                            <span class="partner-stat">
+                                <i class="fas fa-calendar-check"></i>
+                                Since {{ partner.partnership_since|date:"Y" }}
+                            </span>
                             {% endif %}
-
-                            {% if partner.social_links %}
-                            <div class="partner-social">
-                                {% if partner.social_links.facebook %}
-                                <a href="{{ partner.social_links.facebook }}" target="_blank" rel="noopener noreferrer"
-                                    class="social-icon">
-                                    <i class="fab fa-facebook"></i>
-                                </a>
-                                {% endif %}
-                                {% if partner.social_links.twitter %}
-                                <a href="{{ partner.social_links.twitter }}" target="_blank" rel="noopener noreferrer"
-                                    class="social-icon">
-                                    <i class="fab fa-twitter"></i>
-                                </a>
-                                {% endif %}
-                                {% if partner.social_links.linkedin %}
-                                <a href="{{ partner.social_links.linkedin }}" target="_blank" rel="noopener noreferrer"
-                                    class="social-icon">
-                                    <i class="fab fa-linkedin"></i>
-                                </a>
-                                {% endif %}
-                                {% if partner.social_links.instagram %}
-                                <a href="{{ partner.social_links.instagram }}" target="_blank" rel="noopener noreferrer"
-                                    class="social-icon">
-                                    <i class="fab fa-instagram"></i>
-                                </a>
-                                {% endif %}
-                            </div>
-                            {% endif %}
+                            <span class="partner-stat">
+                                <i class="fas fa-hand-holding-heart"></i>
+                                Community ally
+                            </span>
                         </div>
                     </div>
+                </div>
+
+                <div class="partner-card-body">
+                    <p class="partner-description">
+                        {% if partner.description %}
+                        {{ partner.description|truncatewords:30 }}
+                        {% else %}
+                        Supporting Nepali families, cultural continuity, and stronger local connections through ongoing partnership.
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="partner-social-area">
+                    {% if partner.social_links %}
+                    <div class="partner-social" aria-label="{{ partner.name }} social links">
+                        {% if partner.social_links.facebook %}
+                        <a href="{{ partner.social_links.facebook }}" target="_blank" rel="noopener noreferrer"
+                            class="social-icon social-icon--facebook" aria-label="{{ partner.name }} on Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        {% endif %}
+                        {% if partner.social_links.twitter %}
+                        <a href="{{ partner.social_links.twitter }}" target="_blank" rel="noopener noreferrer"
+                            class="social-icon social-icon--twitter" aria-label="{{ partner.name }} on Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        {% endif %}
+                        {% if partner.social_links.linkedin %}
+                        <a href="{{ partner.social_links.linkedin }}" target="_blank" rel="noopener noreferrer"
+                            class="social-icon social-icon--linkedin" aria-label="{{ partner.name }} on LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        {% endif %}
+                        {% if partner.social_links.instagram %}
+                        <a href="{{ partner.social_links.instagram }}" target="_blank" rel="noopener noreferrer"
+                            class="social-icon social-icon--instagram" aria-label="{{ partner.name }} on Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="partner-card-footer">
+                    {% if partner.website %}
+                    <a href="{{ partner.website }}" target="_blank" rel="noopener noreferrer" class="partner-link">
+                        Visit Website
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    {% else %}
+                    <span class="partner-link partner-link-muted">
+                        Community profile available on request
+                    </span>
+                    {% endif %}
                 </div>
             </article>
             {% endfor %}
@@ -115,10 +160,11 @@
 <section class="partners-cta">
     <div class="partners-container">
         <div class="cta-content">
-            <h2 class="cta-title">Become a Partner</h2>
+            <span class="cta-kicker">Work With Us</span>
+            <h2 class="cta-title">Build a Stronger Local Network With Us</h2>
             <p class="cta-text">
-                Interested in partnering with the Nepali Community of Vancouver? We're always looking to build
-                meaningful relationships with organizations that share our values.
+                We collaborate with cultural groups, local businesses, and service organizations that want to create
+                visible community impact with care and consistency.
             </p>
             <a href="{% url 'contact' %}" class="cta-btn">
                 <i class="fas fa-envelope"></i>

@@ -1,15 +1,539 @@
 {% extends 'dashboard/admin_base.html' %}
+{% load static %}
 {% block title %}Analytics{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/admin-analytics.css' %}">
+{% endblock %}
 {% block breadcrumb_items %}<li class="breadcrumb-item active">Analytics</li>{% endblock %}
 {% block page_header %}<div class="page-header">
     <div class="page-header-content">
-        <h1><i class="fas fa-chart-line"></i> Advanced Analytics</h1>
-        <p>Deep dive into platform analytics</p>
+        <h1><i class="fas fa-chart-line"></i> CRM & KPI Analytics</h1>
+        <p>Operational KPIs, conversion health, and micro trends in one place.</p>
+    </div>
+    <div class="analytics-toolbar" role="group" aria-label="Analytics controls">
+        <button type="button" class="density-btn" id="densityToggle" aria-pressed="false" title="Toggle dense mode for compact board view">
+            <i class="fas fa-compress-arrows-alt" aria-hidden="true"></i>
+            Dense
+        </button>
+        <div class="range-switch" role="group" aria-label="Date range selector">
+            <button type="button" class="range-btn" data-range="30d">30d</button>
+            <button type="button" class="range-btn" data-range="90d">90d</button>
+            <button type="button" class="range-btn is-active" data-range="6m">6m</button>
+            <button type="button" class="range-btn" data-range="12m">12m</button>
+        </div>
     </div>
 </div>{% endblock %}
-{% block content %}<div class="content-card">
-    <div class="content-card-body empty-state-card"><i class="fas fa-chart-line"></i>
-        <h3>Advanced Analytics</h3>
-        <p>Comprehensive analytics dashboard with interactive charts coming soon.</p>
-    </div>
-</div>{% endblock %}
+{% block content %}
+<div class="analytics-shell analytics-page">
+    <section class="analytics-kpi-grid">
+        {% for card in kpi_cards %}
+        <article class="analytics-kpi-card">
+            <div class="kpi-head">
+                <span>{{ card.title }}</span>
+                <strong>{{ card.value }}</strong>
+            </div>
+            <div class="kpi-delta {% if card.delta >= 0 %}is-up{% else %}is-down{% endif %}">
+                <i class="fas {% if card.delta >= 0 %}fa-arrow-trend-up{% else %}fa-arrow-trend-down{% endif %}"></i>
+                {{ card.delta }}% vs previous period
+            </div>
+            <div class="micro-bars" aria-hidden="true">
+                {% for v in card.trend %}
+                <span class="micro-bar" data-value="{{ v }}" title="Week {{ forloop.counter }}: {{ v }}" style="height: {% widthratio v 1 8 %}px"></span>
+                {% endfor %}
+            </div>
+        </article>
+        {% endfor %}
+    </section>
+
+    <section class="analytics-grid two-cols">
+        <article class="content-card chart-card" data-chart="crmFunnelChart" data-title="crm-funnel">
+            <div class="content-card-body chart-wrap">
+                <div class="chart-top">
+                    <h3>CRM Funnel</h3>
+                    <div class="chart-actions">
+                        <button type="button" class="chart-btn" data-export="png" data-chart="crmFunnelChart">PNG</button>
+                        <button type="button" class="chart-btn" data-export="csv" data-chart="crmFunnelChart">CSV</button>
+                    </div>
+                </div>
+                <canvas id="crmFunnelChart"></canvas>
+            </div>
+        </article>
+
+        <article class="content-card chart-card" data-chart="requestStatusChart" data-title="request-status-mix">
+            <div class="content-card-body chart-wrap">
+                <div class="chart-top">
+                    <h3>Request Status Mix</h3>
+                    <div class="chart-actions">
+                        <button type="button" class="chart-btn" data-export="png" data-chart="requestStatusChart">PNG</button>
+                        <button type="button" class="chart-btn" data-export="csv" data-chart="requestStatusChart">CSV</button>
+                    </div>
+                </div>
+                <canvas id="requestStatusChart"></canvas>
+            </div>
+        </article>
+    </section>
+
+    <section class="analytics-grid two-cols">
+        <article class="content-card chart-card" data-chart="stageConversionChart" data-title="stage-conversion-health">
+            <div class="content-card-body chart-wrap">
+                <div class="chart-top">
+                    <h3>Stage Conversion Health (%)</h3>
+                    <div class="chart-actions">
+                        <button type="button" class="chart-btn" data-export="png" data-chart="stageConversionChart">PNG</button>
+                        <button type="button" class="chart-btn" data-export="csv" data-chart="stageConversionChart">CSV</button>
+                    </div>
+                </div>
+                <canvas id="stageConversionChart"></canvas>
+            </div>
+        </article>
+        <article class="content-card chart-card" data-chart="volunteerPipelineChart" data-title="volunteer-pipeline-status">
+            <div class="content-card-body chart-wrap">
+                <div class="chart-top">
+                    <h3>Volunteer Pipeline Status</h3>
+                    <div class="chart-actions">
+                        <button type="button" class="chart-btn" data-export="png" data-chart="volunteerPipelineChart">PNG</button>
+                        <button type="button" class="chart-btn" data-export="csv" data-chart="volunteerPipelineChart">CSV</button>
+                    </div>
+                </div>
+                <canvas id="volunteerPipelineChart"></canvas>
+            </div>
+        </article>
+    </section>
+
+    <section class="analytics-grid one-col compact">
+        <article class="content-card chart-card" data-chart="kpiTrendChart" data-title="kpi-trendline">
+            <div class="content-card-body chart-wrap wide">
+                <div class="chart-top">
+                    <h3>KPI Trendline</h3>
+                    <div class="chart-actions">
+                        <button type="button" class="chart-btn" data-export="png" data-chart="kpiTrendChart">PNG</button>
+                        <button type="button" class="chart-btn" data-export="csv" data-chart="kpiTrendChart">CSV</button>
+                    </div>
+                </div>
+                <canvas id="kpiTrendChart"></canvas>
+            </div>
+        </article>
+    </section>
+
+    <section class="analytics-grid two-cols">
+        <article class="content-card chart-card" data-chart="futurePlanningChart" data-title="forward-capacity-plan">
+            <div class="content-card-body chart-wrap">
+                <div class="chart-top">
+                    <h3>Forward Capacity Plan</h3>
+                    <div class="chart-actions">
+                        <button type="button" class="chart-btn" data-export="png" data-chart="futurePlanningChart">PNG</button>
+                        <button type="button" class="chart-btn" data-export="csv" data-chart="futurePlanningChart">CSV</button>
+                    </div>
+                </div>
+                <canvas id="futurePlanningChart"></canvas>
+            </div>
+        </article>
+        <article class="content-card chart-card" data-chart="fundingMomentumChart" data-title="funding-momentum">
+            <div class="content-card-body chart-wrap">
+                <div class="chart-top">
+                    <h3>Funding Momentum (Amount vs Donors)</h3>
+                    <div class="chart-actions">
+                        <button type="button" class="chart-btn" data-export="png" data-chart="fundingMomentumChart">PNG</button>
+                        <button type="button" class="chart-btn" data-export="csv" data-chart="fundingMomentumChart">CSV</button>
+                    </div>
+                </div>
+                <canvas id="fundingMomentumChart"></canvas>
+            </div>
+        </article>
+    </section>
+
+    <section class="analytics-grid two-cols">
+        <article class="content-card mini-summary">
+            <div class="content-card-body">
+                <h4>Active Users (30d)</h4>
+                <p class="metric">{{ active_users_30d }}</p>
+            </div>
+        </article>
+        <article class="content-card mini-summary">
+            <div class="content-card-body">
+                <h4>Open Volunteer Roles</h4>
+                <p class="metric">{{ open_volunteer_roles }}</p>
+            </div>
+        </article>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const analyticsColors = {
+        primary: '#f97316',
+        mint: '#10b981',
+        blue: '#3b82f6',
+        red: '#ef4444',
+        slate: '#334155',
+        amber: '#f59e0b',
+        violet: '#7c3aed'
+    };
+
+    const defaultOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 560, easing: 'easeOutCubic' }
+    };
+
+    const rangeToMonths = {
+        '30d': 1,
+        '90d': 3,
+        '6m': 6,
+        '12m': 12
+    };
+
+    const sourceData = {
+        monthLabels: {{ month_labels|safe }},
+        monthlyUsers: {{ monthly_users|safe }},
+        monthlyRegistrations: {{ monthly_registrations|safe }},
+        monthlyVolunteerApps: {{ monthly_volunteer_apps|safe }},
+        monthlyDonations: {{ monthly_donations|safe }},
+        monthlyDonors: {{ monthly_donors|safe }},
+        planningLabels: {{ planning_labels|safe }},
+        planningEvents: {{ planning_events|safe }},
+        planningRegistrations: {{ planning_registrations|safe }}
+    };
+
+    const charts = {};
+    const densityStorageKey = 'dashboard.analytics.denseMode';
+
+    const makeChart = (id, config) => {
+        const node = document.getElementById(id);
+        if (!node) return;
+        charts[id] = new Chart(node.getContext('2d'), config);
+    };
+
+    makeChart('crmFunnelChart', {
+        type: 'bar',
+        data: {
+            labels: {{ crm_funnel_labels|safe }},
+            datasets: [{
+                label: 'People',
+                data: {{ crm_funnel_values|safe }},
+                backgroundColor: [analyticsColors.slate, analyticsColors.blue, analyticsColors.mint, analyticsColors.primary],
+                borderRadius: 10,
+                maxBarThickness: 42
+            }]
+        },
+        options: {
+            ...defaultOptions,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grace: '8%', grid: { color: 'rgba(15,23,42,0.08)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    makeChart('requestStatusChart', {
+        type: 'doughnut',
+        data: {
+            labels: {{ request_labels|safe }},
+            datasets: [{
+                data: {{ request_values|safe }},
+                backgroundColor: [analyticsColors.amber, analyticsColors.mint, analyticsColors.red],
+                borderColor: '#ffffff',
+                borderWidth: 3
+            }]
+        },
+        options: {
+            ...defaultOptions,
+            cutout: '62%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { usePointStyle: true, boxWidth: 8 }
+                }
+            }
+        }
+    });
+
+    makeChart('stageConversionChart', {
+        type: 'bar',
+        data: {
+            labels: {{ conversion_labels|safe }},
+            datasets: [{
+                label: 'Conversion %',
+                data: {{ conversion_values|safe }},
+                backgroundColor: [analyticsColors.blue, analyticsColors.mint, analyticsColors.violet],
+                borderRadius: 8,
+                maxBarThickness: 36
+            }]
+        },
+        options: {
+            ...defaultOptions,
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: { color: 'rgba(15,23,42,0.08)' },
+                    ticks: { callback: (v) => v + '%' }
+                },
+                y: { grid: { display: false } }
+            }
+        }
+    });
+
+    makeChart('volunteerPipelineChart', {
+        type: 'polarArea',
+        data: {
+            labels: {{ volunteer_pipeline_labels|safe }},
+            datasets: [{
+                data: {{ volunteer_pipeline_values|safe }},
+                backgroundColor: ['rgba(245, 158, 11, 0.85)', 'rgba(16, 185, 129, 0.85)', 'rgba(239, 68, 68, 0.8)', 'rgba(100, 116, 139, 0.8)'],
+                borderWidth: 1,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            ...defaultOptions,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { usePointStyle: true, boxWidth: 8 }
+                }
+            },
+            scales: { r: { beginAtZero: true, ticks: { display: false }, grid: { color: 'rgba(15,23,42,0.08)' } } }
+        }
+    });
+
+    makeChart('kpiTrendChart', {
+        type: 'line',
+        data: {
+            labels: {{ month_labels|safe }},
+            datasets: [
+                {
+                    label: 'New Users',
+                    data: {{ monthly_users|safe }},
+                    borderColor: analyticsColors.blue,
+                    backgroundColor: 'rgba(59,130,246,0.11)',
+                    fill: true,
+                    tension: 0.34,
+                    pointRadius: 2
+                },
+                {
+                    label: 'Event Registrations',
+                    data: {{ monthly_registrations|safe }},
+                    borderColor: analyticsColors.primary,
+                    backgroundColor: 'rgba(249,115,22,0.08)',
+                    fill: true,
+                    tension: 0.34,
+                    pointRadius: 2
+                },
+                {
+                    label: 'Volunteer Applications',
+                    data: {{ monthly_volunteer_apps|safe }},
+                    borderColor: analyticsColors.mint,
+                    backgroundColor: 'rgba(16,185,129,0.08)',
+                    fill: true,
+                    tension: 0.34,
+                    pointRadius: 2
+                }
+            ]
+        },
+        options: {
+            ...defaultOptions,
+            plugins: { legend: { position: 'top', labels: { usePointStyle: true } } },
+            scales: {
+                y: { beginAtZero: true, grace: '8%', grid: { color: 'rgba(15,23,42,0.08)' } },
+                x: { grid: { color: 'rgba(15,23,42,0.05)' } }
+            }
+        }
+    });
+
+    makeChart('futurePlanningChart', {
+        type: 'bar',
+        data: {
+            labels: {{ planning_labels|safe }},
+            datasets: [
+                {
+                    label: 'Planned Events',
+                    data: {{ planning_events|safe }},
+                    backgroundColor: 'rgba(59,130,246,0.8)',
+                    borderRadius: 8,
+                    maxBarThickness: 32
+                },
+                {
+                    type: 'line',
+                    label: 'Pre-Registrations',
+                    data: {{ planning_registrations|safe }},
+                    borderColor: analyticsColors.primary,
+                    backgroundColor: 'rgba(249,115,22,0.18)',
+                    tension: 0.3,
+                    yAxisID: 'y'
+                }
+            ]
+        },
+        options: {
+            ...defaultOptions,
+            plugins: { legend: { position: 'top', labels: { usePointStyle: true } } },
+            scales: {
+                y: { beginAtZero: true, grace: '10%', grid: { color: 'rgba(15,23,42,0.08)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    makeChart('fundingMomentumChart', {
+        type: 'bar',
+        data: {
+            labels: {{ month_labels|safe }},
+            datasets: [
+                {
+                    label: 'Donation Amount',
+                    data: {{ monthly_donations|safe }},
+                    backgroundColor: 'rgba(16,185,129,0.82)',
+                    borderRadius: 8,
+                    maxBarThickness: 32,
+                    yAxisID: 'yAmount'
+                },
+                {
+                    type: 'line',
+                    label: 'Donor Count',
+                    data: {{ monthly_donors|safe }},
+                    borderColor: analyticsColors.violet,
+                    backgroundColor: 'rgba(124,58,237,0.18)',
+                    tension: 0.32,
+                    pointRadius: 2,
+                    yAxisID: 'yDonors'
+                }
+            ]
+        },
+        options: {
+            ...defaultOptions,
+            plugins: { legend: { position: 'top', labels: { usePointStyle: true } } },
+            scales: {
+                yAmount: { beginAtZero: true, position: 'left', grid: { color: 'rgba(15,23,42,0.08)' } },
+                yDonors: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    function sliceTail(data, length) {
+        if (!Array.isArray(data)) return [];
+        return data.slice(-length);
+    }
+
+    function applyRange(rangeKey) {
+        const months = rangeToMonths[rangeKey] || 6;
+        const monthLabels = sliceTail(sourceData.monthLabels, months);
+        const planningLabels = sliceTail(sourceData.planningLabels, months);
+
+        if (charts.kpiTrendChart) {
+            charts.kpiTrendChart.data.labels = monthLabels;
+            charts.kpiTrendChart.data.datasets[0].data = sliceTail(sourceData.monthlyUsers, months);
+            charts.kpiTrendChart.data.datasets[1].data = sliceTail(sourceData.monthlyRegistrations, months);
+            charts.kpiTrendChart.data.datasets[2].data = sliceTail(sourceData.monthlyVolunteerApps, months);
+            charts.kpiTrendChart.update();
+        }
+
+        if (charts.futurePlanningChart) {
+            charts.futurePlanningChart.data.labels = planningLabels;
+            charts.futurePlanningChart.data.datasets[0].data = sliceTail(sourceData.planningEvents, months);
+            charts.futurePlanningChart.data.datasets[1].data = sliceTail(sourceData.planningRegistrations, months);
+            charts.futurePlanningChart.update();
+        }
+
+        if (charts.fundingMomentumChart) {
+            charts.fundingMomentumChart.data.labels = monthLabels;
+            charts.fundingMomentumChart.data.datasets[0].data = sliceTail(sourceData.monthlyDonations, months);
+            charts.fundingMomentumChart.data.datasets[1].data = sliceTail(sourceData.monthlyDonors, months);
+            charts.fundingMomentumChart.update();
+        }
+
+        document.querySelectorAll('.range-btn').forEach((btn) => {
+            btn.classList.toggle('is-active', btn.dataset.range === rangeKey);
+        });
+    }
+
+    document.querySelectorAll('.range-btn').forEach((btn) => {
+        btn.addEventListener('click', () => applyRange(btn.dataset.range));
+    });
+
+    function triggerDownload(href, filename) {
+        const link = document.createElement('a');
+        link.href = href;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function exportChartAsPng(chartId) {
+        const chart = charts[chartId];
+        if (!chart) return;
+        const stamp = new Date().toISOString().slice(0, 10);
+        triggerDownload(chart.toBase64Image('image/png', 1), `${chartId}-${stamp}.png`);
+    }
+
+    function exportChartAsCsv(chartId) {
+        const chart = charts[chartId];
+        if (!chart) return;
+
+        const labels = chart.data.labels || [];
+        const datasets = chart.data.datasets || [];
+        const header = ['Label', ...datasets.map((ds, idx) => ds.label || `Series ${idx + 1}`)];
+        const rows = [header];
+
+        labels.forEach((label, i) => {
+            const row = [label];
+            datasets.forEach((ds) => {
+                const value = Array.isArray(ds.data) ? ds.data[i] : '';
+                row.push(value ?? '');
+            });
+            rows.push(row);
+        });
+
+        const csv = rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const stamp = new Date().toISOString().slice(0, 10);
+        const url = URL.createObjectURL(blob);
+        triggerDownload(url, `${chartId}-${stamp}.csv`);
+        setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
+
+    document.querySelectorAll('.chart-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const chartId = btn.dataset.chart;
+            if (btn.dataset.export === 'png') {
+                exportChartAsPng(chartId);
+                return;
+            }
+            exportChartAsCsv(chartId);
+        });
+    });
+
+    function setDenseMode(enabled) {
+        const analyticsRoot = document.querySelector('.analytics-page');
+        const toggleBtn = document.getElementById('densityToggle');
+        if (!analyticsRoot || !toggleBtn) return;
+
+        analyticsRoot.classList.toggle('analytics-dense', enabled);
+        toggleBtn.classList.toggle('is-active', enabled);
+        toggleBtn.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+        localStorage.setItem(densityStorageKey, enabled ? '1' : '0');
+
+        Object.values(charts).forEach((chart) => chart.resize());
+    }
+
+    const densityToggle = document.getElementById('densityToggle');
+    if (densityToggle) {
+        densityToggle.addEventListener('click', () => {
+            const analyticsRoot = document.querySelector('.analytics-page');
+            const isDense = analyticsRoot ? analyticsRoot.classList.contains('analytics-dense') : false;
+            setDenseMode(!isDense);
+        });
+    }
+
+    if (localStorage.getItem(densityStorageKey) === '1') {
+        setDenseMode(true);
+    }
+
+    applyRange('{{ default_range }}');
+</script>
+{% endblock %}

@@ -15,8 +15,14 @@
 <!-- Hero Section -->
 <div class="donate-hero">
     <div class="donate-hero-content">
+        <span class="donate-hero-kicker">Community Giving</span>
         <h1>Support Our Community</h1>
         <p>Every donation strengthens the Nepali Community of Vancouver</p>
+        <div class="donate-hero-meta">
+            <span>Scholarships</span>
+            <span>Cultural programs</span>
+            <span>Family support</span>
+        </div>
     </div>
 </div>
 
@@ -34,7 +40,7 @@
             {% csrf_token %}
 
             <!-- Tier Selection -->
-            <h2 class="form-section-title"><i class="fas fa-layer-group"></i> Select Your Donation Level</h2>
+            <h2 class="form-section-title">Select Your Donation Level</h2>
 
             <div class="tier-grid">
                 <div class="tier-option">
@@ -88,9 +94,7 @@
 
             <!-- Custom Amount -->
             <div class="custom-amount-container" id="customAmountContainer">
-                <label for="{{ form.custom_amount.id_for_label }}">
-                    <i class="fas fa-pen-fancy"></i> Enter Your Custom Amount
-                </label>
+                <label for="{{ form.custom_amount.id_for_label }}">Enter Your Custom Amount</label>
                 {{ form.custom_amount }}
                 {% if form.custom_amount.errors %}
                 <small style="color: var(--primary); margin-top: 0.5rem;">{{ form.custom_amount.errors }}</small>
@@ -98,22 +102,18 @@
             </div>
 
             <!-- Donor Information -->
-            <h2 class="form-section-title"><i class="fas fa-user-circle"></i> Your Information</h2>
+            <h2 class="form-section-title">Your Information</h2>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="{{ form.donor_name.id_for_label }}">
-                        <i class="fas fa-signature"></i> Full Name
-                    </label>
+                    <label for="{{ form.donor_name.id_for_label }}">Full Name</label>
                     {{ form.donor_name }}
                     {% if form.donor_name.errors %}
                     <small style="color: var(--primary);">{{ form.donor_name.errors }}</small>
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    <label for="{{ form.donor_email.id_for_label }}">
-                        <i class="fas fa-envelope"></i> Email Address
-                    </label>
+                    <label for="{{ form.donor_email.id_for_label }}">Email Address</label>
                     {{ form.donor_email }}
                     {% if form.donor_email.errors %}
                     <small style="color: var(--primary);">{{ form.donor_email.errors }}</small>
@@ -124,9 +124,7 @@
             <!-- Interact Email -->
             <div class="form-row">
                 <div class="form-group">
-                    <label for="{{ form.interact_email.id_for_label }}">
-                        <i class="fas fa-exchange-alt"></i> Interact e-Transfer Email
-                    </label>
+                    <label for="{{ form.interact_email.id_for_label }}">Interact e-Transfer Email</label>
                     {{ form.interact_email }}
                     {% if form.interact_email.errors %}
                     <small style="color: var(--primary);">{{ form.interact_email.errors }}</small>
@@ -135,7 +133,7 @@
             </div>
 
             <!-- Options -->
-            <h2 class="form-section-title"><i class="fas fa-sliders-h"></i> Donation Options</h2>
+            <h2 class="form-section-title">Donation Options</h2>
 
             <div class="checkbox-container">
                 <div class="checkbox-item">
@@ -157,9 +155,7 @@
 
             <!-- Purpose -->
             <div class="form-group" style="margin-bottom: 2rem;">
-                <label for="{{ form.purpose.id_for_label }}">
-                    <i class="fas fa-heart"></i> Purpose (Optional)
-                </label>
+                <label for="{{ form.purpose.id_for_label }}">Purpose (Optional)</label>
                 {{ form.purpose }}
                 <small style="color: #666; margin-top: 0.5rem;">e.g., "Scholarship Fund", "Community Programs",
                     "Cultural Events"</small>
@@ -169,7 +165,7 @@
             </div>
 
             <!-- Payment Method Selection -->
-            <h2 class="form-section-title"><i class="fas fa-credit-card"></i> Payment Method</h2>
+            <h2 class="form-section-title">Payment Method</h2>
 
             <div class="payment-method-selector"
                 data-selected-payment="{{ form.payment_method.value|default:'interact' }}">
@@ -204,7 +200,7 @@
 
             <!-- Interact Payment Section -->
             <div id="interactSection" class="payment-section">
-                <h2 class="form-section-title"><i class="fas fa-building-columns"></i> Interact e-Transfer Payment</h2>
+                <h2 class="form-section-title">Interact e-Transfer Payment</h2>
 
                 <div class="interact-section">
                     <div class="interact-header">
@@ -223,9 +219,7 @@
 
                     <!-- Interact Email -->
                     <div class="form-group" style="margin-bottom: 1.5rem;">
-                        <label for="{{ form.interact_email.id_for_label }}">
-                            <i class="fas fa-envelope"></i> Interact Email
-                        </label>
+                        <label for="{{ form.interact_email.id_for_label }}">Interact Email</label>
                         {{ form.interact_email }}
                         {% if form.interact_email.errors %}
                         <small style="color: var(--primary);">{{ form.interact_email.errors }}</small>
@@ -234,7 +228,7 @@
 
                     <div class="interact-steps">
                         <strong style="color: var(--dark); display: block; margin-bottom: 1rem;">
-                            <i class="fas fa-tasks"></i> How to Complete Your Donation:
+                            How to Complete Your Donation:
                         </strong>
                         <ol>
                             <li>Log into your <strong>bank's online or mobile app</strong></li>
@@ -256,7 +250,7 @@
 
             <!-- Card Payment Section -->
             <div id="cardSection" class="payment-section" style="display: none;">
-                <h2 class="form-section-title"><i class="fas fa-credit-card"></i> Card Payment</h2>
+                <h2 class="form-section-title">Card Payment</h2>
 
                 <div class="card-section">
                     <div class="card-header">
@@ -273,9 +267,7 @@
 
                     <!-- Card Name -->
                     <div class="form-group">
-                        <label for="{{ form.card_name.id_for_label }}">
-                            <i class="fas fa-user-card"></i> Name on Card
-                        </label>
+                        <label for="{{ form.card_name.id_for_label }}">Name on Card</label>
                         {{ form.card_name }}
                         {% if form.card_name.errors %}
                         <small style="color: var(--primary);">{{ form.card_name.errors }}</small>
@@ -284,9 +276,7 @@
 
                     <!-- Card Number -->
                     <div class="form-group">
-                        <label for="{{ form.card_number.id_for_label }}">
-                            <i class="fas fa-hashtag"></i> Card Number
-                        </label>
+                        <label for="{{ form.card_number.id_for_label }}">Card Number</label>
                         {{ form.card_number }}
                         {% if form.card_number.errors %}
                         <small style="color: var(--primary);">{{ form.card_number.errors }}</small>
@@ -296,9 +286,7 @@
                     <div class="form-row">
                         <!-- Card Expiry -->
                         <div class="form-group">
-                            <label for="{{ form.card_expiry.id_for_label }}">
-                                <i class="fas fa-calendar"></i> Expiry (MM/YY)
-                            </label>
+                            <label for="{{ form.card_expiry.id_for_label }}">Expiry (MM/YY)</label>
                             {{ form.card_expiry }}
                             {% if form.card_expiry.errors %}
                             <small style="color: var(--primary);">{{ form.card_expiry.errors }}</small>
@@ -307,9 +295,7 @@
 
                         <!-- Card CVV -->
                         <div class="form-group">
-                            <label for="{{ form.card_cvv.id_for_label }}">
-                                <i class="fas fa-lock"></i> CVV
-                            </label>
+                            <label for="{{ form.card_cvv.id_for_label }}">CVV</label>
                             {{ form.card_cvv }}
                             {% if form.card_cvv.errors %}
                             <small style="color: var(--primary);">{{ form.card_cvv.errors }}</small>
@@ -326,12 +312,12 @@
             <!-- Submit Button -->
             <div class="submit-container">
                 <button type="submit" class="btn-submit" id="submitBtn">
-                    <i class="fas fa-heart"></i> Proceed to Donate
+                    Proceed to Donate
                 </button>
             </div>
 
             <div class="security-note">
-                <i class="fas fa-shield-alt"></i> Your information is secure and protected. We never store payment card
+                Your information is secure and protected. We never store payment card
                 details.
             </div>
         </form>

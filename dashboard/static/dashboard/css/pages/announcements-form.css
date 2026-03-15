@@ -73,6 +73,13 @@ textarea.form-control {
     margin-top: 0.25rem;
 }
 
+.form-help {
+    margin-top: 0.35rem;
+    color: #64748b;
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
 .form-footer {
     display: flex;
     gap: 1rem;

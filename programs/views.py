@@ -8,6 +8,7 @@ from django.urls import reverse_lazy
 from django.db.models import Q
 from django.shortcuts import render
 from communities.models import Community
+from core.email_utils import send_notification_email, build_event_newsletter_html
 from .models import Program, EventRegistration, RequestEvent
 from .forms import GuestRegistrationForm, UserRegistrationForm, RequestEventForm
 import json
@@ -439,6 +440,32 @@ class RegisterForEventView(View):
                     program.save()
                     message = f"Successfully registered for {program.title}!"
                     success = True
+
+                    if request.user.email:
+                        send_notification_email(
+                            subject=f"Event registration confirmed: {program.title}",
+                            message=(
+                                f"Hi {request.user.get_full_name() or request.user.username},\n\n"
+                                f"You are registered for: {program.title}\n"
+                                f"Date: {program.date}\n"
+                                f"Location: {program.location or 'TBA'}\n\n"
+                                "Thank you for participating."
+                            ),
+                            recipients=[request.user.email],
+                            html_message=build_event_newsletter_html(
+                                title='Event Registration Confirmed',
+                                greeting=f"Hi {request.user.get_full_name() or request.user.username},",
+                                summary='Your seat has been reserved successfully.',
+                                event_name=program.title,
+                                event_date=program.date.strftime('%B %d, %Y'),
+                                venue_text=program.location or 'Community venue details will be shared shortly.',
+                                category_text=program.get_event_type_display() if hasattr(program, 'get_event_type_display') else (program.event_type or 'Community Event'),
+                                detail_points=[
+                                    'Please arrive 10-15 minutes early for smooth check-in.',
+                                    'Bring any essentials relevant to this event type.',
+                                ],
+                            ),
+                        )
                 else:
                     message = "You are already registered for this event."
                     success = False
@@ -455,6 +482,32 @@ class RegisterForEventView(View):
                     
                     message = f"Successfully registered for {program.title}!"
                     success = True
+
+                    if registration.guest_email:
+                        send_notification_email(
+                            subject=f"Event registration confirmed: {program.title}",
+                            message=(
+                                f"Hi {registration.guest_name or 'Guest'},\n\n"
+                                f"You are registered for: {program.title}\n"
+                                f"Date: {program.date}\n"
+                                f"Location: {program.location or 'TBA'}\n\n"
+                                "Thank you for participating."
+                            ),
+                            recipients=[registration.guest_email],
+                            html_message=build_event_newsletter_html(
+                                title='Event Registration Confirmed',
+                                greeting=f"Hi {registration.guest_name or 'Community Member'},",
+                                summary='Your registration has been received and confirmed.',
+                                event_name=program.title,
+                                event_date=program.date.strftime('%B %d, %Y'),
+                                venue_text=program.location or 'Community venue details will be shared shortly.',
+                                category_text=program.get_event_type_display() if hasattr(program, 'get_event_type_display') else (program.event_type or 'Community Event'),
+                                detail_points=[
+                                    'Please keep this email for your reference.',
+                                    'We look forward to welcoming you at the event.',
+                                ],
+                            ),
+                        )
                 else:
                     message = "Error: Please fill in all required fields."
                     success = False

@@ -1,4 +1,61 @@
 (function () {
+    function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+    }
+
+    function animateCountValue(el) {
+        if (!el || el.dataset.countupDone === 'true') {
+            return;
+        }
+
+        const rawText = (el.textContent || '').trim();
+        const match = rawText.match(/^(\D*)([\d,]+)(\D*)$/);
+        if (!match) {
+            el.dataset.countupDone = 'true';
+            return;
+        }
+
+        const prefix = match[1] || '';
+        const numberText = match[2] || '0';
+        const suffix = match[3] || '';
+        const target = parseInt(numberText.replace(/,/g, ''), 10);
+
+        if (!Number.isFinite(target)) {
+            el.dataset.countupDone = 'true';
+            return;
+        }
+
+        const duration = 950;
+        const startTime = performance.now();
+        const startValue = 0;
+
+        el.dataset.countupDone = 'true';
+
+        function tick(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(1, elapsed / duration);
+            const eased = easeOutCubic(progress);
+            const current = Math.round(startValue + (target - startValue) * eased);
+            el.textContent = `${prefix}${current.toLocaleString()}${suffix}`;
+
+            if (progress < 1) {
+                requestAnimationFrame(tick);
+            }
+        }
+
+        requestAnimationFrame(tick);
+    }
+
+    function animateMetricCounters(container) {
+        if (!container) {
+            return;
+        }
+
+        container.querySelectorAll('[data-countup]').forEach((counterEl) => {
+            animateCountValue(counterEl);
+        });
+    }
+
     function getCookie(name) {
         const cookies = document.cookie ? document.cookie.split('; ') : [];
         for (const cookie of cookies) {
@@ -73,6 +130,9 @@
         entries.forEach((entry) => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
+                if (entry.target.classList.contains('home-v2-metric-card')) {
+                    animateMetricCounters(entry.target);
+                }
             }
         });
     }, { threshold: 0.15 });

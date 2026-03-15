@@ -148,7 +148,7 @@
                         <input type="checkbox" name="remember_me" {% if form.remember_me.value %}checked{% endif %}>
                         <span>Remember me</span>
                     </label>
-                    <a href="#" class="auth-link-inline" data-placeholder-link>Forgot password?</a>
+                    <a href="{% url 'password_reset' %}" class="auth-link-inline">Forgot password?</a>
                 </div>
 
                 <button type="submit" class="auth-submit" data-submit-btn>

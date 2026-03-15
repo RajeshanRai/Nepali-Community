@@ -827,7 +827,7 @@
 
 .impact-section .section-title,
 .impact-section .section-description {
-    color: var(--card-bg);
+    color: #ffffff;
 }
 
 .impact-section .section-description {
@@ -917,7 +917,7 @@
     margin-bottom: var(--spacing-md);
     position: relative;
     z-index: 1;
-    color: var(--accent-color);
+    color: #ffffff;
 }
 
 .impact-card p {

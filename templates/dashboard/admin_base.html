@@ -130,6 +130,10 @@
                     <i class="fas fa-question-circle"></i>
                     <span>FAQs</span>
                 </a>
+                <a href="{% url 'dashboard:partners_list' %}" data-tooltip="Partners" class="nav-item {% if 'partners' in request.path %}active{% endif %}">
+                    <i class="fas fa-handshake"></i>
+                    <span>Partners</span>
+                </a>
             </div>
 
             <!-- Reports Section -->

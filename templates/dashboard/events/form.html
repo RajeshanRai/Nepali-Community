@@ -169,6 +169,21 @@
             </div>
 
             <!-- Form Actions -->
+            {% if event %}
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-envelope"></i> Update Notification
+                </h3>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="send_update_email" checked>
+                        <span>Send update email to members</span>
+                    </label>
+                </div>
+                <small class="form-help">Uncheck this if you want to save changes silently without notifying members.</small>
+            </div>
+            {% endif %}
+
             <div class="form-actions">
                 <a href="{% url 'dashboard:event_list' %}" class="btn btn-secondary">
                     <i class="fas fa-times"></i> Cancel

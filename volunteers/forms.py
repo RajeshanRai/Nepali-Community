@@ -3,6 +3,45 @@ from .models import VolunteerApplication, VolunteerRequest
 
 
 class VolunteerApplicationForm(forms.ModelForm):
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+        if user and user.is_authenticated:
+            full_name = user.get_full_name() or user.username
+            user_email = (user.email or '').strip()
+            user_phone = (getattr(user, 'phone_number', '') or '').strip()
+
+            # Always use profile identity for logged-in applications.
+            self.fields['name'].initial = full_name
+            self.fields['email'].initial = user_email
+            self.fields['name'].required = False
+            self.fields['email'].required = False
+            self.fields['name'].widget = forms.HiddenInput()
+            self.fields['email'].widget = forms.HiddenInput()
+
+            if user_phone:
+                self.fields['phone'].initial = user_phone
+                self.fields['phone'].required = False
+                self.fields['phone'].widget = forms.HiddenInput()
+            else:
+                self.fields['phone'].required = True
+                self.fields['phone'].widget.attrs['placeholder'] = 'Phone Number (required to contact you)'
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if self.user and self.user.is_authenticated:
+            cleaned_data['name'] = self.user.get_full_name() or self.user.username
+            cleaned_data['email'] = (self.user.email or '').strip()
+            if not cleaned_data.get('phone'):
+                cleaned_data['phone'] = (getattr(self.user, 'phone_number', '') or '').strip()
+
+            if not cleaned_data.get('email'):
+                self.add_error(None, 'Your account must have an email to apply. Please update your profile email.')
+
+        return cleaned_data
+
     class Meta:
         model = VolunteerApplication
         fields = ['name', 'email', 'phone', 'motivation', 'experience', 'availability']

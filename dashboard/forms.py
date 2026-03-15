@@ -7,6 +7,7 @@ from communities.models import Community
 from users.models import CustomUser
 from donations.models import Donation
 from contacts.models import ContactMessage
+from partners.models import Partner
 
 
 class ProgramForm(forms.ModelForm):
@@ -149,4 +150,22 @@ class CommunityForm(forms.ModelForm):
             'introduction': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Short introduction'}),
             'member_count': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
             'events_per_year': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
+        }
+
+
+class PartnerForm(forms.ModelForm):
+    class Meta:
+        model = Partner
+        fields = ['name', 'logo', 'description', 'website', 'partnership_since', 'social_links']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Partner name'}),
+            'logo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Partner description'}),
+            'website': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://example.org'}),
+            'partnership_since': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'social_links': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': '{"facebook":"https://...","twitter":"https://...","linkedin":"https://...","instagram":"https://..."}'
+            }),
         }

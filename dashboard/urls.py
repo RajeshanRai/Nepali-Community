@@ -93,6 +93,12 @@ urlpatterns = [
     path('contact-messages/create/', views.contact_message_create, name='contact_message_create'),
     path('contact-messages/<int:pk>/edit/', views.contact_message_edit, name='contact_message_edit'),
     path('contact-messages/<int:pk>/delete/', views.contact_message_delete, name='contact_message_delete'),
+
+    # Partners
+    path('partners/', views.partners_list, name='partners_list'),
+    path('partners/create/', views.partner_create, name='partner_create'),
+    path('partners/<int:pk>/edit/', views.partner_edit, name='partner_edit'),
+    path('partners/<int:pk>/delete/', views.partner_delete, name='partner_delete'),
     
     # API Endpoints
     path('api/available-opportunities/', dashboard_api.get_available_opportunities, name='api_available_opportunities'),

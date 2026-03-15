@@ -34,10 +34,35 @@
 
             <div class="form-section">
                 <h3><i class="fas fa-user"></i> Your Information</h3>
+                {% if user.is_authenticated %}
+                {{ form.name }}
+                {{ form.email }}
+                {% if not needs_phone %}
+                {{ form.phone }}
+                {% endif %}
+
+                <div class="form-group">
+                    <p>
+                        Applying as <strong>{{ prefilled_name }}</strong>
+                        {% if prefilled_email %} ({{ prefilled_email }}){% endif %}
+                    </p>
+                </div>
+
+                {% if needs_phone %}
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="{{ form.name.id_for_label }}">{{ form.name.label }} <span
-                                class="required">*</span></label>
+                        <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }} <span class="required">*</span></label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                        <span class="error">{{ form.phone.errors }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.name.id_for_label }}">{{ form.name.label }} <span class="required">*</span></label>
                         {{ form.name }}
                         {% if form.name.errors %}
                         <span class="error">{{ form.name.errors }}</span>
@@ -47,8 +72,7 @@
 
                 <div class="form-row two-columns">
                     <div class="form-group">
-                        <label for="{{ form.email.id_for_label }}">{{ form.email.label }} <span
-                                class="required">*</span></label>
+                        <label for="{{ form.email.id_for_label }}">{{ form.email.label }} <span class="required">*</span></label>
                         {{ form.email }}
                         {% if form.email.errors %}
                         <span class="error">{{ form.email.errors }}</span>
@@ -63,6 +87,7 @@
                         {% endif %}
                     </div>
                 </div>
+                {% endif %}
             </div>
 
             <div class="form-section">

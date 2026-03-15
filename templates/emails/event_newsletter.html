@@ -1,0 +1,32 @@
+{% extends 'emails/base.html' %}
+
+{% block email_body %}
+<p class="greeting">{{ greeting }}</p>
+<p>{{ summary }}</p>
+
+<div class="event-card">
+    <h2>{{ event_name }}</h2>
+    <p><strong>When:</strong> {{ event_date }}</p>
+    <p><strong>Where:</strong> {{ venue_text }}</p>
+    <p><strong>Category:</strong> {{ category_text }}</p>
+</div>
+
+{% if detail_points %}
+<div class="highlight-block">
+    <h3>Highlights</h3>
+    <ul>
+        {% for item in detail_points %}
+        <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if cta_text and cta_url %}
+<p class="cta-wrap">
+    <a href="{{ cta_url }}" class="cta-btn">{{ cta_text }}</a>
+</p>
+{% endif %}
+
+<p class="closing">See you soon,<br>{{ brand_name }} Team</p>
+{% endblock %}

@@ -1,12 +1,12 @@
 from django.views.generic import FormView, TemplateView
 from django.contrib import messages
-from django.core.mail import send_mail
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import Donation
 from .forms import DonationForm
 from django.urls import reverse_lazy
+from core.email_utils import send_notification_email, build_donation_receipt_html
 import uuid
 import json
 
@@ -117,7 +117,9 @@ class DonationView(FormView):
     def send_confirmation_email(self, donation, cleaned_data):
         """Send confirmation email with payment details"""
         subject = f'Donation Confirmation - ${donation.amount}'
-        recipient_email = donation.donor_email or (donation.interact_email if donation.payment_method == 'interact' else cleaned_data.get('card_name', 'Donor'))
+        recipient_email = donation.donor_email or donation.interact_email
+        if not recipient_email:
+            return
         
         payment_method = donation.payment_method
         
@@ -146,6 +148,21 @@ Thank you for supporting the Nepali Community of Vancouver!
 Best regards,
 Nepali Community of Vancouver Team
             """
+            html_message = build_donation_receipt_html(
+                title='Donation Initiated Successfully',
+                greeting=f"Hi {donation.donor_name or 'Supporter'},",
+                summary='Thank you for beginning your contribution. Your receipt details are below.',
+                amount_text=f"${donation.amount}",
+                reference_number=donation.transaction_ref,
+                donation_date_text=donation.created_at.strftime('%B %d, %Y'),
+                payment_method_text='Interact e-Transfer',
+                recurring_text='Yes' if donation.is_recurring else 'No',
+                next_steps=[
+                    'Send your transfer to donations@nepalicommunityvancouver.ca.',
+                    f'Include reference {donation.transaction_ref} in your transfer note.',
+                    'You will receive a confirmation as soon as payment is verified.',
+                ],
+            )
         else:  # card payment
             message = f"""
 Thank you for your generous donation!
@@ -165,9 +182,28 @@ We appreciate your support of the Nepali Community of Vancouver!
 Best regards,
 Nepali Community of Vancouver Team
             """
+            html_message = build_donation_receipt_html(
+                title='Donation Confirmation Received',
+                greeting=f"Hi {donation.donor_name or 'Supporter'},",
+                summary='Your contribution has been received and is currently being processed.',
+                amount_text=f"${donation.amount}",
+                reference_number=donation.transaction_ref,
+                donation_date_text=donation.created_at.strftime('%B %d, %Y'),
+                payment_method_text='Credit/Debit Card',
+                recurring_text='Yes' if donation.is_recurring else 'No',
+                next_steps=[
+                    'You will receive final card processing confirmation within 24 hours.',
+                    'Please keep this receipt reference for your records.',
+                ],
+            )
         
         try:
-            send_mail(subject, message, 'noreply@nepalicommunityvancouver.ca', [recipient_email])
+            send_notification_email(
+                subject=subject,
+                message=message,
+                recipients=[recipient_email],
+                html_message=html_message,
+            )
         except Exception as e:
             import logging
             logger = logging.getLogger(__name__)
