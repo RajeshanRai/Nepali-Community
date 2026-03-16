@@ -9,8 +9,8 @@
         --hero-bg: linear-gradient(132deg, var(--color-primary, #1a1a1a) 0%, color-mix(in srgb, var(--color-primary, #1a1a1a) 70%, var(--color-accent, #FF6B35) 30%) 52%, var(--color-accent, #FF6B35) 100%);
         --hero-ink: var(--color-white, #ffffff);
         --hero-ink-soft: rgba(231, 251, 255, 0.78);
-        --hero-card-bg: rgba(255, 255, 255, 0.14);
-        --hero-border: rgba(var(--primary-rgb, 255, 107, 53), 0.36);
+        --hero-card-bg: rgba(0, 0, 0, 0.28);
+        --hero-border: rgba(255, 255, 255, 0.22);
         position: relative;
         overflow: hidden;
         border-radius: 26px;
@@ -117,16 +117,17 @@
         background: var(--hero-card-bg);
         border: 1px solid var(--hero-border);
         border-radius: 20px;
-        backdrop-filter: blur(8px);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         padding: 0.95rem;
         transform-style: preserve-3d;
         transition: transform 260ms ease, box-shadow 260ms ease;
-        box-shadow: 0 20px 34px rgba(2, 16, 24, 0.24);
+        box-shadow: 0 20px 34px rgba(2, 16, 24, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.28);
     }
 
     #member-profile-stage .profile-avatar-wrap {
-        border: 2px solid rgba(235, 255, 255, 0.45);
-        box-shadow: 0 9px 24px rgba(1, 20, 38, 0.35);
+        border: 2px solid rgba(255, 255, 255, 0.65);
+        box-shadow: 0 9px 24px rgba(1, 20, 38, 0.45), 0 0 0 4px rgba(255, 255, 255, 0.12);
     }
 
     #member-profile-stage .profile-hero-status {
@@ -138,20 +139,28 @@
 
     #member-profile-stage .profile-hero-status > div {
         border-radius: 12px;
-        border: 1px solid rgba(var(--primary-rgb, 255, 107, 53), 0.26);
-        background: rgba(var(--primary-rgb, 255, 107, 53), 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(0, 0, 0, 0.22);
         padding: 0.6rem 0.55rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
 
     #member-profile-stage .profile-hero-status strong {
-        color: #f2fdff;
-        font-size: clamp(1rem, 2.2vw, 1.2rem);
-        letter-spacing: -0.02em;
+        color: #ffffff;
+        font-size: 0.88rem;
+        letter-spacing: -0.01em;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     #member-profile-stage .profile-hero-status span {
-        color: rgba(221, 248, 255, 0.86);
+        color: rgba(225, 248, 255, 0.95);
         font-size: 0.77rem;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+        display: block;
     }
 
     #member-profile-stage[data-animate="true"] .profile-hero-copy,
@@ -675,7 +684,7 @@
 <div class="profile-page-shell">
     <section class="profile-page-hero" id="member-profile-stage" data-animate="true" aria-label="Member profile overview">
         <div class="profile-hero-copy">
-            <span class="profile-kicker">Member Profile</span>
+            <span class="profile-kicker">{% if user.is_superuser %}Superuser{% else %}Member{% endif %} Profile</span>
             <h1>{{ user.display_name }}</h1>
             <p>Your profile, security settings, and community activity — all in one place.</p>
             <div class="profile-hero-meta">
@@ -684,7 +693,16 @@
                 {% if display_location %}
                 <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>{{ display_location }}</span>
                 {% endif %}
+                {% if user.phone_number %}
+                <span><i class="fa-solid fa-phone" aria-hidden="true"></i>{{ user.phone_number }}</span>
+                {% endif %}
+                {% if user.primary_community %}
+                <span><i class="fa-solid fa-people-group" aria-hidden="true"></i>{{ user.primary_community }}</span>
+                {% endif %}
             </div>
+            {% if user.bio %}
+            <p style="color:var(--hero-ink-soft);font-size:0.9rem;margin:0.5rem 0 0;display:flex;align-items:flex-start;gap:0.42rem;"><i class="fa-solid fa-quote-left" aria-hidden="true" style="margin-top:0.15rem;opacity:0.7;flex-shrink:0;"></i>{{ user.bio }}</p>
+            {% endif %}
         </div>
         <div class="profile-hero-card">
             <div class="profile-avatar-wrap">
@@ -744,56 +762,107 @@
                 </form>
             </div>
 
-            <h2 style="font-size:1rem">Profile Summary</h2>
-            <ul class="profile-summary-list">
-                <li>
-                    <span>Display name</span>
-                    <strong>{{ user.display_name }}</strong>
-                </li>
-                <li>
-                    <span>Primary community</span>
-                    <strong>{{ user.primary_community|default:'Not selected' }}</strong>
-                </li>
-                <li>
-                    <span>Secondary community</span>
-                    <strong>{{ user.secondary_community|default:'Not selected' }}</strong>
-                </li>
-                <li>
-                    <span>Recovery email</span>
-                    <strong>{{ user.recovery_email|default:'Not set' }}</strong>
-                </li>
-                <li>
-                    <span>Recovery phone</span>
-                    <strong>{{ user.recovery_phone|default:'Not set' }}</strong>
-                </li>
-                <li>
-                    <span>Email verification</span>
-                    <strong>{% if user.email_verified %}Verified{% else %}Pending{% endif %}</strong>
-                </li>
-                <li>
-                    <span>2FA method</span>
-                    <strong>{% if user.two_factor_method == 'email' %}Email code{% elif user.two_factor_method == 'app' %}Authenticator app{% else %}Disabled{% endif %}</strong>
-                </li>
-            </ul>
+            <div class="profile-sidebar-body">
+                <div class="profile-sidebar-section-head">
+                    <h2 style="font-size:1rem">Profile Summary</h2>
+                </div>
+                <ul class="profile-summary-list">
+                    <li>
+                        <a href="#profile-basic-info" class="profile-summary-link" data-profile-target="profile-basic-info" data-focus-field="first_name">
+                            <span class="profile-summary-copy">
+                                <span class="profile-summary-label">Display name</span>
+                                <strong>{{ user.display_name }}</strong>
+                            </span>
+                            <span class="profile-summary-action" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#profile-basic-info" class="profile-summary-link" data-profile-target="profile-basic-info" data-focus-field="primary_community">
+                            <span class="profile-summary-copy">
+                                <span class="profile-summary-label">Primary community</span>
+                                <strong>{{ user.primary_community|default:'Not selected' }}</strong>
+                            </span>
+                            <span class="profile-summary-action" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#profile-basic-info" class="profile-summary-link" data-profile-target="profile-basic-info" data-focus-field="secondary_community">
+                            <span class="profile-summary-copy">
+                                <span class="profile-summary-label">Secondary community</span>
+                                <strong>{{ user.secondary_community|default:'Not selected' }}</strong>
+                            </span>
+                            <span class="profile-summary-action" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#profile-basic-info" class="profile-summary-link" data-profile-target="profile-basic-info" data-focus-field="recovery_email">
+                            <span class="profile-summary-copy">
+                                <span class="profile-summary-label">Recovery email</span>
+                                <strong>{{ user.recovery_email|default:'Not set' }}</strong>
+                            </span>
+                            <span class="profile-summary-action" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#profile-basic-info" class="profile-summary-link" data-profile-target="profile-basic-info" data-focus-field="recovery_phone">
+                            <span class="profile-summary-copy">
+                                <span class="profile-summary-label">Recovery phone</span>
+                                <strong>{{ user.recovery_phone|default:'Not set' }}</strong>
+                            </span>
+                            <span class="profile-summary-action" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#profile-email-verification-panel" class="profile-summary-link" data-profile-target="profile-email-verification-panel">
+                            <span class="profile-summary-copy">
+                                <span class="profile-summary-label">Email verification</span>
+                                <strong>{% if user.email_verified %}Verified{% else %}Pending{% endif %}</strong>
+                            </span>
+                            <span class="profile-summary-action" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#profile-two-factor-panel" class="profile-summary-link" data-profile-target="profile-two-factor-panel">
+                            <span class="profile-summary-copy">
+                                <span class="profile-summary-label">2FA method</span>
+                                <strong>{% if user.two_factor_method == 'email' %}Email code{% elif user.two_factor_method == 'app' %}Authenticator app{% else %}Disabled{% endif %}</strong>
+                            </span>
+                            <span class="profile-summary-action" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+                        </a>
+                    </li>
+                </ul>
 
-            <div class="profile-security-notes">
-                <article>
-                    <h3>Security & verification</h3>
-                    <p>{% if user.is_verified_member %}Your account carries the verified community member badge.{% else %}Your account is active, but community verification has not been approved yet.{% endif %}</p>
-                </article>
-                <article>
-                    <h3>Two-factor authentication</h3>
-                    <p>{% if user.two_factor_method == 'email' %}Email-based verification is enabled at login.{% elif user.two_factor_method == 'app' %}Authenticator app verification is enabled at login.{% else %}Two-factor authentication is currently disabled.{% endif %}</p>
-                </article>
-                <article>
-                    <h3>Account deletion</h3>
-                    <p>Self-service permanent deletion is intentionally disabled. Use deactivation below and contact support if you need full data removal.</p>
-                </article>
+                <div class="profile-security-notes">
+                    <a href="#profile-security-status" class="profile-security-note-link" data-profile-target="profile-security-status">
+                        <span class="profile-security-note-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+                        <span class="profile-security-note-copy">
+                            <strong>Security & verification</strong>
+                            <span>{% if user.is_verified_member %}Your account carries the verified community member badge.{% else %}Your account is active, but community verification has not been approved yet.{% endif %}</span>
+                        </span>
+                        <span class="profile-security-note-action">Open<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+                    </a>
+                    <a href="#profile-two-factor-panel" class="profile-security-note-link" data-profile-target="profile-two-factor-panel">
+                        <span class="profile-security-note-icon"><i class="fa-solid fa-key" aria-hidden="true"></i></span>
+                        <span class="profile-security-note-copy">
+                            <strong>Two-factor authentication</strong>
+                            <span>{% if user.two_factor_method == 'email' %}Email-based verification is enabled at login.{% elif user.two_factor_method == 'app' %}Authenticator app verification is enabled at login.{% else %}Two-factor authentication is currently disabled.{% endif %}</span>
+                        </span>
+                        <span class="profile-security-note-action">Open<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+                    </a>
+                    <a href="#profile-deactivate-panel" class="profile-security-note-link profile-security-note-link-danger" data-profile-target="profile-deactivate-panel" data-focus-field="password">
+                        <span class="profile-security-note-icon"><i class="fa-solid fa-user-slash" aria-hidden="true"></i></span>
+                        <span class="profile-security-note-copy">
+                            <strong>Account deletion</strong>
+                            <span>Self-service permanent deletion is intentionally disabled. Use deactivation below and contact support if you need full data removal.</span>
+                        </span>
+                        <span class="profile-security-note-action">Open<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+                    </a>
+                </div>
             </div>
         </aside>
 
         <div class="profile-main-stack">
-            <section class="profile-card profile-card-basic-compact">
+            <section class="profile-card profile-card-basic-compact" id="profile-basic-info">
                 <div class="profile-card-header">
                     <div>
                         <span class="profile-section-kicker">Basic Profile Information</span>
@@ -876,7 +945,7 @@
                     </form>
 
                     <div class="profile-settings-stack-right">
-                        <div class="profile-settings-panel" data-collapsible-panel>
+                        <div class="profile-settings-panel" data-collapsible-panel id="profile-email-verification-panel">
                             <button type="button" class="profile-settings-toggle" aria-expanded="true">
                                 <h3>Email verification</h3>
                                 <span class="toggle-icon"><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></span>
@@ -897,7 +966,7 @@
                             </div>
                         </div>
 
-                        <form method="post" class="profile-settings-panel profile-settings-panel-danger" data-collapsible-panel>
+                        <form method="post" class="profile-settings-panel profile-settings-panel-danger" data-collapsible-panel id="profile-deactivate-panel">
                             <button type="button" class="profile-settings-toggle" aria-expanded="true">
                                 <h3>Deactivate account</h3>
                                 <span class="toggle-icon"><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></span>
@@ -923,7 +992,7 @@
                         </form>
                     </div>
 
-                    <div class="profile-settings-panel profile-settings-panel-wide" data-collapsible-panel>
+                    <div class="profile-settings-panel profile-settings-panel-wide" data-collapsible-panel id="profile-two-factor-panel">
                         <button type="button" class="profile-settings-toggle" aria-expanded="true">
                             <h3>Two-factor authentication</h3>
                             <span class="toggle-icon"><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></span>
@@ -1103,7 +1172,7 @@
                 </div>
             </section>
 
-            <section class="profile-card">
+            <section class="profile-card" id="profile-security-status">
                 <div class="profile-card-header">
                     <div>
                         <span class="profile-section-kicker">Security & Verification</span>
@@ -1174,13 +1243,45 @@
             document.body.scrollTop = 0;
         }
 
+        function getScrollOffset() {
+            var topBar = document.querySelector('.top-navbar');
+            var mainNav = document.querySelector('.main-navbar');
+            var offset = 18;
+
+            if (topBar) {
+                offset += topBar.getBoundingClientRect().height;
+            }
+
+            if (mainNav) {
+                offset += mainNav.getBoundingClientRect().height;
+            }
+
+            return offset;
+        }
+
+        function prefersReducedMotion() {
+            return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        }
+
+        function scrollToElement(target, behavior) {
+            if (!target) {
+                return;
+            }
+
+            var top = target.getBoundingClientRect().top + window.scrollY - getScrollOffset();
+            window.scrollTo({
+                top: Math.max(top, 0),
+                behavior: prefersReducedMotion() ? 'auto' : (behavior || 'smooth')
+            });
+        }
+
         function scrollToAccessHub() {
             var hub = document.getElementById('profile-access-hub');
             if (!hub) {
                 forceTop();
                 return;
             }
-            hub.scrollIntoView({ behavior: 'auto', block: 'start' });
+            scrollToElement(hub, 'auto');
         }
 
         function applyInitialScrollPreference() {
@@ -1303,6 +1404,37 @@
         }
 
         var root = document.getElementById('profile-access-hub');
+        var desktopCardsMq = window.matchMedia('(min-width: 1101px)');
+        var primarySidebarCard = document.querySelector('.profile-sidebar-card');
+        var primaryBasicCard = document.getElementById('profile-basic-info');
+
+        function syncPrimaryCardsHeight() {
+            if (!primarySidebarCard || !primaryBasicCard) {
+                return;
+            }
+
+            primarySidebarCard.style.minHeight = '0px';
+            primaryBasicCard.style.minHeight = '0px';
+
+            if (!desktopCardsMq.matches) {
+                return;
+            }
+
+            var targetHeight = Math.max(primarySidebarCard.offsetHeight, primaryBasicCard.offsetHeight);
+            primarySidebarCard.style.minHeight = targetHeight + 'px';
+            primaryBasicCard.style.minHeight = targetHeight + 'px';
+        }
+
+        requestAnimationFrame(syncPrimaryCardsHeight);
+        window.addEventListener('load', syncPrimaryCardsHeight);
+        window.addEventListener('resize', syncPrimaryCardsHeight);
+
+        if (typeof desktopCardsMq.addEventListener === 'function') {
+            desktopCardsMq.addEventListener('change', syncPrimaryCardsHeight);
+        } else {
+            desktopCardsMq.addListener(syncPrimaryCardsHeight);
+        }
+
         if (!root) {
             return;
         }
@@ -1357,7 +1489,56 @@
             mobileMq.addListener(syncToViewport);
         }
 
+        var jumpLinks = document.querySelectorAll('[data-profile-target]');
+
+        function focusField(target, fieldName) {
+            if (!target || !fieldName) {
+                return;
+            }
+
+            var field = target.querySelector('[name="' + fieldName + '"]');
+            if (!field && profileForm) {
+                field = profileForm.querySelector('[name="' + fieldName + '"]');
+            }
+            if (!field) {
+                return;
+            }
+
+            window.setTimeout(function () {
+                if (typeof field.focus === 'function') {
+                    field.focus({ preventScroll: true });
+                }
+            }, 220);
+        }
+
+        jumpLinks.forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                var targetId = link.getAttribute('data-profile-target');
+                if (!targetId) {
+                    return;
+                }
+
+                var target = document.getElementById(targetId);
+                if (!target) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                var panel = target.closest('[data-collapsible-panel]');
+                if (panel) {
+                    setCollapseState(panel, false);
+                }
+
+                window.setTimeout(function () {
+                    scrollToElement(target, 'smooth');
+                    focusField(target, link.getAttribute('data-focus-field'));
+                }, panel && mobileMq.matches ? 120 : 40);
+            });
+        });
+
         syncToViewport();
+        syncPrimaryCardsHeight();
     })();
 </script>
 {% endblock %}

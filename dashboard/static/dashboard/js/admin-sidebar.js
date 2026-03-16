@@ -131,6 +131,7 @@ function initDropdowns() {
         userBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             userMenu.classList.toggle('show');
+            userBtn.setAttribute('aria-expanded', userMenu.classList.contains('show') ? 'true' : 'false');
 
             // Close notifications menu if open
             if (notificationsMenu) {
@@ -146,6 +147,9 @@ function initDropdowns() {
         }
         if (userMenu) {
             userMenu.classList.remove('show');
+        }
+        if (userBtn) {
+            userBtn.setAttribute('aria-expanded', 'false');
         }
     });
 

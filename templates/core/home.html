@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block content %}
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 <div class="home-v2">
     <section class="home-v2-hero">
         <div class="home-v2-hero-slideshow" aria-hidden="true">

@@ -153,7 +153,25 @@
 
     const isAuthenticated = document.documentElement.dataset.userAuthenticated === 'true';
     const loginUrl = '/users/login/';
-    const csrfToken = getCookie('csrftoken') || '';
+
+    function isValidCsrfToken(token) {
+        return typeof token === 'string' && (token.length === 32 || token.length === 64);
+    }
+
+    function resolveCsrfToken() {
+        const formToken = document.querySelector('[name="csrfmiddlewaretoken"]')?.value?.trim() || '';
+        const cookieToken = (getCookie('csrftoken') || '').trim();
+
+        if (isValidCsrfToken(formToken)) {
+            return formToken;
+        }
+
+        if (isValidCsrfToken(cookieToken)) {
+            return cookieToken;
+        }
+
+        return '';
+    }
 
     function updateAttendance(card, delta) {
         const countSpan = card.querySelector('.home-v2-meta span:last-child');
@@ -168,16 +186,27 @@
         countSpan.innerHTML = `<i class="fas fa-user-check"></i> ${nextCount} attending`;
     }
 
-    function bindRegister(btn) {
-        btn.addEventListener('click', function () {
+    function attachRegisterHandler(btn) {
+        btn.addEventListener('click', async function () {
             const programId = this.getAttribute('data-program-id');
-
             if (!isAuthenticated) {
                 const next = encodeURIComponent(window.location.pathname + window.location.search);
                 window.location.href = `${loginUrl}?next=${next}`;
                 return;
             }
-
+            const confirmed = await window.GlobalUI.confirm({
+                title: 'Register for Event',
+                message: 'Do you want to register for this event?',
+                okText: 'Register',
+                variant: 'primary'
+            });
+            if (!confirmed) return;
+            const csrfToken = resolveCsrfToken();
+            if (!csrfToken) {
+                showNotification('Security token missing. Refresh the page and try again.', 'error', 'Security Check Failed');
+                return;
+            }
+            const self = this;
             fetch(`/programs/${programId}/register/`, {
                 method: 'POST',
                 headers: {
@@ -185,36 +214,46 @@
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (!data.success) {
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification(data.message || 'Registered successfully', 'success', 'Registration Successful');
+                        self.textContent = 'Unregister';
+                        self.classList.remove('btn-primary');
+                        self.classList.add('btn-secondary');
+                        self.classList.remove('btn-register');
+                        self.classList.add('btn-unregister');
+                        const card = self.closest('.home-v2-program-card');
+                        if (card) {
+                            updateAttendance(card, 1);
+                        }
+                        attachUnregisterHandler(self);
+                    } else {
                         showNotification(data.message || 'Registration failed', 'error', 'Registration Failed');
-                        return;
                     }
-
-                    showNotification(data.message || 'Registered successfully', 'success', 'Registration Successful');
-
-                    this.textContent = 'Unregister';
-                    this.classList.remove('btn-primary', 'btn-register');
-                    this.classList.add('btn-secondary', 'btn-unregister');
-
-                    const card = this.closest('.home-v2-program-card');
-                    if (card) {
-                        updateAttendance(card, 1);
-                    }
-
-                    bindUnregister(this);
                 })
                 .catch(() => {
                     showNotification('An error occurred during registration.', 'error', 'Error');
                 });
-        }, { once: true });
+        });
     }
 
-    function bindUnregister(btn) {
-        btn.addEventListener('click', function () {
+    function attachUnregisterHandler(btn) {
+        btn.addEventListener('click', async function () {
             const programId = this.getAttribute('data-program-id');
-
+            const confirmed = await window.GlobalUI.confirm({
+                title: 'Unregister from Event',
+                message: 'Do you want to unregister from this event?',
+                okText: 'Unregister',
+                variant: 'danger'
+            });
+            if (!confirmed) return;
+            const csrfToken = resolveCsrfToken();
+            if (!csrfToken) {
+                showNotification('Security token missing. Refresh the page and try again.', 'error', 'Security Check Failed');
+                return;
+            }
+            const self = this;
             fetch(`/programs/${programId}/unregister/`, {
                 method: 'POST',
                 headers: {
@@ -222,34 +261,32 @@
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (!data.success) {
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification(data.message || 'Unregistered', 'success', 'Unregistered');
+                        self.textContent = 'Register';
+                        self.classList.remove('btn-secondary');
+                        self.classList.add('btn-primary');
+                        self.classList.remove('btn-unregister');
+                        self.classList.add('btn-register');
+                        const card = self.closest('.home-v2-program-card');
+                        if (card) {
+                            updateAttendance(card, -1);
+                        }
+                        attachRegisterHandler(self);
+                    } else {
                         showNotification(data.message || 'Unregister failed', 'error', 'Error');
-                        return;
                     }
-
-                    showNotification(data.message || 'Unregistered', 'success', 'Unregistered');
-
-                    this.textContent = 'Register';
-                    this.classList.remove('btn-secondary', 'btn-unregister');
-                    this.classList.add('btn-primary', 'btn-register');
-
-                    const card = this.closest('.home-v2-program-card');
-                    if (card) {
-                        updateAttendance(card, -1);
-                    }
-
-                    bindRegister(this);
                 })
                 .catch(() => {
                     showNotification('Unregister request failed', 'error', 'Error');
                 });
-        }, { once: true });
+        });
     }
 
-    document.querySelectorAll('.btn-register').forEach((btn) => bindRegister(btn));
-    document.querySelectorAll('.btn-unregister').forEach((btn) => bindUnregister(btn));
+    document.querySelectorAll('.btn-register').forEach(btn => attachRegisterHandler(btn));
+    document.querySelectorAll('.btn-unregister').forEach(btn => attachUnregisterHandler(btn));
 
     const warningTrigger = document.getElementById('homeWarningTrigger');
     if (warningTrigger) {

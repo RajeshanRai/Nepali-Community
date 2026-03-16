@@ -1,17 +1,17 @@
 {% extends 'dashboard/admin_base.html' %}
 
-{% block title %}Rejected Projects{% endblock %}
+{% block title %}Rejected Events{% endblock %}
 
 {% block breadcrumb_items %}
-<li class="breadcrumb-item">Projects</li>
+<li class="breadcrumb-item">Events</li>
 <li class="breadcrumb-item active">Rejected</li>
 {% endblock %}
 
 {% block page_header %}
 <div class="page-header">
     <div class="page-header-content">
-        <h1><i class="fas fa-times-circle"></i> Rejected Projects</h1>
-        <p>All rejected project requests</p>
+        <h1><i class="fas fa-times-circle"></i> Rejected Events</h1>
+        <p>All rejected event requests</p>
     </div>
 </div>
 {% endblock %}
@@ -31,7 +31,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for request in projects %}
+                    {% for event in projects %}
                     <tr>
                         <td>#{{ request.id }}</td>
                         <td><strong>{{ request.title }}</strong></td>
@@ -41,7 +41,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center text-muted">No rejected projects</td>
+                        <td colspan="5" class="text-center text-muted">No rejected events</td>
                     </tr>
                     {% endfor %}
                 </tbody>

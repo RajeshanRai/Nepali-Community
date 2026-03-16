@@ -1,29 +1,33 @@
 {% extends 'dashboard/admin_base.html' %}
 {% load static %}
 
-{% block title %}{{ title|default:"Approved Projects" }}{% endblock %}
+{% block title %}Approved Events{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'dashboard/css/projects-approved.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/projects-approved.css' %}">
 {% endblock %}
 
 {% block breadcrumb_items %}
-<li class="breadcrumb-item">Projects</li>
+<li class="breadcrumb-item">Events</li>
 <li class="breadcrumb-item active">Approved</li>
 {% endblock %}
 
 {% block page_header %}
-{% include 'dashboard/includes/page_header.html' with title='Approved Projects' subtitle='All approved and active projects' icon_class='fas fa-check-circle' %}
+{% include 'dashboard/includes/page_header.html' with title='Approved Events' subtitle='All approved and active events' icon_class='fas fa-check-circle' %}
 {% endblock %}
 
 {% block content %}
 <div class="content-card">
+    <div class="content-card-header">
+        <i class="fas fa-check-circle me-2"></i>
+        <span class="header-title">Approved Events</span>
+    </div>
     <div class="content-card-body">
         <div class="table-responsive">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>#ID</th>
                         <th>Title</th>
                         <th>Category</th>
                         <th>Date</th>
@@ -36,15 +40,12 @@
                     <tr>
                         <td>#{{ project.id }}</td>
                         <td><strong>{{ project.title }}</strong></td>
-                        <td><span class="badge badge-info">{{ project.get_event_type_display }}</span></td>
+                        <td><span class="type-pill type-{{ project.event_type|default:'other' }}">{{ project.get_event_type_display|default:'Other' }}</span></td>
                         <td>{{ project.date|date:"M d, Y" }}</td>
                         <td>{{ project.location }}</td>
                         <td>
-                            <div class="action-buttons">
-                                <button
-                                    type="button"
-                                    class="btn-icon btn-view"
-                                    title="View details"
+                            <div class="action-buttons enhanced-actions">
+                                <button class="btn-icon btn-view" title="View Details"
                                     data-project-title="{{ project.title|escapejs }}"
                                     data-project-category="{{ project.get_event_type_display|escapejs }}"
                                     data-project-date="{{ project.date|date:'M d, Y'|escapejs }}"
@@ -53,12 +54,12 @@
                                     onclick="openApprovedProjectModal(this)">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <a class="btn-icon btn-edit" href="{% url 'dashboard:event_edit' project.id %}"><i
-                                    class="fas fa-edit"></i></a>
-                                <button type="button" class="btn-icon btn-delete"
+                                <a class="btn-icon btn-edit" href="{% url 'dashboard:event_edit' project.id %}" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn-icon btn-delete" type="button"
                                     data-dashboard-delete-url="{% url 'dashboard:event_delete' project.id %}"
-                                    data-item-name="{{ project.title|escape }}"
-                                    data-item-type="project" title="Delete">
+                                    data-item-name="{{ project.title|escape }}" data-item-type="event" title="Delete">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -66,7 +67,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center text-muted">No approved projects</td>
+                        <td colspan="6" class="text-center text-muted">No approved events</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -74,56 +75,34 @@
         </div>
     </div>
 </div>
-
-<div id="approvedProjectModal" class="approved-project-modal" aria-hidden="true">
-    <div class="approved-project-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="approvedProjectModalTitle">
-        <button type="button" class="approved-project-modal__close" aria-label="Close" onclick="closeApprovedProjectModal()">&times;</button>
-        <h3 id="approvedProjectModalTitle">Project Details</h3>
-        <div class="approved-project-modal__grid">
-            <div><small>Category</small><strong id="approvedProjectCategory">-</strong></div>
-            <div><small>Date</small><strong id="approvedProjectDate">-</strong></div>
-            <div class="full"><small>Location</small><strong id="approvedProjectLocation">-</strong></div>
-            <div class="full"><small>Description</small><p id="approvedProjectDescription">-</p></div>
-        </div>
-    </div>
-</div>
-
-<script>
-    function openApprovedProjectModal(button) {
-        const modal = document.getElementById('approvedProjectModal');
-        const title = button.getAttribute('data-project-title') || 'Project Details';
-        const category = button.getAttribute('data-project-category') || 'N/A';
-        const date = button.getAttribute('data-project-date') || 'N/A';
-        const location = button.getAttribute('data-project-location') || 'N/A';
-        const description = button.getAttribute('data-project-description') || 'No description available.';
-
-        document.getElementById('approvedProjectModalTitle').textContent = title;
-        document.getElementById('approvedProjectCategory').textContent = category;
-        document.getElementById('approvedProjectDate').textContent = date;
-        document.getElementById('approvedProjectLocation').textContent = location;
-        document.getElementById('approvedProjectDescription').textContent = description;
-
-        modal.classList.add('is-open');
-        modal.setAttribute('aria-hidden', 'false');
+<style>
+    .card-header {
+        font-size: 1.25rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
     }
 
-    function closeApprovedProjectModal() {
-        const modal = document.getElementById('approvedProjectModal');
-        modal.classList.remove('is-open');
-        modal.setAttribute('aria-hidden', 'true');
+    .table th,
+    .table td {
+        vertical-align: middle;
     }
 
-    document.addEventListener('click', function (event) {
-        const modal = document.getElementById('approvedProjectModal');
-        if (event.target === modal) {
-            closeApprovedProjectModal();
-        }
-    });
+    .btn-outline-primary:hover,
+    .btn-outline-success:hover,
+    .btn-outline-danger:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transform: scale(1.05);
+    }
 
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') {
-            closeApprovedProjectModal();
+    @media (max-width: 768px) {
+        .card-header {
+            font-size: 1rem;
         }
-    });
-</script>
+
+        .table th,
+        .table td {
+            font-size: 0.95rem;
+        }
+    }
+</style>
 {% endblock %}

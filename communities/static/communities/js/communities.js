@@ -1,0 +1,1 @@
+[communities.js content from old location]

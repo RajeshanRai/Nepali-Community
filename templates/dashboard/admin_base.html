@@ -8,8 +8,8 @@
     <title>{% block title %}Admin Dashboard{% endblock %} - Nepali Community</title>
 
     <!-- Favicon -->
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇳🇵</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.svg' %}">
 
     <meta name="csrf-token" content="{{ csrf_token }}">
     {% include 'dashboard/includes/head_assets.html' %}
@@ -50,13 +50,13 @@
                 </a>
             </div>
 
-            <!-- Projects Section -->
+            <!-- Events Section -->
             <div class="nav-section">
-                <div class="nav-section-title">PROJECTS</div>
-                <a href="{% url 'dashboard:projects_all' %}" data-tooltip="All Projects"
+                <div class="nav-section-title">EVENTS</div>
+                <a href="{% url 'dashboard:projects_all' %}" data-tooltip="All Events"
                     class="nav-item {% if 'projects' in request.path %}active{% endif %}">
                     <i class="fas fa-folder"></i>
-                    <span>All Projects</span>
+                    <span>All Events</span>
                     {% if pending_projects_count %}
                     <span class="badge badge-warning">{{ pending_projects_count }}</span>
                     {% endif %}
@@ -73,9 +73,9 @@
                     <i class="fas fa-times-circle"></i>
                     <span>Rejected</span>
                 </a>
-                <a href="{% url 'dashboard:event_create' %}" data-tooltip="Create New" class="nav-item">
+                <a href="{% url 'dashboard:event_create' %}" data-tooltip="Create New Event" class="nav-item">
                     <i class="fas fa-plus-circle"></i>
-                    <span>Create New</span>
+                    <span>Create New Event</span>
                 </a>
             </div>
 
@@ -152,9 +152,9 @@
                     <i class="fas fa-route"></i>
                     <span>Volunteer Activity</span>
                 </a>
-                <a href="{% url 'dashboard:reports_projects' %}" data-tooltip="Project Success Rate" class="nav-item">
-                    <i class="fas fa-project-diagram"></i>
-                    <span>Project Success Rate</span>
+                <a href="{% url 'dashboard:reports_projects' %}" data-tooltip="Event Success Rate" class="nav-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Event Success Rate</span>
                 </a>
             </div>
 
@@ -176,7 +176,7 @@
         </nav>
 
         <div class="sidebar-footer">
-            <div class="sidebar-user">
+            <a href="{% url 'profile' %}" class="sidebar-user" aria-label="Open my profile">
                 <div class="user-avatar">
                     <i class="fas fa-user-circle"></i>
                 </div>
@@ -184,7 +184,7 @@
                     <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
                     <div class="user-role">Administrator</div>
                 </div>
-            </div>
+            </a>
         </div>
     </aside>
 
@@ -198,14 +198,14 @@
                 </button>
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search projects, users, volunteers..." id="globalSearch">
+                    <input type="text" placeholder="Search events, users, volunteers..." id="globalSearch">
                 </div>
             </div>
 
             <div class="navbar-right">
                 <!-- Quick Actions -->
                 <div class="quick-actions">
-                    <button class="action-btn" title="Add New Project"
+                    <button class="action-btn" title="Add New Event"
                         onclick="window.location.href='{% url 'dashboard:event_create' %}'">
                         <i class="fas fa-plus"></i>
                     </button>
@@ -254,12 +254,14 @@
 
                 <!-- User Profile -->
                 <div class="navbar-item user-dropdown">
-                    <button class="user-btn" id="userBtn">
-                        <div class="user-avatar-small">
+                    <a href="{% url 'profile' %}" class="user-avatar-link" aria-label="Open my profile">
+                        <div class="user-avatar-small" aria-hidden="true">
                             <i class="fas fa-user-circle"></i>
                         </div>
+                    </a>
+                    <button class="user-btn" id="userBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
                         <span class="user-name-nav">{{ request.user.username }}</span>
-                        <i class="fas fa-chevron-down"></i>
+                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
                     </button>
                     <div class="dropdown-menu user-menu" id="userMenu">
                         <div class="dropdown-header">
@@ -268,9 +270,9 @@
                                 <span>{{ request.user.email }}</span>
                             </div>
                         </div>
-                        <a href="{% url 'dashboard:profiles' %}" class="dropdown-item">
+                        <a href="{% url 'profile' %}" class="dropdown-item">
                             <i class="fas fa-user"></i>
-                            My Profiles
+                            My Profile
                         </a>
                         <a href="{% url 'dashboard:settings' %}" class="dropdown-item">
                             <i class="fas fa-cog"></i>

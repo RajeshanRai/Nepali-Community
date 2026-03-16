@@ -1,42 +1,4 @@
-/* Approved Projects Page Styles */
 
-.content-card {
-    background: var(--card-bg, #ffffff);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
-}
-
-.table-responsive {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 0;
-}
-
-.data-table thead {
-    background: #f8f9fa;
-    border-bottom: 2px solid #e9ecef;
-}
-
-.data-table thead th {
-    padding: 14px 16px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 0.72rem;
-    color: #495057;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.data-table tbody tr {
-    border-bottom: 1px solid #e9ecef;
-    transition: background-color 0.2s ease;
-}
 
 .data-table tbody tr:hover {
     background-color: #f8f9fa;

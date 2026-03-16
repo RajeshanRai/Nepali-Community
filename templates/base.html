@@ -53,8 +53,8 @@
     <meta name="ICBM" content="49.2827, -123.1207">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon"
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇳🇵</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.svg' %}">
     <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
 
     {% include 'includes/site_head_assets.html' %}
@@ -233,7 +233,7 @@
 
                 {% if user.is_authenticated %}
                 {% if user.is_superuser %}
-                <a href="{% url 'dashboard:profiles' %}" class="nav-item nav-profile-link">
+                <a href="{% url 'profile' %}" class="nav-item nav-profile-link">
                 {% else %}
                 <a href="{% url 'profile' %}" class="nav-item nav-profile-link">
                 {% endif %}

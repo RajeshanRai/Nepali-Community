@@ -1,20 +1,20 @@
 {% extends 'dashboard/admin_base.html' %}
 {% load static %}
 
-{% block title %}Pending Approval{% endblock %}
+{% block title %}Pending Event Approval{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'dashboard/css/projects-pending.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/projects-pending.css' %}">
 {% endblock %}
 
 {% block breadcrumb_items %}
-<li class="breadcrumb-item">Projects</li>
+<li class="breadcrumb-item">Events</li>
 <li class="breadcrumb-item active">Pending Approval</li>
 {% endblock %}
 
 {% block page_header %}
 {% url 'dashboard:projects_all' as projects_all_url %}
-{% include 'dashboard/includes/page_header.html' with title='Pending Project Approvals' subtitle='Review, approve, or reject incoming event requests with full context.' icon_class='fas fa-hourglass-half' action_url=projects_all_url action_label='View All Projects' action_icon='fas fa-folder-open' action_variant='btn btn-outline' %}
+{% include 'dashboard/includes/page_header.html' with title='Pending Event Approvals' subtitle='Review, approve, or reject incoming event requests with full context.' icon_class='fas fa-hourglass-half' action_url=projects_all_url action_label='View All Events' action_icon='fas fa-folder-open' action_variant='btn btn-outline' %}
 {% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
         <div class="stat-icon"><i class="fas fa-clock"></i></div>
         <div class="stat-info">
             <h3>{{ projects|length }}</h3>
-            <p>Pending Requests</p>
+            <p>Pending Event Requests</p>
         </div>
     </div>
     <div class="pending-stat-card accent-info">
@@ -68,7 +68,7 @@
                 <thead>
                     <tr>
                         <th>#ID</th>
-                        <th>Project Request</th>
+                        <th>Event Request</th>
                         <th>Type</th>
                         <th>Requester</th>
                         <th>Requested Event Date</th>
@@ -83,7 +83,7 @@
                     <tr data-type="{{ request.event_type|default:'other' }}">
                         <td>#{{ request.id }}</td>
                         <td>
-                            <div class="project-title-cell">
+                            <div class="event-title-cell">
                                 <strong>{{ request.title }}</strong>
                                 <small class="text-muted">{{ request.description|truncatewords:16 }}</small>
                             </div>
@@ -119,18 +119,18 @@
                         <td><span class="status-badge status-pending">{{ request.get_status_display }}</span></td>
                         <td>
                             <div class="action-buttons enhanced-actions">
-                                <button class="btn-icon btn-view" title="View Details"
-                                    onclick="viewDetails({{ request.id }}, '{{ request.title|escapejs }}', '{{ request.get_event_type_display|default:'Other'|escapejs }}', '{{ request.requester_name|default:'Guest'|escapejs }}', '{{ request.requester_email|default:'No email'|escapejs }}', '{{ request.location|default:'No location'|escapejs }}', '{{ request.description|default:'No description'|escapejs }}', '{{ request.date|date:'M d, Y'|default:'Not specified'|escapejs }}', '{{ request.target_attendees|default:'N/A'|escapejs }}')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn-icon btn-approve" title="Approve Request"
-                                    onclick="approveRequest({{ request.id }})">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="btn-icon btn-reject" title="Reject Request"
-                                    onclick="rejectRequest({{ request.id }})">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                                    <button class="btn-icon btn-view" title="View Details"
+                                        onclick="viewDetails({{ request.id }}, '{{ request.title|escapejs }}', '{{ request.get_event_type_display|default:'Other'|escapejs }}', '{{ request.requester_name|default:'Guest'|escapejs }}', '{{ request.requester_email|default:'No email'|escapejs }}', '{{ request.location|default:'No location'|escapejs }}', '{{ request.description|default:'No description'|escapejs }}', '{{ request.date|date:'M d, Y'|default:'Not specified'|escapejs }}', '{{ request.target_attendees|default:'N/A'|escapejs }}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-icon btn-approve" title="Approve Request"
+                                        onclick="approveRequest({{ request.id }})">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn-icon btn-reject" title="Reject Request"
+                                        onclick="rejectRequest({{ request.id }})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
                             </div>
                         </td>
                     </tr>

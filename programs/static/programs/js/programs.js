@@ -7,8 +7,37 @@
     'use strict';
 
     // CSRF Token utility
+    function isValidCSRFToken(token) {
+        return typeof token === 'string' && (token.length === 32 || token.length === 64);
+    }
+
+    function getCookie(name) {
+        const cookies = document.cookie ? document.cookie.split(';') : [];
+
+        for (let i = 0; i < cookies.length; i += 1) {
+            const cookie = cookies[i].trim();
+
+            if (cookie.startsWith(name + '=')) {
+                return decodeURIComponent(cookie.slice(name.length + 1));
+            }
+        }
+
+        return '';
+    }
+
     function getCSRFToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const inputToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value?.trim() || '';
+        const cookieToken = getCookie('csrftoken').trim();
+
+        if (isValidCSRFToken(inputToken)) {
+            return inputToken;
+        }
+
+        if (isValidCSRFToken(cookieToken)) {
+            return cookieToken;
+        }
+
+        return '';
     }
 
     // Show loading state
@@ -71,8 +100,13 @@
             btn.addEventListener('click', async function (e) {
                 e.preventDefault();
                 const programId = this.dataset.programId;
+                const csrfToken = getCSRFToken();
 
                 if (!programId) return;
+                if (!csrfToken) {
+                    showNotification('Security token missing. Refresh the page and try again.', 'error');
+                    return;
+                }
 
                 showLoading(this);
 
@@ -81,7 +115,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRFToken': getCSRFToken(),
+                            'X-CSRFToken': csrfToken,
                             'X-Requested-With': 'XMLHttpRequest'
                         }
                     });
@@ -113,8 +147,13 @@
             btn.addEventListener('click', async function (e) {
                 e.preventDefault();
                 const programId = this.dataset.programId;
+                const csrfToken = getCSRFToken();
 
                 if (!programId) return;
+                if (!csrfToken) {
+                    showNotification('Security token missing. Refresh the page and try again.', 'error');
+                    return;
+                }
 
                 const confirmed = await window.GlobalUI.confirm({
                     title: 'Unregister from event',
@@ -134,7 +173,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRFToken': getCSRFToken(),
+                            'X-CSRFToken': csrfToken,
                             'X-Requested-With': 'XMLHttpRequest'
                         }
                     });
@@ -186,6 +225,12 @@
 
             const formData = new FormData(form);
             const submitBtn = form.querySelector('.submit-btn');
+            const csrfToken = getCSRFToken();
+
+            if (!csrfToken) {
+                showNotification('Security token missing. Refresh the page and try again.', 'error');
+                return;
+            }
 
             showLoading(submitBtn);
 
@@ -194,7 +239,7 @@
                     method: 'POST',
                     body: formData,
                     headers: {
-                        'X-CSRFToken': getCSRFToken(),
+                        'X-CSRFToken': csrfToken,
                         'X-Requested-With': 'XMLHttpRequest'  // ensure view returns JSON
                     }
                 });

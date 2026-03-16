@@ -1,20 +1,20 @@
 {% extends 'dashboard/admin_base.html' %}
 {% load static %}
 
-{% block title %}All Projects{% endblock %}
+{% block title %}All Events{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'dashboard/css/pages/projects-all.css' %}">
 {% endblock %}
 
 {% block breadcrumb_items %}
-<li class="breadcrumb-item active">Projects</li>
-<li class="breadcrumb-item active">All Projects</li>
+<li class="breadcrumb-item active">Events</li>
+<li class="breadcrumb-item active">All Events</li>
 {% endblock %}
 
 {% block page_header %}
-{% url 'dashboard:event_create' as create_project_url %}
-{% include 'dashboard/includes/page_header.html' with title='All Projects' subtitle='Manage and overview all projects' icon_class='fas fa-folder' action_url=create_project_url action_label='Create Project' action_icon='fas fa-plus' %}
+{% url 'dashboard:event_create' as create_event_url %}
+{% include 'dashboard/includes/page_header.html' with title='All Events' subtitle='Manage and overview all events' icon_class='fas fa-calendar' action_url=create_event_url action_label='Create Event' action_icon='fas fa-plus' %}
 {% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
         <div class="search-filter-section">
             <div class="search-box-inline">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchProjects" placeholder="Search projects...">
+                <input type="text" id="searchEvents" placeholder="Search events...">
             </div>
             <div class="filter-buttons">
                 <button class="filter-btn active" data-filter="all">All</button>
@@ -44,24 +44,26 @@
                         <th>Category</th>
                         <th>Date</th>
                         <th>Location</th>
+                        <th>Registered</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for project in projects %}
-                    <tr data-category="{{ project.event_type }}">
-                        <td><input type="checkbox" class="bulk-checkbox" value="{{ project.id }}"></td>
-                        <td>#{{ project.id }}</td>
+                    {% for event in projects %}
+                    <tr data-category="{{ event.event_type }}">
+                        <td><input type="checkbox" class="bulk-checkbox" value="{{ event.id }}"></td>
+                        <td>#{{ event.id }}</td>
                         <td>
-                            <strong>{{ project.title }}</strong>
-                            <br><small class="text-muted">{{ project.description|truncatewords:10 }}</small>
+                            <strong>{{ event.title }}</strong>
+                            <br><small class="text-muted">{{ event.description|truncatewords:10 }}</small>
                         </td>
-                        <td><span class="badge badge-info">{{ project.get_event_type_display }}</span></td>
-                        <td>{{ project.date|date:"M d, Y" }}</td>
-                        <td>{{ project.location|truncatewords:5 }}</td>
+                        <td><span class="badge badge-info">{{ event.get_event_type_display }}</span></td>
+                        <td>{{ event.date|date:"M d, Y" }}</td>
+                        <td>{{ event.location|truncatewords:5 }}</td>
+                        <td>{{ event.registrations.count }}</td>
                         <td>
-                            {% if project.date < today %} <span class="status-badge status-completed">Completed</span>
+                            {% if event.date < today %} <span class="status-badge status-completed">Completed</span>
                                 {% else %}
                                 <span class="status-badge status-approved">Active</span>
                                 {% endif %}
@@ -71,13 +73,13 @@
                                 <button type="button" class="btn-icon btn-view" title="View" disabled>
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <a class="btn-icon btn-edit" title="Edit" href="{% url 'dashboard:event_edit' project.id %}">
+                                <a class="btn-icon btn-edit" title="Edit" href="{% url 'dashboard:event_edit' event.id %}">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <button type="button" class="btn-icon btn-delete" title="Delete"
-                                    data-dashboard-delete-url="{% url 'dashboard:event_delete' project.id %}"
-                                    data-item-name="{{ project.title|escape }}"
-                                    data-item-type="project">
+                                    data-dashboard-delete-url="{% url 'dashboard:event_delete' event.id %}"
+                                    data-item-name="{{ event.title|escape }}"
+                                    data-item-type="event">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -85,7 +87,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center text-muted">No projects found</td>
+                        <td colspan="8" class="text-center text-muted">No events found</td>
                     </tr>
                     {% endfor %}
                 </tbody>

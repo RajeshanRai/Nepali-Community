@@ -1,6 +1,5 @@
 // ===== Custom Notification System =====
 
-function showNotification(message, type = 'info', title = 'Notification', autoClose = true) {
     const overlay = document.getElementById('notification-overlay');
     const modal = document.getElementById('notification-modal');
     const titleEl = document.getElementById('notification-title');
@@ -58,6 +57,32 @@ document.addEventListener('DOMContentLoaded', function () {
     const unregisterButtons = document.querySelectorAll('.btn-unregister');
     const IS_AUTH = document.documentElement.getAttribute('data-user-authenticated') === 'true';
 
+    function isValidCsrfToken(token) {
+        return typeof token === 'string' && (token.length === 32 || token.length === 64);
+    }
+
+    function getCookie(name) {
+        const cookieValue = document.cookie
+            .split('; ')
+            .find((row) => row.startsWith(name + '='));
+        return cookieValue ? decodeURIComponent(cookieValue.split('=')[1]) : '';
+    }
+
+    function resolveCsrfToken() {
+        const inputToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value?.trim() || '';
+        const cookieToken = (getCookie('csrftoken') || '').trim();
+
+        if (isValidCsrfToken(inputToken)) {
+            return inputToken;
+        }
+
+        if (isValidCsrfToken(cookieToken)) {
+            return cookieToken;
+        }
+
+        return '';
+    }
+
     function attachRegisterHandler(btn) {
         btn.addEventListener('click', function () {
             const programId = this.getAttribute('data-program-id');
@@ -67,11 +92,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.location.href = '/users/login/?next=' + next;
                 return;
             }
+
+            const csrfToken = resolveCsrfToken();
+            if (!csrfToken) {
+                showNotification('Security token missing. Refresh the page and try again.', 'error', 'Security Check Failed');
+                return;
+            }
+
             const self = this;
             fetch(`/programs/${programId}/register/`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                    'X-CSRFToken': csrfToken,
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
@@ -112,11 +144,16 @@ document.addEventListener('DOMContentLoaded', function () {
     function attachUnregisterHandler(btn) {
         btn.addEventListener('click', function () {
             const programId = this.getAttribute('data-program-id');
+            const csrfToken = resolveCsrfToken();
+            if (!csrfToken) {
+                showNotification('Security token missing. Refresh the page and try again.', 'error', 'Security Check Failed');
+                return;
+            }
             const self = this;
             fetch(`/programs/${programId}/unregister/`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                    'X-CSRFToken': csrfToken,
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
