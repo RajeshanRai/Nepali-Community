@@ -21,7 +21,7 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(max_length=20, blank=True)
     address = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True)
-    bio = models.TextField(blank=True)
+    bio = models.TextField(blank=True, max_length=2000)
     location = models.CharField(max_length=150, blank=True)
     country = models.CharField(max_length=120, blank=True)
     recovery_email = models.EmailField(blank=True)

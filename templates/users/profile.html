@@ -701,7 +701,9 @@
                 {% endif %}
             </div>
             {% if user.bio %}
-            <p style="color:var(--hero-ink-soft);font-size:0.9rem;margin:0.5rem 0 0;display:flex;align-items:flex-start;gap:0.42rem;"><i class="fa-solid fa-quote-left" aria-hidden="true" style="margin-top:0.15rem;opacity:0.7;flex-shrink:0;"></i>{{ user.bio }}</p>
+                        <div class="profile-bio-wide">
+                            <p class="profile-bio-text"><i class="fa-solid fa-quote-left" aria-hidden="true" style="margin-top:0.15rem;opacity:0.7;flex-shrink:0;"></i>{{ user.bio }}</p>
+                        </div>
             {% endif %}
         </div>
         <div class="profile-hero-card">

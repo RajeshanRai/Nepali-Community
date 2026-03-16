@@ -1,3 +1,39 @@
+/* Bio wide container for full width */
+.profile-bio-wide {
+    width: 100%;
+    max-width: 100vw;
+    margin-left: 0;
+    margin-right: 0;
+}
+.profile-bio-text {
+    color: var(--hero-ink-soft);
+    font-size: 0.92rem;
+    margin: 0.5rem 0 0;
+    width: 100%;
+    max-width: 100vw;
+    text-align: justify;
+    word-break: break-word;
+    line-height: 1.25;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.42rem;
+    overflow: hidden;
+}
+/* Bio text styling for longer and justified display */
+.profile-bio-text {
+    color: var(--hero-ink-soft);
+    font-size: 0.92rem;
+    margin: 0.5rem 0 0;
+    max-width: 100vw;
+    width: 100%;
+    text-align: justify;
+    word-break: break-word;
+    line-height: 1.25;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.42rem;
+    overflow: hidden;
+}
 /* ─── Profile page — compact & responsive ─────────────────────────────────── */
 .profile-page-shell {
     --pp-bg:            var(--color-bg-light, #F9FAFB);
