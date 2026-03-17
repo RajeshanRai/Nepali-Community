@@ -5,6 +5,178 @@
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'users/auth.css' %}">
 <link rel="stylesheet" href="{% static 'users/two_factor.css' %}">
+<style>
+    :root {
+        --primary-color: #1f2937;
+        --accent-color: #374151;
+    }
+
+    /* CRITICAL: Remove all default input borders and outlines */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    textarea {
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[type="number"]:focus,
+    textarea:focus {
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    /* CRITICAL: Ensure all auth elements are visible */
+    .auth-shell, .auth-card, .auth-form-panel, .auth-field, .auth-control, .auth-form {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Improve button styling - neutral gray instead of bold burgundy */
+    .auth-submit {
+        background: #6b7280 !important;
+        color: white !important;
+        border: none !important;
+        padding: 0.875rem 2rem !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+        margin-top: 1rem !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        min-height: 44px !important;
+    }
+    
+    .auth-submit:hover {
+        background: #4b5563 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .auth-submit:active {
+        transform: translateY(0) !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Responsive design for mobile */
+    @media (max-width: 768px) {
+        .auth-shell {
+            padding: 0.5rem !important;
+        }
+        
+        .auth-form {
+            gap: 1.25rem !important;
+        }
+        
+        .auth-field {
+            margin-bottom: 1rem !important;
+        }
+        
+        .auth-submit {
+            padding: 0.75rem 1.5rem !important;
+            font-size: 0.95rem !important;
+            width: 100% !important;
+        }
+        
+        .auth-form-header h2 {
+            font-size: 1.5rem !important;
+        }
+        
+        .auth-form-header p {
+            font-size: 0.9rem !important;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .auth-card {
+            border-radius: 12px !important;
+        }
+        
+        .auth-form-panel {
+            padding: 1.5rem 1rem !important;
+        }
+        
+        .auth-submit {
+            padding: 0.7rem 1.25rem !important;
+            font-size: 0.9rem !important;
+        }
+        
+        .auth-form-header h2 {
+            font-size: 1.25rem !important;
+        }
+        
+        label {
+            font-size: 0.85rem !important;
+        }
+    }
+    
+    /* Force visibility of all form children */
+    .auth-form * {
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Ensure messages are always visible and properly positioned */
+    .messages-container {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+        width: 100% !important;
+        margin-bottom: 1.5rem !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 10 !important;
+    }
+    
+    .messages,
+    .auth-alert {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 100% !important;
+        margin-bottom: 0 !important;
+        z-index: 10 !important;
+        position: relative !important;
+    }
+    
+    .auth-alert {
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+        padding: 1rem !important;
+        border-radius: 8px !important;
+        border-left: 4px solid #ef4444 !important;
+        background: #fef2f2 !important;
+        color: #ef4444 !important;
+        font-size: 0.95rem !important;
+    }
+    
+    .auth-alert-success {
+        border-left-color: #10b981 !important;
+        background: #f0fdf4 !important;
+        color: #10b981 !important;
+    }
+    
+    .auth-alert i {
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+    
+    .auth-alert div {
+        flex: 1;
+        line-height: 1.5;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -44,21 +216,65 @@
             </div>
 
             {% if messages %}
-            {% for message in messages %}
-            <div class="auth-alert {% if 'success' in message.tags %}auth-alert-success{% endif %}" role="status" aria-live="polite">
-                <i class="fas {% if 'success' in message.tags %}fa-check-circle{% elif 'error' in message.tags %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}" aria-hidden="true"></i>
-                <div>{{ message }}</div>
+            <div class="messages-container" style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%; margin-bottom: 1.5rem; visibility: visible; opacity: 1;">
+                {% for message in messages %}
+                <div class="auth-alert {% if 'success' in message.tags %}auth-alert-success{% endif %}" role="status" aria-live="polite" style="display: flex !important; align-items: flex-start !important; gap: 0.75rem !important; padding: 1rem !important; border-radius: 8px !important; width: 100% !important; visibility: visible !important; opacity: 1 !important; margin: 0 !important;">
+                    <i class="fas {% if 'success' in message.tags %}fa-check-circle{% elif 'error' in message.tags %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}" aria-hidden="true" style="flex-shrink: 0; margin-top: 0.25rem;"></i>
+                    <div style="flex: 1; line-height: 1.5;">{{ message }}</div>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
             {% endif %}
 
             <form method="post" class="auth-form" novalidate aria-labelledby="two-factor-title">
                 {% csrf_token %}
-                <div class="auth-field">
-                    <div class="auth-control{% if form.code.errors %} is-invalid{% endif %}" data-field>
-                        <span class="auth-input-icon" aria-hidden="true"><i class="fas fa-key"></i></span>
-                        {{ form.code }}
-                        <label class="auth-floating-label" for="{{ form.code.id_for_label }}">Verification code</label>
+                <div class="auth-field" style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%; visibility: visible; opacity: 1; margin-bottom: 1.5rem;">
+                    <label for="id_code" style="display: block; font-size: 0.95rem; font-weight: 600; color: #1f2937; margin-bottom: 0.5rem;">Verification Code</label>
+                    <div class="auth-control" data-field style="
+                        border: 2px solid #d1d5db; 
+                        background: #ffffff; 
+                        display: flex; 
+                        align-items: center; 
+                        border-radius: 8px; 
+                        min-height: 50px; 
+                        position: relative; 
+                        visibility: visible; 
+                        opacity: 1;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.borderColor='#9ca3af'; this.style.boxShadow='0 0 0 2px rgba(107, 114, 128, 0.1)';" onmouseout="this.style.borderColor='#d1d5db'; this.style.boxShadow='none';">
+                        <span class="auth-input-icon" aria-hidden="true" style="position: absolute; left: 1rem; color: #6b7280; visibility: visible; z-index: 2; font-size: 1rem;"><i class="fas fa-key"></i></span>
+                        <input 
+                            type="text" 
+                            name="code" 
+                            id="id_code"
+                            maxlength="6"
+                            minlength="6"
+                            placeholder="000000" 
+                            inputmode="numeric"
+                            autocomplete="one-time-code"
+                            style="
+                                flex: 1; 
+                                border: none !important; 
+                                outline: none !important;
+                                box-shadow: none !important;
+                                background: transparent !important; 
+                                padding: 0.75rem 1rem 0.75rem 3rem !important; 
+                                width: 100% !important; 
+                                color: #1f2937 !important; 
+                                font-size: 1.125rem !important; 
+                                font-weight: 500 !important;
+                                font-family: inherit !important;
+                                min-height: 48px !important; 
+                                box-sizing: border-box !important; 
+                                visibility: visible !important; 
+                                opacity: 1 !important; 
+                                display: block !important; 
+                                margin: 0 !important; 
+                                margin-bottom: 0 !important;
+                            "
+                            onfocus="this.parentElement.style.borderColor='#6b7280'; this.parentElement.style.background='#fff'; this.parentElement.style.boxShadow='0 0 0 3px rgba(107, 114, 128, 0.1)';"
+                            onblur="this.parentElement.style.borderColor='#d1d5db'; this.parentElement.style.boxShadow='none';"
+                        >
                     </div>
                     {% for error in form.code.errors %}
                     <div class="auth-field-error"><i class="fas fa-exclamation-circle" aria-hidden="true"></i>{{ error }}</div>

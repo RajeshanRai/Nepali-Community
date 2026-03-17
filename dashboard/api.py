@@ -12,15 +12,13 @@ from datetime import timedelta
 import json
 
 from users.models import CustomUser
+
+# Import System Chain API
 from programs.models import Program, EventRegistration, RequestEvent
 from donations.models import Donation
 from communities.models import Community
 from contacts.models import ContactMessage
-
-
-def staff_required(user):
-    """Check if user is an active superuser"""
-    return user.is_active and user.is_superuser
+from .decorators import staff_required, superuser_required
 
 
 @require_http_methods(["GET"])

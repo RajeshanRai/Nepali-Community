@@ -1,1 +1,544 @@
-[auth.css content from old location]
+/* Authentication Pages - Layout & Styling */
+
+:root {
+    --primary-color: #8b1e3f;
+    --accent-color: #c9185c;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --border-color: #e5e7eb;
+    --bg-light: #f9fafb;
+}
+
+/* ============================================================================
+   AUTH SHELL - Main Container
+   ============================================================================ */
+
+.auth-shell {
+    display: flex !important;
+    min-height: 100vh !important;
+    background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%) !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1rem !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.auth-shell * {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* ============================================================================
+   AUTH CARD - Main Form Container
+   ============================================================================ */
+
+.auth-card {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    background: white !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15) !important;
+    overflow: hidden !important;
+    max-width: 900px !important;
+    width: 100% !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+@media (max-width: 768px) {
+    .auth-card {
+        grid-template-columns: 1fr;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+    }
+
+    .auth-visual {
+        display: none !important;
+    }
+    
+    .auth-form-panel {
+        padding: 2rem 1.5rem !important;
+    }
+    
+    .auth-shell {
+        padding: 0.5rem !important;
+    }
+    
+    .auth-form {
+        gap: 1.25rem !important;
+    }
+    
+    .auth-submit {
+        width: 100% !important;
+        padding: 0.75rem 1.5rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-form-panel {
+        padding: 1.5rem 1rem !important;
+    }
+    
+    .auth-shell {
+        padding: 0.25rem !important;
+    }
+    
+    .auth-card {
+        border-radius: 12px !important;
+    }
+    
+    .auth-form-header h2 {
+        font-size: 1.25rem !important;
+    }
+    
+    .auth-submit {
+        padding: 0.7rem 1.25rem !important;
+        font-size: 0.9rem !important;
+    }
+}
+}
+
+/* ============================================================================
+   AUTH VISUAL - Left Side Brand & Hero
+   ============================================================================ */
+
+.auth-visual {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%) !important;
+    color: white !important;
+    padding: 3rem 2rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* ============================================================================
+   AUTH BRAND - Brand Info
+   ============================================================================ */
+
+.auth-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.auth-brand-mark {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 1.5rem;
+}
+
+.auth-brand-copy strong {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+/* ============================================================================
+   AUTH HERO - Center Hero Section
+   ============================================================================ */
+
+.auth-hero {
+    position: relative;
+}
+
+.auth-kicker {
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.95;
+}
+
+.auth-kicker-dot {
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+}
+
+.auth-display {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+.auth-display em {
+    font-style: normal;
+    font-weight: 900;
+    background: linear-gradient(120deg, #ffffff 0%, #ffd700 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-copy {
+    opacity: 0.95;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* ============================================================================
+   AUTH FORM PANEL - Right Side Form Container
+   ============================================================================ */
+
+.auth-form-panel {
+    padding: 3rem 2.5rem;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 100% !important;
+}
+
+.auth-form-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+}
+
+.auth-form-header p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* ============================================================================
+   AUTH FORM - Form Styles
+   ============================================================================ */
+
+.auth-form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+/* ============================================================================
+   AUTH FIELD - Form Field Container
+   ============================================================================ */
+
+.auth-field {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    margin: 0 !important;
+    margin-bottom: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.auth-field * {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* ============================================================================
+   AUTH CONTROL - Input Wrapper with Icon
+   ============================================================================ */
+
+.auth-control {
+    position: relative;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    border: 2px solid var(--border-color) !important;
+    border-radius: 10px !important;
+    background: #f9fafb !important;
+    transition: all 0.3s ease !important;
+    min-height: 56px !important;
+    height: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    box-sizing: border-box !important;
+}
+
+.auth-control * {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.auth-control:focus-within {
+    border-color: var(--primary-color);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(139, 30, 63, 0.1);
+}
+
+.auth-control.is-invalid {
+    border-color: var(--danger-color);
+    background: #fff5f5;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* ============================================================================
+   AUTH INPUT ICON - Icon Inside Input
+   ============================================================================ */
+
+.auth-input-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+}
+
+/* ============================================================================
+   AUTH INPUT - Text Input Field
+   ============================================================================ */
+
+.auth-form input.auth-input,
+.auth-form textarea.auth-input,
+.auth-form .auth-control input,
+.auth-form .auth-control textarea,
+.auth-form input[type="text"],
+.auth-form input[type="number"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+input.auth-input,
+textarea.auth-input,
+.auth-control input,
+.auth-control textarea,
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"] {
+    flex: 1 !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 1rem 1rem 1rem 3rem !important;
+    margin: 0 !important;
+    font-size: 1rem !important;
+    color: var(--text-primary) !important;
+    font-family: inherit !important;
+    width: 100% !important;
+    min-height: 48px !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.auth-form input.auth-input:focus,
+.auth-form textarea.auth-input:focus,
+.auth-form .auth-control input:focus,
+.auth-form .auth-control textarea:focus,
+.auth-form input[type="text"]:focus,
+.auth-form input[type="number"]:focus,
+.auth-form input[type="email"]:focus,
+.auth-form input[type="password"]:focus,
+input.auth-input:focus,
+textarea.auth-input:focus,
+.auth-control input:focus,
+.auth-control textarea:focus,
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+input.auth-input::placeholder,
+textarea.auth-input::placeholder,
+.auth-control input::placeholder,
+.auth-control textarea::placeholder,
+input[type="text"]::placeholder,
+input[type="number"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder {
+    color: var(--text-secondary) !important;
+    opacity: 0.8 !important;
+}
+
+/* ============================================================================
+   AUTH FLOATING LABEL - Floating Label
+   ============================================================================ */
+
+.auth-floating-label {
+    position: absolute;
+    left: 3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: var(--text-secondary);
+    pointer-events: none;
+    transition: all 0.3s ease;
+    background: white;
+    padding: 0 0.25rem;
+}
+
+input.auth-input:not(:placeholder-shown) ~ .auth-floating-label,
+input.auth-input:focus ~ .auth-floating-label,
+textarea.auth-input:not(:placeholder-shown) ~ .auth-floating-label,
+textarea.auth-input:focus ~ .auth-floating-label,
+.auth-control input:not(:placeholder-shown) ~ .auth-floating-label,
+.auth-control input:focus ~ .auth-floating-label {
+    top: -0.75rem;
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* ============================================================================
+   AUTH FIELD ERROR - Validation Error Messages
+   ============================================================================ */
+
+.auth-field-error {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--danger-color);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
+/* ============================================================================
+   AUTH ALERT - Message Alerts
+   ============================================================================ */
+
+.auth-alert {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+    padding: 1rem !important;
+    border-radius: 8px !important;
+    background: #fef2f2 !important;
+    color: var(--danger-color) !important;
+    border-left: 4px solid var(--danger-color) !important;
+    font-size: 0.95rem !important;
+    margin-bottom: 1rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.auth-alert i {
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+
+.auth-alert div {
+    flex: 1;
+    line-height: 1.5;
+}
+
+.auth-alert-success {
+    background: #f0fdf4 !important;
+    color: var(--success-color) !important;
+    border-left-color: var(--success-color) !important;
+}
+
+/* ============================================================================
+   AUTH SUBMIT - Submit Button
+   ============================================================================ */
+
+.auth-submit {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.75rem !important;
+    padding: 0.875rem 2rem !important;
+    background: #6b7280 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    min-height: 48px !important;
+    font-family: inherit !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.auth-submit:hover {
+    background: #4b5563 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    transform: none !important;
+}
+
+.auth-submit:active {
+    transform: none !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ============================================================================
+   AUTH SOCIAL BUTTON - Social/Secondary Action Buttons
+   ============================================================================ */
+
+.auth-social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1.5rem;
+    border: 2px solid var(--border-color);
+    background: white;
+    color: var(--text-primary);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.auth-social-btn:hover {
+    border-color: var(--primary-color);
+    background: rgba(139, 30, 63, 0.05);
+    color: var(--primary-color);
+}
+
+/* ============================================================================
+   AUTH LINK - Links and Text Links
+   ============================================================================ */
+
+.auth-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+/* ============================================================================
+   AUTH FOOTER - Bottom Text
+   ============================================================================ */
+
+.auth-footer {
+    margin-top: 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}

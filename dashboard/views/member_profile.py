@@ -48,7 +48,7 @@ class DashboardProfilesView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard/users/profiles.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_superuser:
+        if not (request.user.is_superuser or request.user.is_staff):
             return redirect('profile')
         self.target_user = self._get_target_user()
         return super().dispatch(request, *args, **kwargs)
@@ -101,7 +101,7 @@ class DashboardProfilesView(LoginRequiredMixin, TemplateView):
                 ),
                 username_sort=Lower('username'),
             ).order_by('admin_first', 'username_sort'),
-            'deactivated_users': CustomUser.objects.filter(is_active=False).exclude(pk=user.pk).order_by('-date_joined')[:20],
+            'deactivated_users': CustomUser.objects.filter(is_active=False).order_by('-date_joined')[:20],
             # forms
             'profile_form': extra.pop('profile_form', None) or ProfileUpdateForm(instance=user),
             'password_form': extra.pop('password_form', None) or (ProfilePasswordChangeForm(user=user) if viewing_self else None),

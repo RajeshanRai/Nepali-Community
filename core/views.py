@@ -48,18 +48,8 @@ class HomeView(TemplateView):
                 program__in=upcoming
             ).values_list('program_id', flat=True)
             context['user_upcoming_registrations'] = set(registered_ids)
-
-            warning_notice = self.request.session.pop('login_warning_notice', None)
-            if warning_notice:
-                context['user_latest_warning_message'] = warning_notice.get('message', '')
-                context['user_latest_warning_time'] = warning_notice.get('issued_at', '')
-            else:
-                context['user_latest_warning_message'] = ''
-                context['user_latest_warning_time'] = ''
         else:
             context['user_upcoming_registrations'] = set()
-            context['user_latest_warning_message'] = ''
-            context['user_latest_warning_time'] = ''
         return context
 
 

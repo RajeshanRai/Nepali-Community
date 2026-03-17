@@ -288,24 +288,5 @@
     document.querySelectorAll('.btn-register').forEach(btn => attachRegisterHandler(btn));
     document.querySelectorAll('.btn-unregister').forEach(btn => attachUnregisterHandler(btn));
 
-    const warningTrigger = document.getElementById('homeWarningTrigger');
-    if (warningTrigger) {
-        const warningMessage = warningTrigger.dataset.warningMessage || 'Please review your account warning.';
-        const warningTime = warningTrigger.dataset.warningTime || '';
 
-        warningTrigger.addEventListener('click', function () {
-            const fullMessage = warningTime
-                ? `${warningMessage} (Issued: ${warningTime})`
-                : warningMessage;
-            showNotification(fullMessage, 'error', 'Account Warning', false);
-        });
-
-        // Auto-highlight the warning once when homepage loads.
-        setTimeout(() => {
-            const fullMessage = warningTime
-                ? `${warningMessage} (Issued: ${warningTime})`
-                : warningMessage;
-            showNotification(fullMessage, 'error', 'Account Warning', true);
-        }, 600);
-    }
 })();

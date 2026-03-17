@@ -147,26 +147,10 @@ def _get_authenticated_profile_url(request):
 
 
 def _apply_login_side_effects(request, user, remember_me=False):
-    from dashboard.models import MemberModerationAction
-
     if remember_me:
         request.session.set_expiry(1209600)
     else:
         request.session.set_expiry(0)
-
-    latest_unseen_warning = MemberModerationAction.objects.filter(
-        user=user,
-        action='warn',
-        seen_at__isnull=True,
-    ).order_by('-created_at').first()
-
-    if latest_unseen_warning:
-        request.session['login_warning_notice'] = {
-            'message': latest_unseen_warning.reason.strip() or 'Please review your recent account warning.',
-            'issued_at': latest_unseen_warning.created_at.strftime('%b %d, %Y %I:%M %p'),
-        }
-        latest_unseen_warning.seen_at = timezone.now()
-        latest_unseen_warning.save(update_fields=['seen_at'])
 
     LoginActivity.objects.create(
         user=user,

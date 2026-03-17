@@ -266,19 +266,6 @@
     </section>
 </div>
 
-{% if user.is_authenticated and user_latest_warning_message %}
-<button
-    id="homeWarningTrigger"
-    class="home-warning-trigger"
-    type="button"
-    title="Account warning"
-    aria-label="Open account warning"
-    data-warning-message="{{ user_latest_warning_message|escape }}"
-    data-warning-time="{{ user_latest_warning_time|date:'M d, Y h:i A' }}">
-    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
-</button>
-{% endif %}
-
 <div id="notification-overlay" class="notification-overlay">
     <div id="notification-modal" class="notification-modal info">
         <button class="notification-close-auto" onclick="closeNotification()">&times;</button>

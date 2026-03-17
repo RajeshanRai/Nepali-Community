@@ -38,6 +38,8 @@ urlpatterns = [
         path('admin/categories/<int:pk>/edit/', views.category_edit, name='category_edit'),
         path('admin/categories/<int:pk>/delete/', views.category_delete, name='category_delete'),
         path('admin/reports/monthly/', views.reports_monthly, name='reports_monthly'),
+
+        # System Chain
         path('admin/reports/volunteers/', views.reports_volunteers, name='reports_volunteers'),
         path('admin/reports/projects/', views.reports_projects, name='reports_projects'),
     

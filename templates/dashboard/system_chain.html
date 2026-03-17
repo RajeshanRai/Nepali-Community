@@ -1,0 +1,10 @@
+{% extends 'dashboard/admin_base.html' %}
+{% block content %}
+<div class="system-chain-container" style="height: 100vh; background: #101020;">
+  <div id="systemChain3D" style="width:100%; height:100vh;"></div>
+  <div id="systemChainPanel" class="system-chain-panel" style="display:none;"></div>
+</div>
+<link rel="stylesheet" href="/static/dashboard/css/pages/system-chain.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script src="/static/dashboard/js/pages/system-chain.js"></script>
+{% endblock %}

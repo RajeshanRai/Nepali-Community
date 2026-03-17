@@ -1,1 +1,123 @@
-[two_factor.css content from old location]
+/* Two-Factor Authentication Verification Page */
+
+.two-factor-shell {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+}
+
+.two-factor-card {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* ============================================================================
+   TWO FACTOR FORM - Form Specific Styling
+   ============================================================================ */
+
+.auth-form {
+    margin-bottom: 1.5rem;
+}
+
+/* ============================================================================
+   TWO FACTOR FIELD - Code Input Field with Icon
+   ============================================================================ */
+
+.auth-field .auth-control {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.auth-field .auth-control:focus-within {
+    border-color: #8b1e3f;
+    box-shadow: 0 0 0 3px rgba(139, 30, 63, 0.1);
+}
+
+.auth-field .auth-input {
+    padding: 1rem 1rem 1rem 3rem;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.auth-field .auth-input::placeholder {
+    letter-spacing: normal;
+    opacity: 0.6;
+}
+
+.auth-field .auth-input-icon {
+    left: 1rem;
+    color: #6b7280;
+}
+
+.auth-field .auth-floating-label {
+    left: 3rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.auth-field .auth-input:focus ~ .auth-floating-label {
+    color: #8b1e3f;
+}
+
+/* ============================================================================
+   TWO FACTOR RESEND FORM - Resend Code Button
+   ============================================================================ */
+
+.two-factor-resend-form {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.two-factor-resend-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #e5e7eb;
+    background: white;
+    color: #6b7280;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.two-factor-resend-btn:hover {
+    border-color: #8b1e3f;
+    color: #8b1e3f;
+    background: rgba(139, 30, 63, 0.05);
+}
+
+.two-factor-resend-btn i {
+    transition: transform 0.3s ease;
+}
+
+.two-factor-resend-btn:hover i {
+    transform: rotate(180deg);
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .auth-form-panel {
+        padding: 2rem 1.5rem;
+    }
+
+    .auth-submit {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .two-factor-resend-btn {
+        padding: 0.65rem 1.25rem;
+        font-size: 0.85rem;
+    }
+}

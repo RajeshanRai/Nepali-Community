@@ -23,26 +23,13 @@ from contacts.models import ContactMessage
 from volunteers.models import VolunteerApplication, VolunteerOpportunity, VolunteerRequest
 from announcements.models import Announcement
 from faqs.models import FAQ, FAQCategory
-
-
-def staff_required(user):
-    """Check if user is an active superuser"""
-    return user.is_active and user.is_superuser
-
-
-def admin_required(view_func):
-    """Decorator to require superuser status"""
-    def wrapped_view(request, *args, **kwargs):
-        if not (request.user.is_authenticated and request.user.is_superuser):
-            return redirect('login')
-        return view_func(request, *args, **kwargs)
-    return wrapped_view
+from ..decorators import staff_required, superuser_required, admin_required
 
 
 @method_decorator(user_passes_test(staff_required, login_url='login'), name='dispatch')
 @method_decorator(cache_page(300), name='dispatch')  # Cache for 5 minutes
 class DashboardView(TemplateView):
-    template_name = 'dashboard/legacy/index.html'
+    template_name = 'dashboard/admin/index.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -523,4 +510,12 @@ def advanced_admin_panel(request):
         'total_announcements': Announcement.objects.count(),
         'total_faqs': FAQ.objects.count(),
     }
-    return render(request, 'dashboard/legacy/admin.html', context)
+    return render(request, 'dashboard/admin/admin.html', context)
+
+# ============================================
+# SYSTEM CHAIN VIEW
+# ============================================
+@user_passes_test(staff_required, login_url='login')
+def system_chain_view(request):
+    """System Chain: 3D galaxy view of all pages/features"""
+    return render(request, 'dashboard/system_chain.html', {})

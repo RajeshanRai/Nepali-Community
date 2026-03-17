@@ -1,0 +1,28 @@
+.system-chain-container {
+  background: radial-gradient(ellipse at center, #181830 80%, #101020 100%);
+  overflow: hidden;
+}
+#systemChainPanel {
+  position: absolute;
+  top: 60px;
+  right: 40px;
+  width: 340px;
+  min-height: 120px;
+  background: rgba(24,24,48,0.98);
+  border-radius: 16px;
+  box-shadow: 0 0 32px #00ffff44;
+  color: #fff;
+  z-index: 10;
+  padding: 24px 18px;
+  font-size: 1.1em;
+  display: none;
+}
+.system-chain-panel {
+  border: 2px solid #00ffff;
+  animation: shimmer 2s infinite linear;
+}
+@keyframes shimmer {
+  0% { box-shadow: 0 0 32px #00ffff44; }
+  50% { box-shadow: 0 0 64px #00ffff88; }
+  100% { box-shadow: 0 0 32px #00ffff44; }
+}

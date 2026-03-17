@@ -37,12 +37,20 @@ def _load_env_file(file_path: Path) -> None:
 _load_env_file(BASE_DIR / '.env')
 
 
+def _required_env(name: str) -> str:
+    """Get required environment variable or raise ImproperlyConfigured error."""
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        raise ImproperlyConfigured(f'Missing required environment variable: {name}')
+    return value.strip()
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# In production, set this via environment variable: export SECRET_KEY='your-secure-key'
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-CHANGE-THIS-IN-PRODUCTION')
+# SECRET_KEY is required and must be set via environment variable or .env file
+SECRET_KEY = _required_env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # In production, set this via environment variable: export DEBUG=False
@@ -233,13 +241,6 @@ DATA_UPLOAD_MAX_NUMBER_FILES = 100  # Allow up to 100 files per request (default
 AUTH_USER_MODEL = 'users.CustomUser'
 
 # Email configuration (SMTP)
-def _required_env(name: str) -> str:
-    value = os.getenv(name)
-    if value is None or not value.strip():
-        raise ImproperlyConfigured(f'Missing required environment variable: {name}')
-    return value.strip()
-
-
 EMAIL_BACKEND = _required_env('EMAIL_BACKEND')
 EMAIL_HOST = _required_env('EMAIL_HOST')
 EMAIL_PORT = int(_required_env('EMAIL_PORT'))

@@ -45,11 +45,7 @@ from .utils import (
     is_ajax_request,
     success_json_response,
 )
-
-
-def staff_required(user):
-    """Check if user is an active superuser"""
-    return user.is_active and user.is_superuser
+from .decorators import staff_required, superuser_required
 
 
 def _active_member_emails():
@@ -575,7 +571,7 @@ def advanced_admin_panel(request):
         'faqs': FAQ.objects.select_related('category', 'created_by').order_by('-created_at')[:10],
         'users': CustomUser.objects.all().order_by('-date_joined')[:10],
     }
-    return render(request, 'dashboard/legacy/admin.html', context)
+    return render(request, 'dashboard/admin/admin.html', context)
 
 
 # ====== EVENT MANAGEMENT ======

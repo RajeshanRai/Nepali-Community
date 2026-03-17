@@ -121,6 +121,7 @@ __all__ = [
     # Main Dashboard & Admin Panel
     'DashboardView',
     'advanced_admin_panel',
+    'system_chain_view',
     'staff_required',
     'admin_required',
     
