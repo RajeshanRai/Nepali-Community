@@ -65,7 +65,8 @@ class VolunteerApplication(models.Model):
     """Model for volunteer applications"""
     STATUS_CHOICES = [
         ('pending', 'Pending Review'),
-        ('approved', 'Approved'),
+        ('accepted', 'Accepted'),
+        ('assigned', 'Assigned'),
         ('rejected', 'Rejected'),
         ('withdrawn', 'Withdrawn'),
     ]
@@ -108,9 +109,19 @@ class VolunteerRequest(models.Model):
     STATUS_CHOICES = [
         ('new', 'New'),
         ('reviewed', 'Reviewed'),
-        ('contacted', 'Contacted'),
-        ('closed', 'Closed'),
+        ('contacted', 'Contacted'),  # legacy; treated as Accepted in UI
+        ('accepted', 'Accepted'),
+        ('assigned', 'Assigned'),
+        ('closed', 'Rejected'),
     ]
+
+    assigned_opportunity = models.ForeignKey(
+        'volunteers.VolunteerOpportunity',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='assigned_requests',
+    )
 
     name = models.CharField(max_length=200)
     phone = models.CharField(max_length=30)

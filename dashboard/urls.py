@@ -64,6 +64,7 @@ urlpatterns = [
     path('volunteers/applications/<int:pk>/approve/', views.volunteer_application_approve, name='volunteer_application_approve'),
     path('volunteers/applications/<int:pk>/reject/', views.volunteer_application_reject, name='volunteer_application_reject'),
     path('volunteers/applications/<int:pk>/delete/', views.volunteer_application_delete, name='volunteer_application_delete'),
+    path('volunteers/applications/<int:pk>/assign/', views.volunteer_application_assign, name='volunteer_application_assign'),
     path('volunteers/requests/<int:pk>/approve/', views.volunteer_request_approve, name='volunteer_request_approve'),
     path('volunteers/requests/<int:pk>/reject/', views.volunteer_request_reject, name='volunteer_request_reject'),
     path('volunteers/requests/<int:pk>/delete/', views.volunteer_request_delete, name='volunteer_request_delete'),
@@ -73,6 +74,7 @@ urlpatterns = [
     path('requests/', views.event_requests_list, name='event_requests_list'),
     path('requests/<int:pk>/approve/', views.event_request_approve, name='event_request_approve'),
     path('requests/<int:pk>/reject/', views.event_request_reject, name='event_request_reject'),
+    path('requests/<int:pk>/delete/', views.event_request_delete, name='event_request_delete'),
     
     # Announcements
     path('announcements/', views.announcements_list, name='announcements_list'),

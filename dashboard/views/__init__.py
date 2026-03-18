@@ -31,6 +31,7 @@ from dashboard.views_module import (
     event_requests_list,
     event_request_approve,
     event_request_reject,
+    event_request_delete,
     
     # Volunteer Management
     volunteer_opportunities_list,
@@ -41,6 +42,7 @@ from dashboard.views_module import (
     volunteer_application_approve,
     volunteer_application_reject,
     volunteer_application_delete,
+    volunteer_application_assign,
     volunteer_request_approve,
     volunteer_request_reject,
     volunteer_request_delete,
@@ -133,6 +135,7 @@ __all__ = [
     'event_requests_list',
     'event_request_approve',
     'event_request_reject',
+    'event_request_delete',
     
     # Volunteer Management
     'volunteer_opportunities_list',

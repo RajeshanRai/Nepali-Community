@@ -5,13 +5,12 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import user_passes_test
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.db.models import Count, Q, F
+from django.db.models import Count, Q
 from users.models import CustomUser
 from programs.models import RequestEvent
 from announcements.models import Announcement
 from django.db.models.functions import TruncMonth
 from datetime import timedelta
-from django.db.models import Prefetch
 from communities.models import Community
 from volunteers.models import VolunteerApplication
 

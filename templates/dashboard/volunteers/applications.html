@@ -46,7 +46,8 @@
             <div class="filter-buttons" id="application-status-filters">
                 <button class="filter-btn active" data-status="all">All</button>
                 <button class="filter-btn" data-status="pending">Pending</button>
-                <button class="filter-btn" data-status="approved">Approved</button>
+                <button class="filter-btn" data-status="accepted">Accepted</button>
+                <button class="filter-btn" data-status="assigned">Assigned</button>
                 <button class="filter-btn" data-status="rejected">Rejected</button>
             </div>
             <div class="search-mini">
@@ -90,8 +91,10 @@
                         <td>
                             {% if application.status == 'pending' %}
                             <span class="status-badge status-pending">Pending</span>
-                            {% elif application.status == 'approved' %}
-                            <span class="status-badge status-approved">Approved</span>
+                            {% elif application.status == 'accepted' %}
+                            <span class="status-badge status-approved">Accepted</span>
+                            {% elif application.status == 'assigned' %}
+                            <span class="status-badge status-approved">Assigned</span>
                             {% else %}
                             <span class="status-badge status-rejected">Rejected</span>
                             {% endif %}
@@ -104,16 +107,16 @@
                                 </button>
                                 {% if application.status == 'pending' %}
                                 <button class="btn-icon btn-approve action-application" data-id="{{ application.id }}"
-                                    data-action="approve" title="Approve">
+                                    data-action="approve" title="Accept">
                                     <i class="fas fa-check"></i>
                                 </button>
                                 <button class="btn-icon btn-reject action-application" data-id="{{ application.id }}"
                                     data-action="reject" title="Reject">
                                     <i class="fas fa-times"></i>
                                 </button>
-                                {% elif application.status == 'approved' %}
+                                {% elif application.status == 'accepted' %}
                                 <button class="btn-icon btn-assign volunteer-assign-btn" data-id="{{ application.id }}" 
-                                    data-name="{{ application.name }}" title="Assign to Event">
+                                    data-name="{{ application.name }}" title="Assign to Program">
                                     <i class="fas fa-tasks"></i>
                                 </button>
                                 {% endif %}
@@ -145,8 +148,9 @@
             <div class="filter-buttons" id="request-status-filters">
                 <button class="filter-btn active" data-status="all">All</button>
                 <button class="filter-btn" data-status="new">New</button>
-                <button class="filter-btn" data-status="contacted">Contacted</button>
-                <button class="filter-btn" data-status="closed">Closed</button>
+                <button class="filter-btn" data-status="accepted">Accepted</button>
+                <button class="filter-btn" data-status="assigned">Assigned</button>
+                <button class="filter-btn" data-status="closed">Rejected</button>
             </div>
             <div class="search-mini">
                 <i class="fas fa-search"></i>
@@ -176,7 +180,7 @@
                 </thead>
                 <tbody>
                     {% for request in volunteer_requests %}
-                    <tr data-status="{{ request.status }}" data-kind="request"
+                    <tr data-status="{% if request.status == 'contacted' or request.status == 'accepted' %}accepted{% else %}{{ request.status }}{% endif %}" data-kind="request"
                         data-name="{{ request.name|escape }}"
                         data-phone="{{ request.phone|escape }}"
                         data-email="{{ request.email|escape }}"
@@ -199,23 +203,46 @@
                         <td>
                             {% if request.status == 'new' %}
                             <span class="status-badge status-pending">New</span>
-                            {% elif request.status == 'contacted' %}
-                            <span class="status-badge status-approved">Contacted</span>
+                            {% elif request.status == 'contacted' or request.status == 'accepted' %}
+                            <span class="status-badge status-approved">Accepted</span>
+                            {% elif request.status == 'assigned' %}
+                            <span class="status-badge status-approved">Assigned</span>
                             {% elif request.status == 'closed' %}
-                            <span class="status-badge status-rejected">Closed</span>
+                            <span class="status-badge status-rejected">Rejected</span>
                             {% else %}
                             <span class="status-badge">{{ request.get_status_display }}</span>
                             {% endif %}
                         </td>
                         <td>
-                            <select class="assignment-select request-opportunity-select" data-request-id="{{ request.id }}">
-                                <option value="">Select</option>
-                                {% for opportunity in available_opportunities %}
-                                <option value="{{ opportunity.id }}" title="{{ opportunity.title }}">{{ opportunity.title|truncatechars:42 }}</option>
-                                {% empty %}
-                                <option value="" disabled>No open programs</option>
-                                {% endfor %}
-                            </select>
+                            {% if request.status == 'accepted' or request.status == 'contacted' or request.status == 'assigned' %}
+                                <select class="assignment-select request-opportunity-select" data-request-id="{{ request.id }}">
+                                    <option value="">Select</option>
+
+                                    {% if request.assigned_opportunity %}
+                                        <option value="{{ request.assigned_opportunity.id }}" selected title="{{ request.assigned_opportunity.title }}">
+                                            {{ request.assigned_opportunity.title|truncatechars:42 }}
+                                        </option>
+                                    {% endif %}
+
+                                    {% for opportunity in available_opportunities %}
+                                        {% if request.assigned_opportunity and opportunity.id == request.assigned_opportunity.id %}
+                                            {# already included above #}
+                                        {% else %}
+                                            <option value="{{ opportunity.id }}" title="{{ opportunity.title }}">
+                                                {{ opportunity.title|truncatechars:42 }}
+                                            </option>
+                                        {% endif %}
+                                    {% empty %}
+                                        <option value="" disabled>No open programs</option>
+                                    {% endfor %}
+                                </select>
+                            {% elif request.status == 'new' or request.status == 'reviewed' %}
+                                <select class="assignment-select" disabled>
+                                    <option value="">Approve first to assign</option>
+                                </select>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
                         </td>
                         <td>{{ request.created_at|date:"M d, Y" }}</td>
                         <td>

@@ -140,15 +140,21 @@
     }
 
     function statusBadge(type, action) {
-        if (action === 'approve') {
-            return type === 'application'
-                ? '<span class="status-badge status-approved">Approved</span>'
-                : '<span class="status-badge status-approved">Contacted</span>';
+        if (type === 'application') {
+            if (action === 'approve') {
+                return '<span class="status-badge status-approved">Accepted</span>';
+            }
+            return '<span class="status-badge status-rejected">Rejected</span>';
         }
 
-        return type === 'application'
-            ? '<span class="status-badge status-rejected">Rejected</span>'
-            : '<span class="status-badge status-rejected">Closed</span>';
+        // Request statuses: accepted, assigned, rejected
+        if (action === 'approve') {
+            return '<span class="status-badge status-approved">Accepted</span>';
+        }
+        if (action === 'assign') {
+            return '<span class="status-badge status-approved">Assigned</span>';
+        }
+        return '<span class="status-badge status-rejected">Rejected</span>';
     }
 
     async function postAction(url, extraData) {
@@ -200,9 +206,26 @@
         }
 
         if (row.dataset) {
-            row.dataset.status = action === 'approve'
-                ? (type === 'application' ? 'approved' : 'contacted')
-                : (type === 'application' ? 'rejected' : 'closed');
+            if (type === 'application') {
+                row.dataset.status = action === 'approve' ? 'accepted' : 'rejected';
+            } else {
+                if (action === 'approve') {
+                    row.dataset.status = 'accepted';
+                } else if (action === 'assign') {
+                    row.dataset.status = 'assigned';
+                } else {
+                    row.dataset.status = 'closed';
+                }
+            }
+        }
+
+        // Update assignment field availability for requests
+        if (type === 'request') {
+            const select = row.querySelector('.request-opportunity-select');
+            if (select) {
+                const status = row.dataset.status;
+                select.disabled = status === 'closed';
+            }
         }
 
         if (actionsCell) {
@@ -212,16 +235,28 @@
             }
 
             const scopeClass = type === 'application' ? 'action-application' : 'action-request';
-            actionsCell.innerHTML = `
+            let actionsHtml = `
                 <div class="action-buttons">
                     <button class="btn-icon btn-view ${scopeClass}" data-id="${id}" data-action="view" title="View Details">
                         <i class="fas fa-eye"></i>
-                    </button>
+                    </button>`;
+
+            if (type === 'application' && action === 'approve') {
+                // For accepted applications, show assign button
+                actionsHtml += `
+                    <button class="btn-icon btn-assign volunteer-assign-btn" data-id="${id}" data-name="${data.name || ''}" title="Assign to Program">
+                        <i class="fas fa-tasks"></i>
+                    </button>`;
+            }
+
+            actionsHtml += `
                     <button class="btn-icon btn-delete ${scopeClass}" data-id="${id}" data-action="delete" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
             `;
+
+            actionsCell.innerHTML = actionsHtml;
         }
     }
 
@@ -335,7 +370,7 @@
                     const response = await postAction(`/dashboard/volunteers/requests/${requestId}/assign/`, {
                         opportunity_id: opportunityId
                     });
-                    updateRowAfterAction(row, 'request', 'approve');
+                    updateRowAfterAction(row, 'request', 'assign');
                     notify(response.message || 'Volunteer assigned successfully.', 'success');
                 } catch (error) {
                     select.value = '';

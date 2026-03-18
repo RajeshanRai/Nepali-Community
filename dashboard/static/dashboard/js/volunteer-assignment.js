@@ -134,17 +134,40 @@
             return;
         }
 
-        // In a real implementation, you might call an API endpoint to record this assignment
-        // For now, we'll just provide feedback
+        // Send assignment request to server
         e.target.disabled = true;
         e.target.textContent = 'Assigning...';
 
-        // You could add an API call here if you create an assignment endpoint
-        // For now, just show success message
-        setTimeout(() => {
-            showNotification(`Volunteer assigned to "${oppTitle}"`, 'success');
-            document.getElementById('assignmentModal').classList.remove('show');
-        }, 500);
+        try {
+            const response = await fetch(`/dashboard/volunteers/applications/${appId}/assign/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'opportunity_id': oppId
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showNotification(`Volunteer assigned to "${oppTitle}"`, 'success');
+                document.getElementById('assignmentModal').classList.remove('show');
+                // Trigger a custom event to update the applications table
+                document.dispatchEvent(new CustomEvent('volunteerDataUpdated'));
+            } else {
+                showNotification(data.message || 'Failed to assign volunteer', 'error');
+                e.target.disabled = false;
+                e.target.innerHTML = '<i class="fas fa-tasks"></i>';
+            }
+        } catch (error) {
+            console.error('Assignment error:', error);
+            showNotification('Failed to assign volunteer', 'error');
+            e.target.disabled = false;
+            e.target.innerHTML = '<i class="fas fa-tasks"></i>';
+        }
     }
 
     function bindAssignmentButtons() {

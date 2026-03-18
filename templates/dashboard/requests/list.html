@@ -31,9 +31,9 @@
                 </div>
                 <select name="status" class="form-control form-control-max-300">
                     <option value="">All Status</option>
-                    <option value="pending" {% if status_filter=='pending' %}selected{% endif %}>Pending</option>
-                    <option value="approved" {% if status_filter=='approved' %}selected{% endif %}>Approved</option>
-                    <option value="rejected" {% if status_filter=='rejected' %}selected{% endif %}>Rejected</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
                 </select>
                 <button type="submit" class="btn btn-sm btn-primary">
                     <i class="fas fa-filter"></i> Filter
@@ -69,18 +69,18 @@
                     <tr>
                         <td><strong>#{{ request.id }}</strong></td>
                         <td>
-                            <strong>{{ request.title }}</strong>
+                            <strong>{{ request.title|default:'—' }}</strong>
                             <br>
-                            <small class="text-muted">{{ request.description|truncatewords:15 }}</small>
+                            <small class="text-muted">{{ request.description|truncatewords:15|default:'—' }}</small>
                         </td>
                         <td>
                             {% if request.requester %}
-                            <span>{{ request.requester.get_full_name }}</span>
+                            <span>{{ request.requester.get_full_name|default:'—' }}</span>
                             {% else %}
-                            <span>{{ request.requester_name }}</span>
+                            <span>{{ request.requester_name|default:'—' }}</span>
                             {% endif %}
                             <br>
-                            <small class="text-muted">{{ request.requester_email }}</small>
+                            <small class="text-muted">{{ request.requester_email|default:'—' }}</small>
                         </td>
                         <td>
                             {% if request.date %}
@@ -91,11 +91,11 @@
                         </td>
                         <td>
                             <i class="fas fa-map-marker-alt"></i>
-                            {{ request.location|default:"N/A" }}
+                            {{ request.location|default:'N/A' }}
                         </td>
                         <td>
                             <span class="badge badge-secondary">
-                                {{ request.get_event_type_display }}
+                                {{ request.get_event_type_display|default:'—' }}
                             </span>
                         </td>
                         <td>
@@ -147,9 +147,17 @@
             <h3>No Event Requests Found</h3>
             <p>
                 {% if status_filter or search %}
-                No requests match your filters. Try clearing your search criteria.
+                    {% if status_filter == 'pending' %}
+                        There are no pending event requests at this moment.
+                    {% elif status_filter == 'approved' %}
+                        There are no approved event requests.
+                    {% elif status_filter == 'rejected' %}
+                        There are no rejected event requests.
+                    {% else %}
+                        No requests match your filters. Try clearing your search criteria.
+                    {% endif %}
                 {% else %}
-                There are no pending event requests at this moment.
+                    There are no pending event requests at this moment.
                 {% endif %}
             </p>
             <a href="{% url 'dashboard:event_create' %}" class="btn btn-primary">

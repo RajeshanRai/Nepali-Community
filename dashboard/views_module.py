@@ -773,7 +773,7 @@ def volunteer_opportunity_delete(request, pk):
 def volunteer_applications_list(request):
     """List all volunteer applications"""
     applications = VolunteerApplication.objects.all().order_by('-applied_at')
-    volunteer_requests = VolunteerRequest.objects.all().order_by('-created_at')
+    volunteer_requests = VolunteerRequest.objects.select_related('assigned_opportunity').all().order_by('-created_at')
     available_opportunities = VolunteerOpportunity.objects.filter(status='open').order_by('title')
     status_filter = request.GET.get('status', '')
     if status_filter:
@@ -792,15 +792,15 @@ def volunteer_applications_list(request):
 @user_passes_test(staff_required, login_url='login')
 @require_http_methods(["POST"])
 def volunteer_application_approve(request, pk):
-    """Approve volunteer application"""
+    """Accept volunteer application"""
     application = get_object_or_404(VolunteerApplication, pk=pk)
-    application.status = 'approved'
+    application.status = 'accepted'
     application.save()
     
     # Update volunteer opportunity positions
     opportunity = application.opportunity
     opportunity.positions_filled = VolunteerApplication.objects.filter(
-        opportunity=opportunity, status='approved'
+        opportunity=opportunity, status__in=['accepted', 'assigned']
     ).count()
     
     if opportunity.positions_filled >= opportunity.positions_needed:
@@ -809,10 +809,10 @@ def volunteer_application_approve(request, pk):
     opportunity.save()
 
     send_notification_email(
-        subject=f'Volunteer application approved: {opportunity.title}',
+        subject=f'Volunteer application accepted: {opportunity.title}',
         message=(
             f"Hi {application.name},\n\n"
-            f"Your volunteer application has been approved.\n"
+            f"Your volunteer application has been accepted.\n"
             f"Opportunity: {opportunity.title}\n"
             f"Category: {opportunity.get_category_display()}\n"
             f"Start Date: {opportunity.start_date or 'TBA'}\n"
@@ -821,9 +821,9 @@ def volunteer_application_approve(request, pk):
         ),
         recipients=[application.email],
         html_message=build_branded_email_html(
-            title='Volunteer Application Approved',
+            title='Volunteer Application Accepted',
             greeting=f'Hi {application.name},',
-            intro=f"Great news, your application for {opportunity.title} has been approved.",
+            intro=f"Great news, your application for {opportunity.title} has been accepted.",
             paragraphs=[
                 f"You are joining the {opportunity.get_category_display()} stream, and we are excited to have your support.",
                 f"Your expected start window is {opportunity.start_date or 'to be announced'}, with a commitment pattern of {opportunity.time_commitment or 'to be confirmed'}.",
@@ -831,7 +831,7 @@ def volunteer_application_approve(request, pk):
         ),
     )
     
-    return JsonResponse({'success': True, 'message': 'Application approved'})
+    return JsonResponse({'success': True, 'message': 'Application accepted'})
 
 
 @user_passes_test(staff_required, login_url='login')
@@ -853,13 +853,13 @@ def volunteer_application_delete(request, pk):
 
     application.delete()
 
-    approved_count = VolunteerApplication.objects.filter(
+    assigned_count = VolunteerApplication.objects.filter(
         opportunity=opportunity,
-        status='approved'
+        status__in=['accepted', 'assigned']
     ).count()
-    opportunity.positions_filled = approved_count
+    opportunity.positions_filled = assigned_count
 
-    if approved_count < opportunity.positions_needed and opportunity.status == 'filled':
+    if assigned_count < opportunity.positions_needed and opportunity.status == 'filled':
         opportunity.status = 'open'
 
     opportunity.save(update_fields=['positions_filled', 'status'])
@@ -868,13 +868,50 @@ def volunteer_application_delete(request, pk):
 
 @user_passes_test(staff_required, login_url='login')
 @require_http_methods(["POST"])
+def volunteer_application_assign(request, pk):
+    """Assign accepted volunteer application to a program"""
+    application = get_object_or_404(VolunteerApplication, pk=pk)
+    
+    if application.status != 'accepted':
+        return JsonResponse({'success': False, 'message': 'Only accepted applications can be assigned'})
+    
+    # Get the opportunity ID from POST data
+    opportunity_id = request.POST.get('opportunity_id')
+    if not opportunity_id:
+        return JsonResponse({'success': False, 'message': 'Opportunity ID is required'})
+    
+    try:
+        opportunity = VolunteerOpportunity.objects.get(pk=opportunity_id)
+    except VolunteerOpportunity.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Opportunity not found'})
+    
+    # Update application status
+    application.status = 'assigned'
+    application.admin_notes = f'Assigned to opportunity: {opportunity.title} (ID: {opportunity.id})'
+    application.save()
+    
+    # Update positions for the new opportunity
+    opportunity.positions_filled = VolunteerApplication.objects.filter(
+        opportunity=opportunity, status__in=['accepted', 'assigned']
+    ).count()
+    
+    if opportunity.positions_filled >= opportunity.positions_needed:
+        opportunity.status = 'filled'
+    
+    opportunity.save()
+    
+    return JsonResponse({'success': True, 'message': f'Application assigned to {opportunity.title}'})
+
+
+@user_passes_test(staff_required, login_url='login')
+@require_http_methods(["POST"])
 def volunteer_request_approve(request, pk):
-    """Approve volunteer request by marking it contacted"""
+    """Approve volunteer request by marking it accepted"""
     volunteer_request = get_object_or_404(VolunteerRequest, pk=pk)
-    volunteer_request.status = 'contacted'
+    volunteer_request.status = 'accepted'
     volunteer_request.reviewed_at = timezone.now()
     volunteer_request.save(update_fields=['status', 'reviewed_at'])
-    return JsonResponse({'success': True, 'message': 'Volunteer request approved'})
+    return JsonResponse({'success': True, 'message': 'Volunteer request accepted'})
 
 
 @user_passes_test(staff_required, login_url='login')
@@ -902,6 +939,10 @@ def volunteer_request_delete(request, pk):
 def volunteer_request_assign(request, pk):
     """Assign general volunteer request to a volunteer opportunity"""
     volunteer_request = get_object_or_404(VolunteerRequest, pk=pk)
+
+    if volunteer_request.status not in ['accepted', 'contacted', 'assigned']:
+        return JsonResponse({'success': False, 'message': 'Request must be accepted before assigning.'}, status=400)
+
     opportunity_id = request.POST.get('opportunity_id')
 
     if not opportunity_id:
@@ -909,11 +950,11 @@ def volunteer_request_assign(request, pk):
 
     opportunity = get_object_or_404(VolunteerOpportunity, pk=opportunity_id)
 
-    approved_count = VolunteerApplication.objects.filter(
+    assigned_count = VolunteerApplication.objects.filter(
         opportunity=opportunity,
-        status='approved'
+        status__in=['accepted', 'assigned']
     ).count()
-    if opportunity.status != 'open' or approved_count >= opportunity.positions_needed:
+    if opportunity.status != 'open' or assigned_count >= opportunity.positions_needed:
         return JsonResponse({'success': False, 'message': 'Selected opportunity is not available.'}, status=400)
 
     application, created = VolunteerApplication.objects.get_or_create(
@@ -925,7 +966,7 @@ def volunteer_request_assign(request, pk):
             'motivation': volunteer_request.purpose,
             'experience': volunteer_request.expertise or '',
             'availability': volunteer_request.schedule_availability,
-            'status': 'approved',
+            'status': 'accepted',
             'reviewed_at': timezone.now(),
             'reviewed_by': request.user,
             'admin_notes': f'Assigned from volunteer request #{volunteer_request.id}',
@@ -938,22 +979,23 @@ def volunteer_request_assign(request, pk):
         application.motivation = volunteer_request.purpose
         application.experience = volunteer_request.expertise or ''
         application.availability = volunteer_request.schedule_availability
-        application.status = 'approved'
+        application.status = 'accepted'
         application.reviewed_at = timezone.now()
         application.reviewed_by = request.user
         application.admin_notes = f'Assigned from volunteer request #{volunteer_request.id}'
         application.save()
 
-    volunteer_request.status = 'contacted'
+    volunteer_request.status = 'assigned'
+    volunteer_request.assigned_opportunity = opportunity
     volunteer_request.reviewed_at = timezone.now()
     volunteer_request.admin_notes = (
         f'Assigned to opportunity "{opportunity.title}" (ID: {opportunity.id}) by {request.user.username}'
     )
-    volunteer_request.save(update_fields=['status', 'reviewed_at', 'admin_notes'])
+    volunteer_request.save(update_fields=['status', 'assigned_opportunity', 'reviewed_at', 'admin_notes'])
 
     opportunity.positions_filled = VolunteerApplication.objects.filter(
         opportunity=opportunity,
-        status='approved'
+        status__in=['accepted', 'assigned']
     ).count()
 
     if opportunity.positions_filled >= opportunity.positions_needed:
@@ -975,9 +1017,12 @@ def volunteer_request_assign(request, pk):
 def event_requests_list(request):
     """List all event requests"""
     requests = RequestEvent.objects.all().order_by('-submitted_at')
-    status_filter = request.GET.get('status', '')
+    status_filter = request.GET.get('status', '').strip()
+
+    # Allow case-insensitive filtering to avoid missing records if status values are not normalized
     if status_filter:
-        requests = requests.filter(status=status_filter)
+        requests = requests.filter(status__iexact=status_filter)
+
     return render(request, 'dashboard/requests/list.html', {'requests': requests, 'status_filter': status_filter})
 
 
@@ -1055,12 +1100,8 @@ def event_request_reject(request, pk):
     try:
         event_request = get_object_or_404(RequestEvent, pk=pk)
         
-        # Get rejection reason from request body if provided
-        try:
-            data = json.loads(request.body)
-            rejection_reason = data.get('reason', '')
-        except json.JSONDecodeError:
-            rejection_reason = ''
+        # Get rejection reason from POST data (FormData from JavaScript)
+        rejection_reason = request.POST.get('reason', '')
         
         # Update request status
         event_request.status = 'rejected'
@@ -1077,6 +1118,21 @@ def event_request_reject(request, pk):
             'success': False, 
             'message': f'Error rejecting request: {str(e)}'
         }, status=500)
+
+
+@user_passes_test(staff_required, login_url='login')
+@require_http_methods(["POST"])
+def event_request_delete(request, pk):
+    """Delete an event request"""
+    event_request = get_object_or_404(RequestEvent, pk=pk)
+    request_title = event_request.title
+    event_request.delete()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'message': f'Request "{request_title}" deleted successfully.'})
+
+    messages.success(request, f'Request "{request_title}" deleted successfully.')
+    return redirect('dashboard:projects_rejected')
 
 
 # ====== ANNOUNCEMENT MANAGEMENT ======

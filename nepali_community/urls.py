@@ -37,6 +37,8 @@ urlpatterns = [
     path('faq/', include('faqs.urls')),
 ]
 
-# Serve media files in development
+# Serve static and media files in development
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Serve from the source static directory, not STATIC_ROOT (which is for production)
+    urlpatterns += static(settings.STATIC_URL, document_root=str(settings.BASE_DIR / 'static'))
+    urlpatterns += static(settings.MEDIA_URL, document_root=str(settings.MEDIA_ROOT))
