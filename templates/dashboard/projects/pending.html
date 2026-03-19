@@ -71,6 +71,7 @@
                         <th>Event Request</th>
                         <th>Type</th>
                         <th>Requester</th>
+                        <th>Phone</th>
                         <th>Requested Event Date</th>
                         <th>Submitted</th>
                         <th>Target Attendees</th>
@@ -107,6 +108,7 @@
                             </div>
                             {% endif %}
                         </td>
+                        <td>{{ request.requester_phone|default:'-' }}</td>
                         <td>{{ request.date|date:"M d, Y"|default:"Not specified" }}</td>
                         <td>{{ request.submitted_at|date:"M d, Y" }}</td>
                         <td>
@@ -120,7 +122,7 @@
                         <td>
                             <div class="action-buttons enhanced-actions">
                                     <button class="btn-icon btn-view" title="View Details"
-                                        onclick="viewDetails({{ request.id }}, '{{ request.title|escapejs }}', '{{ request.get_event_type_display|default:'Other'|escapejs }}', '{{ request.requester_name|default:'Guest'|escapejs }}', '{{ request.requester_email|default:'No email'|escapejs }}', '{{ request.location|default:'No location'|escapejs }}', '{{ request.description|default:'No description'|escapejs }}', '{{ request.date|date:'M d, Y'|default:'Not specified'|escapejs }}', '{{ request.target_attendees|default:'N/A'|escapejs }}')">
+                                        onclick="viewDetails({{ request.id }}, '{{ request.title|escapejs }}', '{{ request.get_event_type_display|default:'Other'|escapejs }}', '{{ request.requester_name|default:'Guest'|escapejs }}', '{{ request.requester_email|default:'No email'|escapejs }}', '{{ request.requester_phone|default:'N/A'|escapejs }}', '{{ request.location|default:'No location'|escapejs }}', '{{ request.description|default:'No description'|escapejs }}', '{{ request.date|date:'M d, Y'|default:'Not specified'|escapejs }}', '{{ request.target_attendees|default:'N/A'|escapejs }}')">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <button class="btn-icon btn-approve" title="Approve Request"
@@ -136,7 +138,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="9" class="text-center text-muted">No pending requests at the moment.</td>
+                        <td colspan="10" class="text-center text-muted">No pending requests at the moment.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -165,6 +167,9 @@
                 </div>
                 <div><label>Email</label>
                     <p id="detailEmail"></p>
+                </div>
+                <div><label>Phone</label>
+                    <p id="detailPhone"></p>
                 </div>
                 <div><label>Event Date</label>
                     <p id="detailDate"></p>
@@ -530,11 +535,12 @@
         showDecisionModal(id, 'reject');
     }
 
-    function viewDetails(id, title, type, requester, email, location, description, date, attendees) {
+    function viewDetails(id, title, type, requester, email, phone, location, description, date, attendees) {
         document.getElementById('detailTitle').textContent = title;
         document.getElementById('detailType').textContent = type;
         document.getElementById('detailRequester').textContent = requester;
         document.getElementById('detailEmail').textContent = email;
+        document.getElementById('detailPhone').textContent = phone;
         document.getElementById('detailLocation').textContent = location;
         document.getElementById('detailDescription').textContent = description;
         document.getElementById('detailDate').textContent = date;

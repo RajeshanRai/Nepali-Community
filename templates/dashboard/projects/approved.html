@@ -105,4 +105,60 @@
         }
     }
 </style>
+
+<!-- Event Details Modal -->
+<div id="approvedProjectModal" class="details-modal" aria-hidden="true">
+    <div class="details-modal-backdrop" id="approvedProjectModalBackdrop"></div>
+    <div class="details-modal-content">
+        <div class="details-modal-header">
+            <h3><i class="fas fa-eye"></i> Event Details</h3>
+            <button class="modal-close" type="button" id="approvedProjectModalClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="details-modal-body">
+            <div class="details-grid">
+                <div class="detail-item"><label>Title</label><p id="approvedDetailTitle"></p></div>
+                <div class="detail-item"><label>Category</label><p id="approvedDetailCategory"></p></div>
+                <div class="detail-item"><label>Date</label><p id="approvedDetailDate"></p></div>
+                <div class="detail-item"><label>Location</label><p id="approvedDetailLocation"></p></div>
+                <div class="detail-item full"><label>Description</label><p id="approvedDetailDescription"></p></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    function openApprovedProjectModal(btn) {
+        document.getElementById('approvedDetailTitle').textContent = btn.dataset.projectTitle || '-';
+        document.getElementById('approvedDetailCategory').textContent = btn.dataset.projectCategory || '-';
+        document.getElementById('approvedDetailDate').textContent = btn.dataset.projectDate || '-';
+        document.getElementById('approvedDetailLocation').textContent = btn.dataset.projectLocation || '-';
+        document.getElementById('approvedDetailDescription').textContent = btn.dataset.projectDescription || '-';
+
+        const modal = document.getElementById('approvedProjectModal');
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeApprovedProjectModal() {
+        const modal = document.getElementById('approvedProjectModal');
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    window.openApprovedProjectModal = openApprovedProjectModal;
+
+    document.getElementById('approvedProjectModalClose').addEventListener('click', closeApprovedProjectModal);
+    document.getElementById('approvedProjectModalBackdrop').addEventListener('click', closeApprovedProjectModal);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeApprovedProjectModal(); }
+    });
+}());
+</script>
 {% endblock %}

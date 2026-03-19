@@ -744,7 +744,7 @@
 
 .team-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 1rem;
     margin-top: 1rem;
 }
@@ -789,7 +789,7 @@
 .member-image-wrapper {
     position: relative;
     width: 100%;
-    padding-bottom: 80%;
+    padding-bottom: 75%;
     overflow: hidden;
     background: linear-gradient(135deg, var(--accent-color), var(--color-orange));
 }
@@ -825,52 +825,56 @@
 }
 
 .member-content {
-    padding: 0.9rem;
+    padding: 0.85rem;
     display: flex;
     flex-direction: column;
     flex: 1;
 }
 
 .member-name {
-    font-size: 1rem;
+    font-size: 0.92rem;
     font-weight: 700;
     color: var(--text-color);
     margin-bottom: var(--spacing-xs);
 }
 
 .member-role {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--accent-color);
     margin-bottom: var(--spacing-md);
 }
 
 .member-bio {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #666;
-    line-height: 1.5;
-    margin-bottom: 0.8rem;
+    line-height: 1.4;
+    margin-bottom: 0.55rem;
     flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .member-socials {
     display: flex;
-    gap: var(--spacing-sm);
+    gap: 0.35rem;
     margin-top: auto;
-    padding-top: 0.75rem;
+    padding-top: 0.5rem;
     border-top: 1px solid var(--border-color);
 }
 
 .social-link {
-    width: 40px;
-    height: 40px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: rgba(255, 107, 53, 0.1);
     color: var(--accent-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.9rem;
+    font-size: 0.72rem;
     transition: transform 0.28s ease, box-shadow 0.28s ease, background 0.28s ease, color 0.28s ease;
     text-decoration: none;
     position: relative;
@@ -941,6 +945,183 @@
 .member-socials .social-link--email:hover i,
 .member-socials .social-link--email:focus-visible i {
     transform: translateY(-1px) scale(1.09);
+}
+
+/* =====================================================
+   TEAM SECTION REDESIGN (Meet the People)
+   ===================================================== */
+
+.team-section {
+    background:
+        radial-gradient(circle at 8% 14%, rgba(255, 107, 53, 0.12), transparent 34%),
+        radial-gradient(circle at 92% 8%, rgba(26, 26, 26, 0.08), transparent 28%),
+        linear-gradient(180deg, #fafafa 0%, #f4f6f9 100%);
+}
+
+.team-meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin: 0.25rem 0 1rem;
+}
+
+.team-meta-strip span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    padding: 0.4rem 0.72rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 107, 53, 0.22);
+    background: rgba(255, 107, 53, 0.09);
+    color: #3d3d3d;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.team-meta-strip i {
+    color: var(--accent-color);
+    font-size: 0.72rem;
+}
+
+.team-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.team-member-card {
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.74);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+
+.team-member-card:hover {
+    transform: translateY(-9px) scale(1.01);
+    box-shadow: 0 22px 44px rgba(15, 23, 42, 0.14);
+}
+
+.member-image-wrapper {
+    padding-bottom: 75%;
+}
+
+.member-badge {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.28rem 0.58rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #111827;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.member-content {
+    padding: 1rem 1rem 0.95rem;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto auto;
+    align-content: start;
+}
+
+.member-name {
+    font-size: 1.04rem;
+    letter-spacing: -0.01em;
+}
+
+.member-role {
+    margin-bottom: 0.5rem;
+    font-size: 0.86rem;
+}
+
+.member-bio {
+    font-size: 0.81rem;
+    line-height: 1.55;
+    margin-bottom: 0.65rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.member-focus {
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 10px;
+    background: rgba(248, 250, 252, 0.9);
+    padding: 0.5rem 0.6rem;
+    margin-top: auto;
+    margin-bottom: 0.75rem;
+    min-height: 58px;
+    display: grid;
+    align-content: center;
+}
+
+.member-focus span {
+    display: block;
+    font-size: 0.67rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 800;
+    color: #64748b;
+    margin-bottom: 0.16rem;
+}
+
+.member-focus p {
+    margin: 0;
+    color: #334155;
+    font-size: 0.76rem;
+    line-height: 1.4;
+}
+
+.member-socials {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 0.7rem;
+    gap: 0.55rem;
+    margin-top: 0;
+}
+
+/* Keep original LinkedIn and email color themes intact */
+.member-socials .social-link--linkedin {
+    background: rgba(10, 102, 194, 0.14);
+    color: #0a66c2;
+    border: 1px solid #0a66c2;
+}
+
+.member-socials .social-link--email {
+    background: rgba(234, 67, 53, 0.14);
+    color: #ea4335;
+    border: 1px solid #ea4335;
+}
+
+@media (max-width: 1200px) {
+    .team-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1024px) {
+    .team-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .team-meta-strip {
+        gap: 0.45rem;
+    }
+
+    .team-meta-strip span {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* =====================================================
@@ -1429,6 +1610,11 @@
     padding: 0.86rem;
 }
 
+.about-page.ultra-compact .team-member-card .member-content {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto auto;
+}
+
 .about-page.ultra-compact .mission-icon,
 .about-page.ultra-compact .impact-icon {
     width: 30px;
@@ -1449,6 +1635,15 @@
 .about-page.ultra-compact .values-list li {
     font-size: 0.82rem;
     line-height: 1.5;
+}
+
+.about-page.ultra-compact .member-bio {
+    min-height: unset;
+}
+
+.about-page.ultra-compact .member-focus {
+    margin-top: auto;
+    min-height: 56px;
 }
 
 .about-page.ultra-compact .core-values {

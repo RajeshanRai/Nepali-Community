@@ -72,7 +72,11 @@ class AboutView(TemplateView):
         # Years of service (since 1995)
         from datetime import datetime
         context['years_of_service'] = datetime.now().year - 1995
-        
+
+        # Leadership team
+        from core.models import TeamMember
+        context['team_members'] = TeamMember.objects.filter(is_active=True)
+
         return context
 
 

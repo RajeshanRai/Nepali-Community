@@ -54,8 +54,14 @@
                         <td>
                             <div class="action-buttons">
                                
-                                <button class="btn-icon btn-view action-application" data-id="{{ opportunity.id }}" data-action="view"
-                                    title="View Details">
+                                <button class="btn-icon btn-view action-vol-opportunity" title="View Details"
+                                    data-opp-title="{{ opportunity.title|escapejs }}"
+                                    data-opp-description="{{ opportunity.description|truncatewords:40|striptags|escapejs }}"
+                                    data-opp-location="{{ opportunity.location|default:'N/A'|escapejs }}"
+                                    data-opp-positions="{{ opportunity.positions_filled }}/{{ opportunity.positions_needed }}"
+                                    data-opp-status="{{ opportunity.get_status_display|escapejs }}"
+                                    data-opp-category="{{ opportunity.get_category_display|escapejs }}"
+                                    data-opp-time="{{ opportunity.time_commitment|default:'N/A'|escapejs }}">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <a class="btn-icon btn-edit"
@@ -80,5 +86,67 @@
     </div>
 </div>
 
+<!-- Opportunity Details Modal -->
+<div id="volOpportunityModal" class="details-modal" aria-hidden="true">
+    <div class="details-modal-backdrop" id="volOpportunityModalBackdrop"></div>
+    <div class="details-modal-content">
+        <div class="details-modal-header">
+            <h3><i class="fas fa-eye"></i> Opportunity Details</h3>
+            <button class="modal-close" type="button" id="volOpportunityModalClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="details-modal-body">
+            <div class="details-grid">
+                <div class="detail-item"><label>Title</label><p id="volOppDetailTitle"></p></div>
+                <div class="detail-item"><label>Category</label><p id="volOppDetailCategory"></p></div>
+                <div class="detail-item"><label>Location</label><p id="volOppDetailLocation"></p></div>
+                <div class="detail-item"><label>Time Commitment</label><p id="volOppDetailTime"></p></div>
+                <div class="detail-item"><label>Positions</label><p id="volOppDetailPositions"></p></div>
+                <div class="detail-item"><label>Status</label><p id="volOppDetailStatus"></p></div>
+                <div class="detail-item full"><label>Description</label><p id="volOppDetailDescription"></p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    function openVolOpportunityModal(btn) {
+        document.getElementById('volOppDetailTitle').textContent = btn.dataset.oppTitle || '-';
+        document.getElementById('volOppDetailCategory').textContent = btn.dataset.oppCategory || '-';
+        document.getElementById('volOppDetailLocation').textContent = btn.dataset.oppLocation || '-';
+        document.getElementById('volOppDetailTime').textContent = btn.dataset.oppTime || '-';
+        document.getElementById('volOppDetailPositions').textContent = btn.dataset.oppPositions || '-';
+        document.getElementById('volOppDetailStatus').textContent = btn.dataset.oppStatus || '-';
+        document.getElementById('volOppDetailDescription').textContent = btn.dataset.oppDescription || '-';
+
+        const modal = document.getElementById('volOpportunityModal');
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeVolOpportunityModal() {
+        const modal = document.getElementById('volOpportunityModal');
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.action-vol-opportunity').forEach(function (btn) {
+        btn.addEventListener('click', function () { openVolOpportunityModal(btn); });
+    });
+
+    document.getElementById('volOpportunityModalClose').addEventListener('click', closeVolOpportunityModal);
+    document.getElementById('volOpportunityModalBackdrop').addEventListener('click', closeVolOpportunityModal);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeVolOpportunityModal(); }
+    });
+}());
+</script>
 {% endblock %}
 

@@ -70,7 +70,14 @@
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <button type="button" class="btn-icon btn-view" title="View" disabled>
+                                <button type="button" class="btn-icon btn-view action-all-event" title="View"
+                                    data-event-title="{{ event.title|escapejs }}"
+                                    data-event-category="{{ event.get_event_type_display|escapejs }}"
+                                    data-event-date="{{ event.date|date:'M d, Y'|escapejs }}"
+                                    data-event-location="{{ event.location|truncatewords:5|escapejs }}"
+                                    data-event-description="{{ event.description|truncatewords:40|striptags|escapejs }}"
+                                    data-event-registered="{{ event.registrations.count }}"
+                                    data-event-status="{% if event.date < today %}Completed{% else %}Active{% endif %}">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <a class="btn-icon btn-edit" title="Edit" href="{% url 'dashboard:event_edit' event.id %}">
@@ -96,8 +103,67 @@
     </div>
 </div>
 
+<!-- Event Details Modal -->
+<div id="allEventModal" class="details-modal" aria-hidden="true">
+    <div class="details-modal-backdrop" id="allEventModalBackdrop"></div>
+    <div class="details-modal-content">
+        <div class="details-modal-header">
+            <h3><i class="fas fa-eye"></i> Event Details</h3>
+            <button class="modal-close" type="button" id="allEventModalClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="details-modal-body">
+            <div class="details-grid">
+                <div class="detail-item"><label>Title</label><p id="allEventDetailTitle"></p></div>
+                <div class="detail-item"><label>Category</label><p id="allEventDetailCategory"></p></div>
+                <div class="detail-item"><label>Date</label><p id="allEventDetailDate"></p></div>
+                <div class="detail-item"><label>Location</label><p id="allEventDetailLocation"></p></div>
+                <div class="detail-item"><label>Registered</label><p id="allEventDetailRegistered"></p></div>
+                <div class="detail-item"><label>Status</label><p id="allEventDetailStatus"></p></div>
+                <div class="detail-item full"><label>Description</label><p id="allEventDetailDescription"></p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'dashboard/js/pages/projects-all.js' %}"></script>
+<script>
+(function () {
+    function openAllEventModal(btn) {
+        document.getElementById('allEventDetailTitle').textContent = btn.dataset.eventTitle || '-';
+        document.getElementById('allEventDetailCategory').textContent = btn.dataset.eventCategory || '-';
+        document.getElementById('allEventDetailDate').textContent = btn.dataset.eventDate || '-';
+        document.getElementById('allEventDetailLocation').textContent = btn.dataset.eventLocation || '-';
+        document.getElementById('allEventDetailRegistered').textContent = btn.dataset.eventRegistered || '0';
+        document.getElementById('allEventDetailStatus').textContent = btn.dataset.eventStatus || '-';
+        document.getElementById('allEventDetailDescription').textContent = btn.dataset.eventDescription || '-';
+
+        const modal = document.getElementById('allEventModal');
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAllEventModal() {
+        const modal = document.getElementById('allEventModal');
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.action-all-event').forEach(function (btn) {
+        btn.addEventListener('click', function () { openAllEventModal(btn); });
+    });
+
+    document.getElementById('allEventModalClose').addEventListener('click', closeAllEventModal);
+    document.getElementById('allEventModalBackdrop').addEventListener('click', closeAllEventModal);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeAllEventModal(); }
+    });
+}());
+</script>
 {% endblock %}

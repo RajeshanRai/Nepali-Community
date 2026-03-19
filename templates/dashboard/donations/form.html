@@ -1,32 +1,187 @@
 {% extends 'dashboard/admin_base.html' %}
+{% load static %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{% if object or form.instance.pk %}Edit Donation{% else %}Create Donation{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/dynamic-form-pattern.css' %}">
+{% endblock %}
 
 {% block breadcrumb_items %}
 <li class="breadcrumb-item"><a href="{% url 'dashboard:donations_list' %}">Donations</a></li>
-<li class="breadcrumb-item active">{{ title }}</li>
+<li class="breadcrumb-item active">{% if object or form.instance.pk %}Edit Donation{% else %}Create Donation{% endif %}</li>
 {% endblock %}
 
 {% block page_header %}
 <div class="page-header">
     <div class="page-header-content">
-        <h1><i class="fas fa-hand-holding-heart"></i> {{ title }}</h1>
-        <p>Create or update donation records.</p>
+        <h1><i class="fas fa-hand-holding-heart"></i> {% if object or form.instance.pk %}Edit Donation{% else %}Create Donation{% endif %}</h1>
+        <p>Manage donor details, payment metadata, and donation status.</p>
     </div>
 </div>
 {% endblock %}
 
 {% block content %}
-<div class="content-card">
-    <div class="content-card-body">
-        <form method="POST">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="form-footer">
-                <a href="{% url 'dashboard:donations_list' %}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
-            </div>
-        </form>
+<div class="dfp-layout">
+    <div class="content-card dfp-main-card">
+        <div class="content-card-body">
+            <form method="POST" class="dfp-form" id="donationForm">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="dfp-progress-wrap">
+                    <div class="dfp-progress-head">
+                        <span><i class="fas fa-rocket"></i> Completion</span>
+                        <strong id="donProgressText">0%</strong>
+                    </div>
+                    <div class="dfp-progress-bar"><span id="donProgressBar"></span></div>
+                </div>
+
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-user"></i> Donor Profile</h3>
+                    <div class="dfp-grid two">
+                        <div class="dfp-field">
+                            <label for="{{ form.user.id_for_label }}" class="dfp-label">Linked User</label>
+                            {{ form.user }}
+                            {% if form.user.errors %}<div class="dfp-error">{{ form.user.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.status.id_for_label }}" class="dfp-label required">Status</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}<div class="dfp-error">{{ form.status.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="dfp-grid two">
+                        <div class="dfp-field">
+                            <label for="{{ form.donor_name.id_for_label }}" class="dfp-label">Donor Name</label>
+                            {{ form.donor_name }}
+                            {% if form.donor_name.errors %}<div class="dfp-error">{{ form.donor_name.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.donor_email.id_for_label }}" class="dfp-label">Donor Email</label>
+                            {{ form.donor_email }}
+                            {% if form.donor_email.errors %}<div class="dfp-error">{{ form.donor_email.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-money-bill-wave"></i> Donation Details</h3>
+                    <div class="dfp-grid two">
+                        <div class="dfp-field">
+                            <label for="{{ form.amount.id_for_label }}" class="dfp-label required">Amount</label>
+                            {{ form.amount }}
+                            {% if form.amount.errors %}<div class="dfp-error">{{ form.amount.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.payment_method.id_for_label }}" class="dfp-label">Payment Method</label>
+                            {{ form.payment_method }}
+                            {% if form.payment_method.errors %}<div class="dfp-error">{{ form.payment_method.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="dfp-field">
+                        <label for="{{ form.purpose.id_for_label }}" class="dfp-label">Purpose</label>
+                        {{ form.purpose }}
+                        {% if form.purpose.errors %}<div class="dfp-error">{{ form.purpose.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="dfp-grid three">
+                        <div class="dfp-check-wrap"><label class="dfp-check">{{ form.is_recurring }} <span>Recurring</span></label></div>
+                        <div class="dfp-check-wrap"><label class="dfp-check">{{ form.anonymous }} <span>Anonymous</span></label></div>
+                        <div class="dfp-field">
+                            <label for="{{ form.interact_email.id_for_label }}" class="dfp-label">Interac Email</label>
+                            {{ form.interact_email }}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-credit-card"></i> Payment Metadata</h3>
+                    <div class="dfp-grid two">
+                        <div class="dfp-field">
+                            <label for="{{ form.card_last_four.id_for_label }}" class="dfp-label">Card Last 4</label>
+                            {{ form.card_last_four }}
+                            {% if form.card_last_four.errors %}<div class="dfp-error">{{ form.card_last_four.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.transaction_ref.id_for_label }}" class="dfp-label">Transaction Ref</label>
+                            {{ form.transaction_ref }}
+                            {% if form.transaction_ref.errors %}<div class="dfp-error">{{ form.transaction_ref.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                <div class="dfp-actions">
+                    <a href="{% url 'dashboard:donations_list' %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Donation</button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <aside class="content-card dfp-side-card">
+        <div class="content-card-body">
+            <h3><i class="fas fa-eye"></i> Donation Snapshot</h3>
+            <div class="dfp-side-block"><div class="dfp-k">Amount</div><div class="dfp-v" id="donPreviewAmount">0.00</div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Status</div><div class="dfp-v"><span class="dfp-pill" id="donPreviewStatus">Pending</span></div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Donor</div><div class="dfp-v" id="donPreviewDonor">Not specified</div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Payment</div><div class="dfp-v" id="donPreviewPayment">Not selected</div></div>
+
+            <hr class="dfp-divider">
+            <h4><i class="fas fa-lightbulb"></i> Tips</h4>
+            <ul class="dfp-tips">
+                <li>Use clear purpose labels for reporting accuracy.</li>
+                <li>Always store transaction references when available.</li>
+                <li>Set status carefully to match payment confirmation.</li>
+            </ul>
+        </div>
+    </aside>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const amount = document.getElementById('{{ form.amount.id_for_label }}');
+    const status = document.getElementById('{{ form.status.id_for_label }}');
+    const donorName = document.getElementById('{{ form.donor_name.id_for_label }}');
+    const payment = document.getElementById('{{ form.payment_method.id_for_label }}');
+
+    const progressBar = document.getElementById('donProgressBar');
+    const progressText = document.getElementById('donProgressText');
+    const previewAmount = document.getElementById('donPreviewAmount');
+    const previewStatus = document.getElementById('donPreviewStatus');
+    const previewDonor = document.getElementById('donPreviewDonor');
+    const previewPayment = document.getElementById('donPreviewPayment');
+
+    const required = [amount, status].filter(Boolean);
+
+    function update() {
+        if (previewAmount && amount) {
+            const value = parseFloat(amount.value || '0');
+            previewAmount.textContent = Number.isNaN(value) ? '0.00' : value.toFixed(2);
+        }
+        if (previewStatus && status) previewStatus.textContent = status.options[status.selectedIndex]?.text || 'Pending';
+        if (previewDonor && donorName) previewDonor.textContent = (donorName.value || '').trim() || 'Not specified';
+        if (previewPayment && payment) previewPayment.textContent = payment.options[payment.selectedIndex]?.text || 'Not selected';
+
+        if (progressBar && progressText) {
+            const done = required.filter((el) => String(el.value || '').trim() !== '').length;
+            const pct = required.length ? Math.round((done / required.length) * 100) : 0;
+            progressBar.style.width = pct + '%';
+            progressText.textContent = pct + '%';
+        }
+    }
+
+    [amount, status, donorName, payment].forEach((el) => {
+        if (el) {
+            el.addEventListener('input', update);
+            el.addEventListener('change', update);
+        }
+    });
+    update();
+})();
+</script>
 {% endblock %}

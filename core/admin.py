@@ -1,7 +1,10 @@
 from django.contrib import admin
+from .models import TeamMember
 
-# Core app admin - no models to register
-# Models have been moved to dedicated apps:
-# - Announcements: announcements app
-# - FAQs: faqs app
-# - Volunteers: volunteers app
+
+@admin.register(TeamMember)
+class TeamMemberAdmin(admin.ModelAdmin):
+    list_display = ('name', 'role', 'badge', 'order', 'is_active')
+    list_editable = ('order', 'is_active')
+    list_filter = ('is_active',)
+    search_fields = ('name', 'role')

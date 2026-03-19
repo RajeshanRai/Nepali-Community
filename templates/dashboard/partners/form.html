@@ -1,63 +1,10 @@
 {% extends 'dashboard/admin_base.html' %}
+{% load static %}
 
 {% block title %}{{ title }}{% endblock %}
 
 {% block extra_css %}
-<style>
-    .partner-form .form-row {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.9rem;
-        margin-bottom: 0.85rem;
-    }
-
-    .partner-form .form-row.single {
-        grid-template-columns: 1fr;
-    }
-
-    .partner-form .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
-    }
-
-    .partner-form .form-label {
-        font-size: 0.82rem;
-        font-weight: 600;
-        color: #334155;
-    }
-
-    .partner-form .form-label i {
-        color: #f97316;
-        margin-right: 0.25rem;
-    }
-
-    .partner-form .form-help {
-        font-size: 0.75rem;
-        color: #64748b;
-    }
-
-    .partner-form .form-error {
-        color: #dc2626;
-        font-size: 0.75rem;
-    }
-
-    .partner-form .form-errors {
-        background: #fff1f2;
-        border: 1px solid #fecdd3;
-        color: #9f1239;
-        border-radius: 10px;
-        padding: 0.7rem 0.85rem;
-        margin-bottom: 0.9rem;
-        font-size: 0.83rem;
-    }
-
-    @media (max-width: 768px) {
-        .partner-form .form-row {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/dynamic-form-pattern.css' %}">
 {% endblock %}
 
 {% block breadcrumb_items %}
@@ -75,63 +22,158 @@
 {% endblock %}
 
 {% block content %}
-<div class="content-card">
-    <div class="content-card-body">
-        <form method="POST" enctype="multipart/form-data" class="partner-form">
-            {% csrf_token %}
+<div class="dfp-layout">
+    <div class="content-card dfp-main-card">
+        <div class="content-card-body">
+            <form method="POST" enctype="multipart/form-data" class="dfp-form" id="partnerForm">
+                {% csrf_token %}
 
-            {% if form.non_field_errors %}
-            <div class="form-errors">{{ form.non_field_errors }}</div>
-            {% endif %}
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="id_name" class="form-label"><i class="fas fa-building"></i> Partner Name</label>
-                    {{ form.name }}
-                    {% if form.name.errors %}<div class="form-error">{{ form.name.errors }}</div>{% endif %}
+                <div class="dfp-progress-wrap">
+                    <div class="dfp-progress-head">
+                        <span><i class="fas fa-rocket"></i> Readiness</span>
+                        <strong id="partnerProgressText">0%</strong>
+                    </div>
+                    <div class="dfp-progress-bar"><span id="partnerProgressBar"></span></div>
                 </div>
-                <div class="form-group">
-                    <label for="id_partnership_since" class="form-label"><i class="fas fa-calendar-alt"></i> Partnership Since</label>
-                    {{ form.partnership_since }}
-                    {% if form.partnership_since.errors %}<div class="form-error">{{ form.partnership_since.errors }}</div>{% endif %}
-                </div>
-            </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="id_website" class="form-label"><i class="fas fa-globe"></i> Website</label>
-                    {{ form.website }}
-                    {% if form.website.errors %}<div class="form-error">{{ form.website.errors }}</div>{% endif %}
-                </div>
-                <div class="form-group">
-                    <label for="id_logo" class="form-label"><i class="fas fa-image"></i> Logo</label>
-                    {{ form.logo }}
-                    {% if form.logo.errors %}<div class="form-error">{{ form.logo.errors }}</div>{% endif %}
-                </div>
-            </div>
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-building"></i> Partner Identity</h3>
+                    <div class="dfp-grid two">
+                        <div class="dfp-field">
+                            <label for="{{ form.name.id_for_label }}" class="dfp-label required">Partner Name</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<div class="dfp-error">{{ form.name.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.partnership_since.id_for_label }}" class="dfp-label">Partnership Since</label>
+                            {{ form.partnership_since }}
+                            {% if form.partnership_since.errors %}<div class="dfp-error">{{ form.partnership_since.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                </section>
 
-            <div class="form-row single">
-                <div class="form-group">
-                    <label for="id_description" class="form-label"><i class="fas fa-align-left"></i> Description</label>
-                    {{ form.description }}
-                    {% if form.description.errors %}<div class="form-error">{{ form.description.errors }}</div>{% endif %}
-                </div>
-            </div>
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-globe"></i> Presence</h3>
+                    <div class="dfp-grid two">
+                        <div class="dfp-field">
+                            <label for="{{ form.website.id_for_label }}" class="dfp-label">Website</label>
+                            {{ form.website }}
+                            {% if form.website.errors %}<div class="dfp-error">{{ form.website.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.logo.id_for_label }}" class="dfp-label">Logo</label>
+                            {{ form.logo }}
+                            {% if form.logo.errors %}<div class="dfp-error">{{ form.logo.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="dfp-field" style="margin-top: .75rem;">
+                        <label for="{{ form.description.id_for_label }}" class="dfp-label">Description</label>
+                        {{ form.description }}
+                        <div class="dfp-meta-row"><small>Summarize mission, impact area, and collaboration scope.</small><small id="partnerDescCount">0</small></div>
+                        {% if form.description.errors %}<div class="dfp-error">{{ form.description.errors.0 }}</div>{% endif %}
+                    </div>
+                </section>
 
-            <div class="form-row single">
-                <div class="form-group">
-                    <label for="id_social_links" class="form-label"><i class="fas fa-share-alt"></i> Social Links (JSON)</label>
-                    {{ form.social_links }}
-                    <small class="form-help">Example: {"facebook":"https://...","twitter":"https://...","linkedin":"https://...","instagram":"https://..."}</small>
-                    {% if form.social_links.errors %}<div class="form-error">{{ form.social_links.errors }}</div>{% endif %}
-                </div>
-            </div>
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-share-alt"></i> Social Channels</h3>
+                    <div class="dfp-field">
+                        <label for="{{ form.social_links.id_for_label }}" class="dfp-label">Social Links JSON</label>
+                        {{ form.social_links }}
+                        <small class="dfp-help">Example: {"facebook":"https://...","twitter":"https://...","linkedin":"https://...","instagram":"https://..."}</small>
+                        {% if form.social_links.errors %}<div class="dfp-error">{{ form.social_links.errors.0 }}</div>{% endif %}
+                    </div>
+                </section>
 
-            <div class="form-footer">
-                <a href="{% url 'dashboard:partners_list' %}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
-            </div>
-        </form>
+                <div class="dfp-actions">
+                    <a href="{% url 'dashboard:partners_list' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {% if form.instance.pk %}Update{% else %}Create{% endif %} Partner</button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <aside class="content-card dfp-side-card">
+        <div class="content-card-body">
+            <h3><i class="fas fa-eye"></i> Partner Snapshot</h3>
+            <div class="dfp-side-block"><div class="dfp-k">Name</div><div class="dfp-v" id="partnerPreviewName">Unnamed partner</div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Website</div><div class="dfp-v" id="partnerPreviewWebsite">Not provided</div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Partnership Since</div><div class="dfp-v" id="partnerPreviewSince">Not set</div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Description</div><div class="dfp-v" id="partnerPreviewDescription">No description yet.</div></div>
+
+            <hr class="dfp-divider">
+            <h4><i class="fas fa-lightbulb"></i> Tips</h4>
+            <ul class="dfp-tips">
+                <li>Use official organization names for easier reporting.</li>
+                <li>Prefer full URLs with https for consistent linking.</li>
+                <li>Keep social links JSON valid to avoid parse errors.</li>
+            </ul>
+        </div>
+    </aside>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const name = document.getElementById('{{ form.name.id_for_label }}');
+    const website = document.getElementById('{{ form.website.id_for_label }}');
+    const since = document.getElementById('{{ form.partnership_since.id_for_label }}');
+    const description = document.getElementById('{{ form.description.id_for_label }}');
+    const social = document.getElementById('{{ form.social_links.id_for_label }}');
+
+    const progressBar = document.getElementById('partnerProgressBar');
+    const progressText = document.getElementById('partnerProgressText');
+    const descCount = document.getElementById('partnerDescCount');
+
+    const previewName = document.getElementById('partnerPreviewName');
+    const previewWebsite = document.getElementById('partnerPreviewWebsite');
+    const previewSince = document.getElementById('partnerPreviewSince');
+    const previewDescription = document.getElementById('partnerPreviewDescription');
+
+    const required = [name].filter(Boolean);
+    const optional = [website, since, description, social].filter(Boolean);
+
+    function update() {
+        if (descCount && description) {
+            descCount.textContent = String((description.value || '').trim().length);
+        }
+
+        if (previewName && name) {
+            previewName.textContent = (name.value || '').trim() || 'Unnamed partner';
+        }
+        if (previewWebsite && website) {
+            previewWebsite.textContent = (website.value || '').trim() || 'Not provided';
+        }
+        if (previewSince && since) {
+            previewSince.textContent = (since.value || '').trim() || 'Not set';
+        }
+        if (previewDescription && description) {
+            const txt = (description.value || '').trim();
+            previewDescription.textContent = txt ? (txt.length > 110 ? txt.slice(0, 110) + '...' : txt) : 'No description yet.';
+        }
+
+        if (progressBar && progressText) {
+            const requiredDone = required.filter((el) => String(el.value || '').trim() !== '').length;
+            const optionalDone = optional.filter((el) => String(el.value || '').trim() !== '').length;
+            const requiredWeight = required.length ? (requiredDone / required.length) * 70 : 0;
+            const optionalWeight = optional.length ? (optionalDone / optional.length) * 30 : 0;
+            const pct = Math.round(requiredWeight + optionalWeight);
+            progressBar.style.width = pct + '%';
+            progressText.textContent = pct + '%';
+        }
+    }
+
+    [name, website, since, description, social].forEach((el) => {
+        if (el) {
+            el.addEventListener('input', update);
+            el.addEventListener('change', update);
+        }
+    });
+    update();
+})();
+</script>
 {% endblock %}

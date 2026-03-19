@@ -292,6 +292,36 @@
         font-size: 0.86rem;
     }
 
+    .ur-action-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.55rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .ur-action-meta-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #f8fafc;
+        padding: 0.55rem 0.62rem;
+        display: grid;
+        gap: 0.18rem;
+    }
+
+    .ur-action-meta-card span {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        font-weight: 700;
+    }
+
+    .ur-action-meta-card strong {
+        color: #0f172a;
+        font-size: 0.84rem;
+        word-break: break-word;
+    }
+
     .warn-modal-label {
         display: block;
         font-size: 0.75rem;
@@ -449,6 +479,10 @@
         .warn-modal-actions .btn {
             width: 100%;
         }
+
+        .ur-action-meta-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 {% endblock %}
@@ -576,9 +610,9 @@
                         <td>
                             <div class="ur-action-row">
                                 <button type="button" class="ur-action" title="View profile" onclick="urViewUser(event, {{ user.id }})"><i class="fas fa-eye"></i></button>
-                                <button type="button" class="ur-action" title="Warn member" onclick="urOpenWarn(event, {{ user.id }}, '{{ user.get_full_name|default:user.username|escapejs }}')"><i class="fas fa-exclamation-triangle"></i></button>
+                                <button type="button" class="ur-action ur-warn-action" title="Warn member" onclick="urOpenAction(event, 'warn', {{ user.id }}, '{{ user.get_full_name|default:user.username|escapejs }}', {{ user.is_active|lower }})"><i class="fas fa-exclamation-triangle"></i></button>
                                 {% if not user.is_superuser %}
-                                <button type="button" class="ur-action" title="{{ user.is_active|yesno:'Ban member,Unban member' }}" onclick="urToggleBan({{ user.id }}, {{ user.is_active|lower }})">
+                                <button type="button" class="ur-action ur-ban-toggle" data-user-id="{{ user.id }}" data-is-active="{{ user.is_active|yesno:'true,false' }}" title="{{ user.is_active|yesno:'Ban member,Unban member' }}" onclick="urOpenAction(event, 'toggle-ban', {{ user.id }}, '{{ user.get_full_name|default:user.username|escapejs }}', {{ user.is_active|lower }})">
                                     <i class="fas fa-{% if user.is_active %}ban{% else %}check{% endif %}"></i>
                                 </button>
                                 {% endif %}
@@ -602,32 +636,49 @@
     </div>
 </div>
 
-<div class="member-modal" id="warnMemberModal" aria-hidden="true">
+<div class="member-modal" id="userActionModal" aria-hidden="true">
     <div class="member-modal__content warn-modal-content">
-        <button type="button" class="close" onclick="urCloseWarn()">&times;</button>
-        <h3 id="warnModalTitle">Warn Member</h3>
-        <p class="warn-modal-note">Add a warning message for this member. This action will be saved in moderation history.</p>
-        <label for="warnReasonInput" class="warn-modal-label">Warning reason</label>
-        <textarea id="warnReasonInput" class="warn-modal-textarea" rows="4" placeholder="Enter warning reason (optional)"></textarea>
+        <button type="button" class="close" onclick="urCloseActionModal()">&times;</button>
+        <h3 id="urActionModalTitle">Action Form</h3>
+        <p class="warn-modal-note" id="urActionModalNote">Apply moderation action using the same review flow.</p>
+
+        <div class="ur-action-meta-grid">
+            <div class="ur-action-meta-card">
+                <span>Target</span>
+                <strong id="urActionTargetLabel">-</strong>
+            </div>
+            <div class="ur-action-meta-card">
+                <span>Action</span>
+                <strong id="urActionTypeLabel">-</strong>
+            </div>
+        </div>
+
+        <label for="warnReasonInput" class="warn-modal-label">Admin note</label>
+        <textarea id="warnReasonInput" class="warn-modal-textarea" rows="4" placeholder="Optional moderation note"></textarea>
         <div class="warn-helper-row">
             <span class="warn-char-count" id="warnCharCount">0 / 500</span>
         </div>
-        <div class="warn-template-list">
+
+        <div class="warn-template-list" id="urWarnTemplateList">
             <button type="button" class="warn-template-btn" data-template="Please keep communication respectful with other members.">Respectful Communication</button>
             <button type="button" class="warn-template-btn" data-template="Please avoid posting duplicate or repetitive content.">Duplicate Content</button>
             <button type="button" class="warn-template-btn" data-template="Please follow event submission guidelines for complete and accurate details.">Submission Guidelines</button>
             <button type="button" class="warn-template-btn" data-template="Please keep profile and contact details accurate for verification.">Profile Accuracy</button>
         </div>
+
         <div class="warn-modal-actions">
-            <button type="button" class="btn btn-secondary" onclick="urCloseWarn()">Cancel</button>
-            <button type="button" id="urWarnSubmitBtn" class="btn btn-warning warn-submit" onclick="urSubmitWarn()">Send Warning</button>
+            <button type="button" class="btn btn-secondary" onclick="urCloseActionModal()">Cancel</button>
+            <button type="button" id="urActionSubmitBtn" class="btn btn-primary warn-submit" onclick="urSubmitAction()">Apply Action</button>
         </div>
         <div id="warnState" class="warn-state" aria-live="polite"></div>
     </div>
 </div>
 
 <script>
-    let urWarnTargetUserId = null;
+    let urActionTargetUserId = null;
+    let urActionType = '';
+    let urActionTargetName = '';
+    let urActionTargetActive = true;
     const UR_WARN_MAX = 500;
 
     function urGetCookie(name) {
@@ -767,50 +818,112 @@
         input.focus();
     }
 
-    function urOpenWarn(event, id, displayName) {
+    function urOpenAction(event, action, id, displayName, isActive) {
         if (event) {
             event.preventDefault();
             event.stopPropagation();
         }
-        urWarnTargetUserId = id;
-        document.getElementById('warnModalTitle').textContent = `Warn ${displayName}`;
+
+        urActionTargetUserId = id;
+        urActionType = action;
+        urActionTargetName = displayName || 'Member';
+        urActionTargetActive = !!isActive;
+
+        const title = document.getElementById('urActionModalTitle');
+        const noteText = document.getElementById('urActionModalNote');
+        const targetLabel = document.getElementById('urActionTargetLabel');
+        const actionLabel = document.getElementById('urActionTypeLabel');
+        const submitBtn = document.getElementById('urActionSubmitBtn');
+        const templateList = document.getElementById('urWarnTemplateList');
         const input = document.getElementById('warnReasonInput');
+
+        const effectiveAction = action === 'toggle-ban' ? (isActive ? 'ban' : 'unban') : action;
+        const effectiveLabel = effectiveAction.charAt(0).toUpperCase() + effectiveAction.slice(1);
+
+        if (title) title.textContent = `${effectiveLabel} Member`;
+        if (noteText) {
+            noteText.textContent = effectiveAction === 'warn'
+                ? 'Add a warning message for this member. This action will be saved in moderation history.'
+                : `Confirm you want to ${effectiveAction} this member.`;
+        }
+        if (targetLabel) targetLabel.textContent = `${displayName} (ID #${id})`;
+        if (actionLabel) actionLabel.textContent = effectiveLabel;
+        if (submitBtn) {
+            submitBtn.textContent = effectiveAction === 'warn' ? 'Send Warning' : effectiveLabel;
+            submitBtn.classList.toggle('btn-warning', effectiveAction === 'warn');
+            submitBtn.classList.toggle('btn-danger', effectiveAction === 'ban');
+            submitBtn.classList.toggle('btn-primary', effectiveAction === 'unban');
+        }
+        if (templateList) templateList.style.display = effectiveAction === 'warn' ? '' : 'none';
+
         input.value = '';
         urUpdateWarnCounter();
         urSetWarnState('', '');
-        const modal = document.getElementById('warnMemberModal');
+        const modal = document.getElementById('userActionModal');
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         setTimeout(() => input.focus(), 0);
     }
 
-    function urCloseWarn() {
-        urWarnTargetUserId = null;
+    function urCloseActionModal() {
+        urActionTargetUserId = null;
+        urActionType = '';
+        urActionTargetName = '';
         urSetWarnState('', '');
-        const modal = document.getElementById('warnMemberModal');
+        const modal = document.getElementById('userActionModal');
         modal.classList.remove('is-open');
         modal.setAttribute('aria-hidden', 'true');
     }
 
-    async function urSubmitWarn() {
-        if (!urWarnTargetUserId) {
-            urCloseWarn();
+    function urUpdateStatusInRow(userId, isActive) {
+        const banBtn = document.querySelector(`.ur-ban-toggle[data-user-id="${userId}"]`);
+        if (banBtn) {
+            banBtn.dataset.isActive = isActive ? 'true' : 'false';
+            banBtn.title = isActive ? 'Ban member' : 'Unban member';
+            banBtn.setAttribute('onclick', `urOpenAction(event, 'toggle-ban', ${userId}, '${urActionTargetName.replace(/'/g, "\\'")}', ${isActive ? 'true' : 'false'})`);
+            const icon = banBtn.querySelector('i');
+            if (icon) {
+                icon.className = `fas fa-${isActive ? 'ban' : 'check'}`;
+            }
+        }
+
+        const row = banBtn ? banBtn.closest('tr') : null;
+        if (!row) return;
+
+        row.dataset.status = isActive ? 'active' : 'inactive';
+        const statusBadge = row.querySelector('.ur-status-active, .ur-status-inactive');
+        if (statusBadge) {
+            statusBadge.classList.remove('ur-status-active', 'ur-status-inactive');
+            statusBadge.classList.add(isActive ? 'ur-status-active' : 'ur-status-inactive');
+            statusBadge.textContent = isActive ? 'Active' : 'Inactive';
+        }
+    }
+
+    async function urSubmitAction() {
+        if (!urActionTargetUserId || !urActionType) {
+            urCloseActionModal();
             return;
         }
 
         const reason = document.getElementById('warnReasonInput').value.trim();
-        if (reason.length > UR_WARN_MAX) {
+        const effectiveAction = urActionType === 'toggle-ban' ? (urActionTargetActive ? 'ban' : 'unban') : urActionType;
+
+        if (effectiveAction === 'warn' && reason.length > UR_WARN_MAX) {
             urSetWarnState('error', `Warning reason must be ${UR_WARN_MAX} characters or fewer.`);
             return;
         }
 
-        const submitBtn = document.getElementById('urWarnSubmitBtn');
+        const submitBtn = document.getElementById('urActionSubmitBtn');
         submitBtn.classList.add('is-loading');
         submitBtn.disabled = true;
         urSetWarnState('', '');
 
         try {
-            const response = await fetch(`/dashboard/admin/users/${urWarnTargetUserId}/warn/`, {
+            const endpoint = effectiveAction === 'warn'
+                ? `/dashboard/admin/users/${urActionTargetUserId}/warn/`
+                : `/dashboard/admin/users/${urActionTargetUserId}/toggle-ban/`;
+
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -822,51 +935,29 @@
 
             const data = await response.json();
             if (response.ok && data.success) {
-                urSetWarnState('success', data.message || 'Warning recorded successfully.');
-                urMarkRowWarned(urWarnTargetUserId, data.warned_at_display);
-                showToast('Warning recorded successfully.', 'success');
+                if (effectiveAction === 'warn') {
+                    urSetWarnState('success', data.message || 'Warning recorded successfully.');
+                    urMarkRowWarned(urActionTargetUserId, data.warned_at_display);
+                } else {
+                    urSetWarnState('success', data.message || 'Member status updated.');
+                    urActionTargetActive = !urActionTargetActive;
+                    urUpdateStatusInRow(urActionTargetUserId, urActionTargetActive);
+                    urApplyFilters();
+                }
+                showToast(data.message || 'Action completed successfully.', 'success');
                 setTimeout(() => {
-                    urCloseWarn();
+                    urCloseActionModal();
                 }, 850);
                 return;
             }
 
-            urSetWarnState('error', data.message || 'Failed to warn member.');
+            urSetWarnState('error', data.message || 'Failed to apply action.');
         } catch (error) {
-            urSetWarnState('error', 'Failed to warn member. Please try again.');
+            urSetWarnState('error', 'Failed to apply action. Please try again.');
         } finally {
             submitBtn.classList.remove('is-loading');
             submitBtn.disabled = false;
         }
-    }
-
-    async function urToggleBan(id, isActive) {
-        const action = isActive ? 'ban' : 'unban';
-        const confirmed = await window.GlobalUI.confirm({
-            title: `${action.charAt(0).toUpperCase()}${action.slice(1)} member`,
-            message: `Are you sure you want to ${action} this member?`,
-            okText: action.charAt(0).toUpperCase() + action.slice(1),
-            variant: action === 'ban' ? 'danger' : 'primary'
-        });
-
-        if (!confirmed) return;
-
-        const response = await fetch(`/dashboard/admin/users/${id}/toggle-ban/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': urCsrfToken(),
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-            showToast(data.message || 'Member status updated.', 'success');
-            window.location.reload();
-            return;
-        }
-
-        showToast(data.message || 'Failed to update member status.', 'error');
     }
 
     ['ur-search', 'ur-role-filter', 'ur-status-filter', 'ur-sort'].forEach(id => {
@@ -890,8 +981,8 @@
             if (event.target !== modal) return;
             if (modal.id === 'memberProfileModal') {
                 urCloseMemberModal();
-            } else if (modal.id === 'warnMemberModal') {
-                urCloseWarn();
+            } else if (modal.id === 'userActionModal') {
+                urCloseActionModal();
             }
         });
     });
@@ -899,7 +990,7 @@
     document.addEventListener('keydown', (event) => {
         if (event.key !== 'Escape') return;
         urCloseMemberModal();
-        urCloseWarn();
+        urCloseActionModal();
     });
 
     urApplyFilters();

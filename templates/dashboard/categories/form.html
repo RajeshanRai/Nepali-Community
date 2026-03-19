@@ -1,6 +1,11 @@
 {% extends 'dashboard/admin_base.html' %}
+{% load static %}
 
 {% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/dynamic-form-pattern.css' %}">
+{% endblock %}
 
 {% block breadcrumb_items %}
 <li class="breadcrumb-item"><a href="{% url 'dashboard:categories_list' %}">Categories</a></li>
@@ -17,16 +22,149 @@
 {% endblock %}
 
 {% block content %}
-<div class="content-card">
-    <div class="content-card-body">
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="form-footer">
-                <a href="{% url 'dashboard:categories_list' %}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
-            </div>
-        </form>
+<div class="dfp-layout">
+    <div class="content-card dfp-main-card">
+        <div class="content-card-body">
+            <form method="POST" enctype="multipart/form-data" class="dfp-form" id="catForm">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="dfp-progress-wrap">
+                    <div class="dfp-progress-head">
+                        <span><i class="fas fa-rocket"></i> Completion</span>
+                        <strong id="catProgressText">0%</strong>
+                    </div>
+                    <div class="dfp-progress-bar"><span id="catProgressBar"></span></div>
+                </div>
+
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-tags"></i> Core Details</h3>
+                    <div class="dfp-field">
+                        <label for="{{ form.name.id_for_label }}" class="dfp-label required">Category Name</label>
+                        {{ form.name }}
+                        <div class="dfp-meta-row"><small>Use a short, recognizable category label.</small><small id="catNameCount">0</small></div>
+                        {% if form.name.errors %}<div class="dfp-error">{{ form.name.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="dfp-field">
+                        <label for="{{ form.introduction.id_for_label }}" class="dfp-label">Introduction</label>
+                        {{ form.introduction }}
+                        <div class="dfp-meta-row"><small>Describe the category purpose in 1-2 lines.</small><small id="catIntroCount">0</small></div>
+                        {% if form.introduction.errors %}<div class="dfp-error">{{ form.introduction.errors.0 }}</div>{% endif %}
+                    </div>
+                </section>
+
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-chart-bar"></i> Metrics</h3>
+                    <div class="dfp-grid two">
+                        <div class="dfp-field">
+                            <label for="{{ form.member_count.id_for_label }}" class="dfp-label">Member Count</label>
+                            {{ form.member_count }}
+                            {% if form.member_count.errors %}<div class="dfp-error">{{ form.member_count.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.events_per_year.id_for_label }}" class="dfp-label">Events Per Year</label>
+                            {{ form.events_per_year }}
+                            {% if form.events_per_year.errors %}<div class="dfp-error">{{ form.events_per_year.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-image"></i> Icon Upload</h3>
+                    <div class="dfp-field">
+                        <label for="{{ form.icon.id_for_label }}" class="dfp-label">Category Icon</label>
+                        {{ form.icon }}
+                        {% if form.icon.errors %}<div class="dfp-error">{{ form.icon.errors.0 }}</div>{% endif %}
+                        <small class="dfp-help" id="catFileName">Choose a square icon for best results.</small>
+                        {% if category and category.icon %}
+                        <div class="dfp-help">Current icon: <a href="{{ category.icon.url }}" target="_blank" rel="noopener">View existing icon</a></div>
+                        {% endif %}
+                    </div>
+                </section>
+
+                <div class="dfp-actions">
+                    <a href="{% url 'dashboard:categories_list' %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Category</button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <aside class="content-card dfp-side-card">
+        <div class="content-card-body">
+            <h3><i class="fas fa-eye"></i> Category Snapshot</h3>
+            <div class="dfp-side-block"><div class="dfp-k">Name</div><div class="dfp-v" id="catPreviewName">Untitled category</div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Members</div><div class="dfp-v" id="catPreviewMembers">0</div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Events / Year</div><div class="dfp-v" id="catPreviewEvents">0</div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Icon</div><div class="dfp-v" id="catPreviewIcon">No file selected</div></div>
+
+            <hr class="dfp-divider">
+            <h4><i class="fas fa-lightbulb"></i> Tips</h4>
+            <ul class="dfp-tips">
+                <li>Keep names short and culturally identifiable.</li>
+                <li>Update member counts periodically for reporting.</li>
+                <li>Use optimized images for faster dashboard loading.</li>
+            </ul>
+        </div>
+    </aside>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const nameField = document.getElementById('{{ form.name.id_for_label }}');
+    const introField = document.getElementById('{{ form.introduction.id_for_label }}');
+    const membersField = document.getElementById('{{ form.member_count.id_for_label }}');
+    const eventsField = document.getElementById('{{ form.events_per_year.id_for_label }}');
+    const iconField = document.getElementById('{{ form.icon.id_for_label }}');
+
+    const nameCount = document.getElementById('catNameCount');
+    const introCount = document.getElementById('catIntroCount');
+    const progressBar = document.getElementById('catProgressBar');
+    const progressText = document.getElementById('catProgressText');
+    const fileName = document.getElementById('catFileName');
+
+    const previewName = document.getElementById('catPreviewName');
+    const previewMembers = document.getElementById('catPreviewMembers');
+    const previewEvents = document.getElementById('catPreviewEvents');
+    const previewIcon = document.getElementById('catPreviewIcon');
+
+    const required = [nameField].filter(Boolean);
+
+    function update() {
+        if (nameField && nameCount) nameCount.textContent = String((nameField.value || '').trim().length);
+        if (introField && introCount) introCount.textContent = String((introField.value || '').trim().length);
+
+        if (previewName && nameField) previewName.textContent = (nameField.value || '').trim() || 'Untitled category';
+        if (previewMembers && membersField) previewMembers.textContent = (membersField.value || '0').trim() || '0';
+        if (previewEvents && eventsField) previewEvents.textContent = (eventsField.value || '0').trim() || '0';
+
+        if (iconField && previewIcon) {
+            const selected = iconField.files && iconField.files.length ? iconField.files[0].name : '';
+            previewIcon.textContent = selected || 'No file selected';
+            if (fileName && selected) fileName.textContent = 'Selected: ' + selected;
+        }
+
+        if (progressBar && progressText) {
+            const done = required.filter((el) => String(el.value || '').trim() !== '').length;
+            const pct = required.length ? Math.round((done / required.length) * 100) : 0;
+            progressBar.style.width = pct + '%';
+            progressText.textContent = pct + '%';
+        }
+    }
+
+    [nameField, introField, membersField, eventsField, iconField].forEach((el) => {
+        if (el) {
+            el.addEventListener('input', update);
+            el.addEventListener('change', update);
+        }
+    });
+    update();
+})();
+</script>
 {% endblock %}

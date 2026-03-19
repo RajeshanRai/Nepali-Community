@@ -81,6 +81,9 @@
                             {% endif %}
                             <br>
                             <small class="text-muted">{{ request.requester_email|default:'—' }}</small>
+                            {% if request.requester_phone %}
+                            <br><small class="text-muted"><i class="fas fa-phone fa-xs"></i> {{ request.requester_phone }}</small>
+                            {% endif %}
                         </td>
                         <td>
                             {% if request.date %}

@@ -1,78 +1,175 @@
 {% extends 'dashboard/admin_base.html' %}
+{% load static %}
 
 {% block title %}Contact Messages{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/contact-messages.css' %}">
+{% endblock %}
 
 {% block breadcrumb_items %}
 <li class="breadcrumb-item active">Contact Messages</li>
 {% endblock %}
 
 {% block page_header %}
-<div class="page-header">
-    <div class="page-header-content">
-        <h1><i class="fas fa-envelope-open-text"></i> Contact Messages</h1>
-        <p>Read and manage inbound contact submissions.</p>
+<div class="cm-page-header">
+    <div class="cm-page-header-left">
+        <h1>
+            <span class="cm-header-icon"><i class="fas fa-inbox"></i></span>
+            Inbox
+        </h1>
+        <p>All inbound contact submissions in one place.</p>
     </div>
-    <div class="page-header-actions">
+    <div>
         <a href="{% url 'dashboard:contact_message_create' %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Create Message
+            <i class="fas fa-pen"></i> Compose
         </a>
     </div>
 </div>
 {% endblock %}
 
 {% block content %}
-<div class="content-card">
-    <div class="content-card-header">
-        <form method="GET" class="search-form">
-            <div class="search-input-group">
-                <i class="fas fa-search"></i>
-                <input type="text" name="search" placeholder="Search sender, email, subject..." value="{{ search }}">
-            </div>
-            <button type="submit" class="btn btn-sm btn-primary">Search</button>
-            {% if search %}
-            <a href="{% url 'dashboard:contact_messages_list' %}" class="btn btn-sm btn-secondary">Reset</a>
-            {% endif %}
-        </form>
-    </div>
 
-    <div class="content-card-body">
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Sender</th>
-                        <th>Subject</th>
-                        <th>Email</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for msg in contact_messages %}
-                    <tr>
-                        <td>#{{ msg.pk }}</td>
-                        <td>{{ msg.name }}</td>
-                        <td>{{ msg.subject|truncatechars:60 }}</td>
-                        <td>{{ msg.email }}</td>
-                        <td>{{ msg.created_at|date:"M d, Y H:i" }}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="{% url 'dashboard:contact_message_edit' msg.pk %}" class="btn-icon btn-edit"
-                                    title="Edit"><i class="fas fa-edit"></i></a>
-                                <a href="{% url 'dashboard:contact_message_delete' msg.pk %}"
-                                    class="btn-icon btn-delete" title="Delete"><i class="fas fa-trash"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center text-muted">No contact messages found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+<!-- Stats Row -->
+<div class="cm-stats-row">
+    <div class="cm-stat-pill">
+        <span class="cm-stat-icon total"><i class="fas fa-envelope"></i></span>
+        {{ contact_messages|length }} Total
+    </div>
+    <div class="cm-stat-pill">
+        <span class="cm-stat-icon attach"><i class="fas fa-paperclip"></i></span>
+        {{ contact_messages|length }} With Files &amp; Info
+    </div>
+    <div class="cm-stat-pill">
+        <span class="cm-stat-icon recent"><i class="fas fa-clock"></i></span>
+        Latest Messages
     </div>
 </div>
+
+<!-- Toolbar -->
+<div class="cm-toolbar">
+    <form method="GET" class="cm-search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" name="search" class="cm-search-input"
+               placeholder="Search sender, subject, email, message…"
+               value="{{ search }}">
+    </form>
+    {% if search %}
+    <a href="{% url 'dashboard:contact_messages_list' %}" class="btn btn-sm btn-secondary">
+        <i class="fas fa-redo"></i> Reset
+    </a>
+    {% endif %}
+</div>
+
+<!-- Inbox -->
+<div class="cm-inbox">
+    {% for msg in contact_messages %}
+    {% with initials=msg.name|slice:":2" %}
+    <div class="cm-message-card" id="cm-card-{{ msg.pk }}">
+
+        <!-- Collapsed Header (click to expand) -->
+        <div class="cm-message-header" onclick="cmToggle({{ msg.pk }})">
+            <div class="cm-avatar" style="background: linear-gradient(135deg, hsl({{ msg.pk|add:'200'|add:'40' }}, 60%, 52%), hsl({{ msg.pk|add:'240'|add:'40' }}, 70%, 45%))">
+                {{ initials|upper }}
+            </div>
+            <div class="cm-msg-main">
+                <div class="cm-msg-top">
+                    <span class="cm-msg-name">{{ msg.name }}</span>
+                    <span class="text-muted" style="font-size:.8rem;">·</span>
+                    <span class="cm-msg-subject">{{ msg.subject|truncatechars:70 }}</span>
+                </div>
+                <div class="cm-msg-preview">{{ msg.message|truncatechars:100 }}</div>
+            </div>
+            <div class="cm-msg-meta">
+                <span class="cm-msg-date">
+                    <i class="far fa-clock" style="margin-right:.25rem;"></i>{{ msg.created_at|date:"M d, Y" }}
+                </span>
+                <div class="cm-msg-badges">
+                    {% if msg.phone %}
+                    <span class="cm-badge phone"><i class="fas fa-phone"></i> {{ msg.phone }}</span>
+                    {% endif %}
+                    {% if msg.attachment %}
+                    <span class="cm-badge attach"><i class="fas fa-paperclip"></i> File</span>
+                    {% endif %}
+                </div>
+            </div>
+            <button class="cm-expand-btn" type="button" aria-label="Expand message">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+
+        <!-- Expanded Body -->
+        <div class="cm-message-body">
+            <div class="cm-body-grid">
+                <div class="cm-body-field">
+                    <label><i class="fas fa-user"></i> Sender</label>
+                    <p>{{ msg.name }}</p>
+                </div>
+                <div class="cm-body-field">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <p><a href="mailto:{{ msg.email }}" style="color:var(--cm-accent);text-decoration:none;">{{ msg.email }}</a></p>
+                </div>
+                {% if msg.phone %}
+                <div class="cm-body-field">
+                    <label><i class="fas fa-phone"></i> Phone</label>
+                    <p>{{ msg.phone }}</p>
+                </div>
+                {% endif %}
+                <div class="cm-body-field">
+                    <label><i class="fas fa-calendar-alt"></i> Received</label>
+                    <p>{{ msg.created_at|date:"M d, Y · H:i" }}</p>
+                </div>
+                <div class="cm-body-field" style="grid-column: 1 / -1;">
+                    <label><i class="fas fa-tag"></i> Subject</label>
+                    <p style="font-weight:700;">{{ msg.subject }}</p>
+                </div>
+            </div>
+
+            <div class="cm-msg-full">{{ msg.message }}</div>
+
+            {% if msg.attachment %}
+            <a href="{{ msg.attachment.url }}" target="_blank" class="cm-attachment-link">
+                <i class="fas fa-paperclip"></i> View Attachment
+            </a>
+            {% endif %}
+
+            <div class="cm-card-actions">
+                <a href="{% url 'dashboard:contact_message_edit' msg.pk %}" class="cm-btn cm-btn-edit">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <button type="button" class="cm-btn cm-btn-delete"
+                    data-dashboard-delete-url="{% url 'dashboard:contact_message_delete' msg.pk %}"
+                    data-item-name="{{ msg.subject|escape }}"
+                    data-item-type="contact message">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+
+    </div>
+    {% endwith %}
+    {% empty %}
+    <div class="cm-empty">
+        <div class="cm-empty-icon"><i class="fas fa-inbox"></i></div>
+        <h3>No messages yet</h3>
+        <p>
+            {% if search %}
+            No messages match "{{ search }}". <a href="{% url 'dashboard:contact_messages_list' %}">Clear search</a>
+            {% else %}
+            When people contact you, their messages will appear here.
+            {% endif %}
+        </p>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function cmToggle(id) {
+    const card = document.getElementById('cm-card-' + id);
+    if (card) card.classList.toggle('open');
+}
+</script>
 {% endblock %}

@@ -1,6 +1,11 @@
 {% extends 'dashboard/admin_base.html' %}
+{% load static %}
 
 {% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/contact-messages.css' %}">
+{% endblock %}
 
 {% block breadcrumb_items %}
 <li class="breadcrumb-item"><a href="{% url 'dashboard:contact_messages_list' %}">Contact Messages</a></li>
@@ -8,25 +13,232 @@
 {% endblock %}
 
 {% block page_header %}
-<div class="page-header">
-    <div class="page-header-content">
-        <h1><i class="fas fa-envelope-open-text"></i> {{ title }}</h1>
-        <p>Create or update contact message records.</p>
+<div class="cm-page-header">
+    <div class="cm-page-header-left">
+        <h1>
+            <span class="cm-header-icon">
+                <i class="fas fa-{% if message_obj %}edit{% else %}pen-alt{% endif %}"></i>
+            </span>
+            {{ title }}
+        </h1>
+        <p>{% if message_obj %}Update the contact message record.{% else %}Log a new contact message manually.{% endif %}</p>
+    </div>
+    <div>
+        <a href="{% url 'dashboard:contact_messages_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Inbox
+        </a>
     </div>
 </div>
 {% endblock %}
 
 {% block content %}
-<div class="content-card">
-    <div class="content-card-body">
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="form-footer">
-                <a href="{% url 'dashboard:contact_messages_list' %}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+<div class="cm-compose-wrap">
+
+    <!-- ── Compose Card ── -->
+    <div class="cm-compose-card">
+        <div class="cm-compose-topbar">
+            <div class="cm-compose-topbar-icon">
+                <i class="fas fa-envelope-open-text"></i>
             </div>
-        </form>
+            <div class="cm-compose-topbar-text">
+                <h2>{% if message_obj %}Edit Message #{{ message_obj.pk }}{% else %}New Message{% endif %}</h2>
+                <p>{% if message_obj %}Update sender details and content below.{% else %}Fill in the contact details and message body.{% endif %}</p>
+            </div>
+        </div>
+
+        <div class="cm-compose-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="cm-form-errors">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Row 1: Name + Email -->
+                <div class="cm-field-row">
+                    <div class="cm-field-group">
+                        <label class="cm-field-label" for="{{ form.name.id_for_label }}">
+                            <i class="fas fa-user"></i> Sender Name
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <ul class="cm-field-errors">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                        {% endif %}
+                    </div>
+                    <div class="cm-field-group">
+                        <label class="cm-field-label" for="{{ form.email.id_for_label }}">
+                            <i class="fas fa-envelope"></i> Email Address
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <ul class="cm-field-errors">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Row 2: Phone + Subject -->
+                <div class="cm-field-row">
+                    <div class="cm-field-group">
+                        <label class="cm-field-label" for="{{ form.phone.id_for_label }}">
+                            <i class="fas fa-phone"></i> Phone <span style="font-weight:400;text-transform:none;color:#a0aec0;">(optional)</span>
+                        </label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                        <ul class="cm-field-errors">{% for e in form.phone.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                        {% endif %}
+                    </div>
+                    <div class="cm-field-group">
+                        <label class="cm-field-label" for="{{ form.subject.id_for_label }}">
+                            <i class="fas fa-tag"></i> Subject
+                        </label>
+                        {{ form.subject }}
+                        {% if form.subject.errors %}
+                        <ul class="cm-field-errors">{% for e in form.subject.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Message Body -->
+                <div class="cm-field-group full">
+                    <label class="cm-field-label" for="{{ form.message.id_for_label }}">
+                        <i class="fas fa-comment-alt"></i> Message
+                    </label>
+                    {{ form.message }}
+                    {% if form.message.errors %}
+                    <ul class="cm-field-errors">{% for e in form.message.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+
+                <!-- Attachment Drop Zone -->
+                <div class="cm-field-group full">
+                    <label class="cm-field-label">
+                        <i class="fas fa-paperclip"></i> Attachment <span style="font-weight:400;text-transform:none;color:#a0aec0;">(optional)</span>
+                    </label>
+                    {% if message_obj and message_obj.attachment %}
+                    <a href="{{ message_obj.attachment.url }}" target="_blank" class="cm-current-attachment">
+                        <i class="fas fa-file"></i>
+                        Current file: {{ message_obj.attachment.name|slice:"30:" }}…
+                        <span style="font-size:.75rem;font-weight:400;margin-left:.5rem;">Click to view</span>
+                    </a>
+                    {% endif %}
+                    <div class="cm-file-zone" id="cm-dropzone">
+                        {{ form.attachment }}
+                        <div class="cm-file-zone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                        <div class="cm-file-zone-text">
+                            <strong>Click to choose a file</strong> or drag &amp; drop here
+                        </div>
+                        <div class="cm-file-name" id="cm-file-name"></div>
+                    </div>
+                    {% if form.attachment.errors %}
+                    <ul class="cm-field-errors">{% for e in form.attachment.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+
+                <!-- Actions -->
+                <div class="cm-form-actions">
+                    <a href="{% url 'dashboard:contact_messages_list' %}" class="cm-btn-cancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="cm-btn-save">
+                        <i class="fas fa-{% if message_obj %}save{% else %}paper-plane{% endif %}"></i>
+                        {% if message_obj %}Save Changes{% else %}Create Message{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <!-- ── Sidebar ── -->
+    <aside class="cm-compose-sidebar">
+
+        {% if message_obj %}
+        <!-- Edit mode: show sender info card -->
+        <div class="cm-info-card">
+            <div class="cm-info-card-header">
+                <i class="fas fa-user-circle"></i> Sender Info
+            </div>
+            <div class="cm-info-card-body">
+                <div class="cm-sender-preview">
+                    <div class="cm-avatar-lg">{{ message_obj.name|slice:":2"|upper }}</div>
+                    <div>
+                        <div class="cm-sender-name">{{ message_obj.name }}</div>
+                        <div class="cm-sender-email">{{ message_obj.email }}</div>
+                    </div>
+                </div>
+                <div class="cm-info-rows">
+                    {% if message_obj.phone %}
+                    <div class="cm-info-row">
+                        <i class="fas fa-phone"></i>
+                        <span class="cm-info-row-label">Phone</span>
+                        <span class="cm-info-row-value">{{ message_obj.phone }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="cm-info-row">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span class="cm-info-row-label">Received</span>
+                        <span class="cm-info-row-value">{{ message_obj.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="cm-info-row">
+                        <i class="fas fa-tag"></i>
+                        <span class="cm-info-row-label">Subject</span>
+                        <span class="cm-info-row-value">{{ message_obj.subject|truncatechars:40 }}</span>
+                    </div>
+                    {% if message_obj.attachment %}
+                    <div class="cm-info-row">
+                        <i class="fas fa-paperclip"></i>
+                        <span class="cm-info-row-label">File</span>
+                        <span class="cm-info-row-value">
+                            <a href="{{ message_obj.attachment.url }}" target="_blank" style="color:var(--cm-orange);font-weight:600;text-decoration:none;">View file</a>
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Create mode: show tips card -->
+        <div class="cm-info-card">
+            <div class="cm-info-card-header">
+                <i class="fas fa-lightbulb"></i> Quick Tips
+            </div>
+            <div class="cm-info-card-body">
+                <div class="cm-tip">
+                    <i class="fas fa-info-circle"></i>
+                    Use this form to manually log a message received through another channel (phone call, walk-in, etc.).
+                </div>
+                <div class="cm-tip">
+                    <i class="fas fa-paperclip"></i>
+                    Attach a file (screenshot, document) to keep context alongside the message.
+                </div>
+                <div class="cm-tip">
+                    <i class="fas fa-phone"></i>
+                    Phone is optional. Include it to make follow-up easy.
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </aside>
+
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const input = document.querySelector('.cm-file-zone input[type="file"]');
+    const label = document.getElementById('cm-file-name');
+    if (input && label) {
+        input.addEventListener('change', function () {
+            const name = this.files.length ? this.files[0].name : '';
+            label.textContent = name;
+            label.style.display = name ? 'block' : 'none';
+        });
+    }
+})();
+</script>
 {% endblock %}

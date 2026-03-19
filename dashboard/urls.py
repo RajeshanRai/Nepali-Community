@@ -47,6 +47,8 @@ urlpatterns = [
         path('admin/notifications/', views.notifications, name='notifications'),
         path('admin/notifications/mark-all-read/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
         path('admin/settings/', views.settings_view, name='settings'),
+        # System Design (3D graph view)
+        path('admin/system-design/', views.system_chain_view, name='system_design'),
     
     
     # Event Management

@@ -4,6 +4,7 @@
 {% block title %}Profiles{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/dynamic-form-pattern.css' %}">
 <style>
 #dashboard-profiles-page {
     width: 100%;
@@ -68,6 +69,26 @@
 
 #dashboard-profiles-page .btn-sm { padding:.35rem .75rem; font-size:.8rem; }
 #dashboard-profiles-page .pf-actions { display:flex; align-items:center; gap:.65rem; flex-wrap:wrap; padding-top:.5rem; border-top:1px solid var(--border-color,#f3f4f6); margin-top:.5rem; }
+
+#dashboard-profiles-page .profile-edit-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 1rem;
+    align-items: start;
+}
+
+#dashboard-profiles-page .profile-edit-main .dfp-progress-wrap,
+#dashboard-profiles-page .profile-edit-main .dfp-section {
+    margin-bottom: .9rem;
+}
+
+#dashboard-profiles-page .profile-edit-main .dfp-section:last-of-type {
+    margin-bottom: 0;
+}
+
+#dashboard-profiles-page .profile-edit-side .dfp-side-block {
+    margin-bottom: .55rem;
+}
 
 #dashboard-profiles-page .panel-collapsible { display:block; }
 
@@ -260,6 +281,7 @@
 
 @media (max-width: 1024px) {
     #dashboard-profiles-page .profiles-two-col { grid-template-columns:1fr; }
+    #dashboard-profiles-page .profile-edit-layout { grid-template-columns:1fr; }
 }
 
 @media (max-width: 768px) {
@@ -498,111 +520,147 @@
             <h3><i class="fas fa-edit"></i> Edit Profile Information</h3>
         </div>
         <div class="panel-body">
-            <form method="post" enctype="multipart/form-data" class="pf-form" novalidate>
-                {% csrf_token %}
-                <input type="hidden" name="action" value="update_profile">
+            <div class="profile-edit-layout">
+                <div class="profile-edit-main">
+                    <form method="post" enctype="multipart/form-data" class="pf-form" novalidate id="profileEditForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_profile">
 
-                <!-- Avatar -->
-                <div class="pf-field">
-                    <label>Profile Picture</label>
-                    <div class="avatar-upload-row">
-                        {% if profile_user.profile_picture %}
-                            <img src="{{ profile_user.profile_picture.url }}" alt="Current avatar" class="avatar-thumb">
-                        {% else %}
-                            <div class="avatar-thumb-placeholder"><i class="fas fa-user"></i></div>
-                        {% endif %}
-                        {{ profile_form.profile_picture }}
-                    </div>
-                    {% if profile_form.profile_picture.errors %}<ul class="errorlist">{% for e in profile_form.profile_picture.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                        <div class="dfp-progress-wrap">
+                            <div class="dfp-progress-head">
+                                <span><i class="fas fa-rocket"></i> Profile Completion</span>
+                                <strong id="profileProgressText">0%</strong>
+                            </div>
+                            <div class="dfp-progress-bar"><span id="profileProgressBar"></span></div>
+                        </div>
+
+                        <section class="dfp-section">
+                            <h3 class="dfp-section-title"><i class="fas fa-image"></i> Avatar</h3>
+                            <div class="pf-field">
+                                <label>Profile Picture</label>
+                                <div class="avatar-upload-row">
+                                    {% if profile_user.profile_picture %}
+                                        <img src="{{ profile_user.profile_picture.url }}" alt="Current avatar" class="avatar-thumb">
+                                    {% else %}
+                                        <div class="avatar-thumb-placeholder"><i class="fas fa-user"></i></div>
+                                    {% endif %}
+                                    {{ profile_form.profile_picture }}
+                                </div>
+                                {% if profile_form.profile_picture.errors %}<ul class="errorlist">{% for e in profile_form.profile_picture.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                            </div>
+                        </section>
+
+                        <section class="dfp-section">
+                            <h3 class="dfp-section-title"><i class="fas fa-id-card"></i> Account Details</h3>
+                            <div class="pf-grid">
+                                <div class="pf-field">
+                                    <label>{{ profile_form.first_name.label }}</label>
+                                    {{ profile_form.first_name }}
+                                    {% if profile_form.first_name.errors %}<ul class="errorlist">{% for e in profile_form.first_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                                <div class="pf-field">
+                                    <label>{{ profile_form.last_name.label }}</label>
+                                    {{ profile_form.last_name }}
+                                    {% if profile_form.last_name.errors %}<ul class="errorlist">{% for e in profile_form.last_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                                <div class="pf-field">
+                                    <label>{{ profile_form.username.label }}</label>
+                                    {{ profile_form.username }}
+                                    {% if profile_form.username.errors %}<ul class="errorlist">{% for e in profile_form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                                <div class="pf-field">
+                                    <label>{{ profile_form.email.label }}</label>
+                                    {{ profile_form.email }}
+                                    {% if profile_form.email.errors %}<ul class="errorlist">{% for e in profile_form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                                <div class="pf-field">
+                                    <label>{{ profile_form.phone_number.label }}</label>
+                                    {{ profile_form.phone_number }}
+                                    {% if profile_form.phone_number.errors %}<ul class="errorlist">{% for e in profile_form.phone_number.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                                <div class="pf-field">
+                                    <label>{{ profile_form.birth_date.label }}</label>
+                                    {{ profile_form.birth_date }}
+                                    {% if profile_form.birth_date.errors %}<ul class="errorlist">{% for e in profile_form.birth_date.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                                <div class="pf-field">
+                                    <label>{{ profile_form.location.label }}</label>
+                                    {{ profile_form.location }}
+                                    {% if profile_form.location.errors %}<ul class="errorlist">{% for e in profile_form.location.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                                <div class="pf-field">
+                                    <label>{{ profile_form.country.label }}</label>
+                                    {{ profile_form.country }}
+                                    {% if profile_form.country.errors %}<ul class="errorlist">{% for e in profile_form.country.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                                <div class="pf-field">
+                                    <label>{{ profile_form.recovery_email.label }}</label>
+                                    {{ profile_form.recovery_email }}
+                                    {% if profile_form.recovery_email.errors %}<ul class="errorlist">{% for e in profile_form.recovery_email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                                <div class="pf-field">
+                                    <label>{{ profile_form.recovery_phone.label }}</label>
+                                    {{ profile_form.recovery_phone }}
+                                    {% if profile_form.recovery_phone.errors %}<ul class="errorlist">{% for e in profile_form.recovery_phone.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                                <div class="pf-field">
+                                    <label>{{ profile_form.primary_community.label }}</label>
+                                    {{ profile_form.primary_community }}
+                                    {% if profile_form.primary_community.errors %}<ul class="errorlist">{% for e in profile_form.primary_community.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                                <div class="pf-field">
+                                    <label>{{ profile_form.secondary_community.label }}</label>
+                                    {{ profile_form.secondary_community }}
+                                    {% if profile_form.secondary_community.errors %}<ul class="errorlist">{% for e in profile_form.secondary_community.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                                <div class="pf-field pf-field--full">
+                                    <label>{{ profile_form.bio.label }}</label>
+                                    {{ profile_form.bio }}
+                                    {% if profile_form.bio.errors %}<ul class="errorlist">{% for e in profile_form.bio.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                                <div class="pf-field pf-field--full">
+                                    <label>{{ profile_form.address.label }}</label>
+                                    {{ profile_form.address }}
+                                    {% if profile_form.address.errors %}<ul class="errorlist">{% for e in profile_form.address.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                            </div>
+                        </section>
+
+                        <div class="pf-actions">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            {% if not profile_user.email_verified and profile_user.email %}
+                            <button type="submit" name="action" value="resend_verification_email" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-envelope"></i> Resend Verification Email
+                            </button>
+                            {% endif %}
+                            {% for error in profile_form.non_field_errors %}
+                            <span style="font-size:.75rem;color:#dc2626;">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </form>
                 </div>
 
-                <div class="pf-grid">
-                    <div class="pf-field">
-                        <label>{{ profile_form.first_name.label }}</label>
-                        {{ profile_form.first_name }}
-                        {% if profile_form.first_name.errors %}<ul class="errorlist">{% for e in profile_form.first_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="pf-field">
-                        <label>{{ profile_form.last_name.label }}</label>
-                        {{ profile_form.last_name }}
-                        {% if profile_form.last_name.errors %}<ul class="errorlist">{% for e in profile_form.last_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="pf-field">
-                        <label>{{ profile_form.username.label }}</label>
-                        {{ profile_form.username }}
-                        {% if profile_form.username.errors %}<ul class="errorlist">{% for e in profile_form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="pf-field">
-                        <label>{{ profile_form.email.label }}</label>
-                        {{ profile_form.email }}
-                        {% if profile_form.email.errors %}<ul class="errorlist">{% for e in profile_form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="pf-field">
-                        <label>{{ profile_form.phone_number.label }}</label>
-                        {{ profile_form.phone_number }}
-                        {% if profile_form.phone_number.errors %}<ul class="errorlist">{% for e in profile_form.phone_number.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="pf-field">
-                        <label>{{ profile_form.birth_date.label }}</label>
-                        {{ profile_form.birth_date }}
-                        {% if profile_form.birth_date.errors %}<ul class="errorlist">{% for e in profile_form.birth_date.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="pf-field">
-                        <label>{{ profile_form.location.label }}</label>
-                        {{ profile_form.location }}
-                        {% if profile_form.location.errors %}<ul class="errorlist">{% for e in profile_form.location.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="pf-field">
-                        <label>{{ profile_form.country.label }}</label>
-                        {{ profile_form.country }}
-                        {% if profile_form.country.errors %}<ul class="errorlist">{% for e in profile_form.country.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="pf-field">
-                        <label>{{ profile_form.recovery_email.label }}</label>
-                        {{ profile_form.recovery_email }}
-                        {% if profile_form.recovery_email.errors %}<ul class="errorlist">{% for e in profile_form.recovery_email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="pf-field">
-                        <label>{{ profile_form.recovery_phone.label }}</label>
-                        {{ profile_form.recovery_phone }}
-                        {% if profile_form.recovery_phone.errors %}<ul class="errorlist">{% for e in profile_form.recovery_phone.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="pf-field">
-                        <label>{{ profile_form.primary_community.label }}</label>
-                        {{ profile_form.primary_community }}
-                        {% if profile_form.primary_community.errors %}<ul class="errorlist">{% for e in profile_form.primary_community.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="pf-field">
-                        <label>{{ profile_form.secondary_community.label }}</label>
-                        {{ profile_form.secondary_community }}
-                        {% if profile_form.secondary_community.errors %}<ul class="errorlist">{% for e in profile_form.secondary_community.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="pf-field pf-field--full">
-                        <label>{{ profile_form.bio.label }}</label>
-                        {{ profile_form.bio }}
-                        {% if profile_form.bio.errors %}<ul class="errorlist">{% for e in profile_form.bio.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                    <div class="pf-field pf-field--full">
-                        <label>{{ profile_form.address.label }}</label>
-                        {{ profile_form.address }}
-                        {% if profile_form.address.errors %}<ul class="errorlist">{% for e in profile_form.address.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                    </div>
-                </div>
+                <aside class="content-card dfp-side-card profile-edit-side">
+                    <div class="content-card-body">
+                        <h3><i class="fas fa-eye"></i> Live Profile Snapshot</h3>
+                        <div class="dfp-side-block"><div class="dfp-k">Full Name</div><div class="dfp-v" id="profilePreviewName">{{ profile_user.get_full_name|default:profile_user.username }}</div></div>
+                        <div class="dfp-side-block"><div class="dfp-k">Username</div><div class="dfp-v" id="profilePreviewUsername">{{ profile_user.username }}</div></div>
+                        <div class="dfp-side-block"><div class="dfp-k">Email</div><div class="dfp-v" id="profilePreviewEmail">{{ profile_user.email|default:'No email' }}</div></div>
+                        <div class="dfp-side-block"><div class="dfp-k">Phone</div><div class="dfp-v" id="profilePreviewPhone">{{ profile_user.phone_number|default:'Not provided' }}</div></div>
+                        <div class="dfp-side-block"><div class="dfp-k">Location</div><div class="dfp-v" id="profilePreviewLocation">{{ display_location|default:'Not provided' }}</div></div>
 
-                <div class="pf-actions">
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
-                    {% if not profile_user.email_verified and profile_user.email %}
-                    <button type="submit" name="action" value="resend_verification_email" class="btn btn-secondary btn-sm">
-                        <i class="fas fa-envelope"></i> Resend Verification Email
-                    </button>
-                    {% endif %}
-                    {% for error in profile_form.non_field_errors %}
-                    <span style="font-size:.75rem;color:#dc2626;">{{ error }}</span>
-                    {% endfor %}
-                </div>
-            </form>
+                        <hr class="dfp-divider">
+                        <h4><i class="fas fa-lightbulb"></i> Tips</h4>
+                        <ul class="dfp-tips">
+                            <li>Keep contact fields current for account recovery workflows.</li>
+                            <li>Use bio and address fields to support admin verification.</li>
+                            <li>Set community mapping for cleaner dashboard segmentation.</li>
+                        </ul>
+                    </div>
+                </aside>
+            </div>
         </div>
     </section>
 
@@ -918,6 +976,57 @@
     });
 
     if (!searchInput || !userCards.length) return;
+
+    var profileEditForm = document.getElementById('profileEditForm');
+    var profileProgressBar = document.getElementById('profileProgressBar');
+    var profileProgressText = document.getElementById('profileProgressText');
+
+    function valueById(id) {
+        var el = document.getElementById(id);
+        return el ? (el.value || '').trim() : '';
+    }
+
+    function updateProfilePreview() {
+        var firstName = valueById('id_first_name');
+        var lastName = valueById('id_last_name');
+        var username = valueById('id_username');
+        var email = valueById('id_email');
+        var phone = valueById('id_phone_number');
+        var location = valueById('id_location');
+        var country = valueById('id_country');
+
+        var previewName = document.getElementById('profilePreviewName');
+        var previewUsername = document.getElementById('profilePreviewUsername');
+        var previewEmail = document.getElementById('profilePreviewEmail');
+        var previewPhone = document.getElementById('profilePreviewPhone');
+        var previewLocation = document.getElementById('profilePreviewLocation');
+
+        if (previewName) previewName.textContent = (firstName + ' ' + lastName).trim() || username || 'Unnamed user';
+        if (previewUsername) previewUsername.textContent = username || 'Not set';
+        if (previewEmail) previewEmail.textContent = email || 'No email';
+        if (previewPhone) previewPhone.textContent = phone || 'Not provided';
+        if (previewLocation) previewLocation.textContent = [location, country].filter(Boolean).join(', ') || 'Not provided';
+
+        if (profileProgressBar && profileProgressText) {
+            var requiredIds = ['id_username', 'id_email'];
+            var optionalIds = ['id_first_name', 'id_last_name', 'id_phone_number', 'id_location', 'id_country', 'id_bio', 'id_address'];
+            var requiredDone = requiredIds.filter(function (id) { return valueById(id) !== ''; }).length;
+            var optionalDone = optionalIds.filter(function (id) { return valueById(id) !== ''; }).length;
+            var requiredPct = requiredIds.length ? (requiredDone / requiredIds.length) * 70 : 0;
+            var optionalPct = optionalIds.length ? (optionalDone / optionalIds.length) * 30 : 0;
+            var pct = Math.round(requiredPct + optionalPct);
+            profileProgressBar.style.width = pct + '%';
+            profileProgressText.textContent = pct + '%';
+        }
+    }
+
+    if (profileEditForm) {
+        profileEditForm.querySelectorAll('input, select, textarea').forEach(function (el) {
+            el.addEventListener('input', updateProfilePreview);
+            el.addEventListener('change', updateProfilePreview);
+        });
+        updateProfilePreview();
+    }
 
     var filterUsers = function () {
         var query = (searchInput.value || '').trim().toLowerCase();

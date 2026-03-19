@@ -4,7 +4,7 @@
 {% block title %}{% if form.instance.pk %}Edit Announcement{% else %}Create Announcement{% endif %}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'dashboard/css/pages/announcements-form.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/dynamic-form-pattern.css' %}">
 {% endblock %}
 
 {% block breadcrumb_items %}
@@ -23,157 +23,163 @@
 {% endblock %}
 
 {% block content %}
-<div class="content-card">
-    <div class="content-card-body">
-        <form method="POST" class="announcement-form">
-            {% csrf_token %}
+<div class="dfp-layout">
+    <div class="content-card dfp-main-card">
+        <div class="content-card-body">
+            <form method="POST" class="dfp-form" id="annForm">
+                {% csrf_token %}
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="id_title" class="form-label">
-                        <i class="fas fa-heading"></i> Announcement Title
-                    </label>
-                    {{ form.title }}
-                    {% if form.title.errors %}
-                    <div class="form-error">{{ form.title.errors }}</div>
-                    {% endif %}
-                </div>
-            </div>
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
 
-            <div class="form-row">
-                <div class="form-group field-grow">
-                    <label for="id_category" class="form-label">
-                        <i class="fas fa-tag"></i> Category
-                    </label>
-                    {{ form.category }}
-                    {% if form.category.errors %}
-                    <div class="form-error">{{ form.category.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="form-group field-grow">
-                    <label for="id_priority" class="form-label">
-                        <i class="fas fa-exclamation"></i> Priority
-                    </label>
-                    {{ form.priority }}
-                    {% if form.priority.errors %}
-                    <div class="form-error">{{ form.priority.errors }}</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="id_content" class="form-label">
-                        <i class="fas fa-align-left"></i> Content
-                    </label>
-                    {{ form.content }}
-                    {% if form.content.errors %}
-                    <div class="form-error">{{ form.content.errors }}</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group field-grow">
-                    <label for="id_publish_date" class="form-label">
-                        <i class="fas fa-calendar"></i> Publish Date
-                    </label>
-                    {{ form.publish_date }}
-                    {% if form.publish_date.errors %}
-                    <div class="form-error">{{ form.publish_date.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="form-group field-grow">
-                    <label for="id_expire_date" class="form-label">
-                        <i class="fas fa-times-circle"></i> Expire Date (Optional)
-                    </label>
-                    {{ form.expire_date }}
-                    {% if form.expire_date.errors %}
-                    <div class="form-error">{{ form.expire_date.errors }}</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group field-grow">
-                    <label for="id_link_url" class="form-label">
-                        <i class="fas fa-link"></i> External Link (Optional)
-                    </label>
-                    {{ form.link_url }}
-                    {% if form.link_url.errors %}
-                    <div class="form-error">{{ form.link_url.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="form-group field-grow">
-                    <label for="id_link_text" class="form-label">
-                        <i class="fas fa-text-height"></i> Link Text
-                    </label>
-                    {{ form.link_text }}
-                    {% if form.link_text.errors %}
-                    <div class="form-error">{{ form.link_text.errors }}</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group field-grow">
-                    <div class="form-check">
-                        {{ form.is_active }}
-                        <label for="id_is_active" class="form-check-label">
-                            <i class="fas fa-toggle-on"></i> Is Active
-                        </label>
+                <div class="dfp-progress-wrap">
+                    <div class="dfp-progress-head">
+                        <span><i class="fas fa-rocket"></i> Readiness</span>
+                        <strong id="annProgressText">0%</strong>
                     </div>
-                    {% if form.is_active.errors %}
-                    <div class="form-error">{{ form.is_active.errors }}</div>
+                    <div class="dfp-progress-bar"><span id="annProgressBar"></span></div>
+                </div>
+
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-heading"></i> Announcement Content</h3>
+                    <div class="dfp-field">
+                        <label for="{{ form.title.id_for_label }}" class="dfp-label required">Title</label>
+                        {{ form.title }}
+                        <div class="dfp-meta-row"><small>Clear titles increase open rates.</small><small id="annTitleCount">0</small></div>
+                        {% if form.title.errors %}<div class="dfp-error">{{ form.title.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="dfp-field">
+                        <label for="{{ form.content.id_for_label }}" class="dfp-label required">Content</label>
+                        {{ form.content }}
+                        <div class="dfp-meta-row"><small>Keep intro concise and actionable.</small><small id="annContentCount">0</small></div>
+                        {% if form.content.errors %}<div class="dfp-error">{{ form.content.errors.0 }}</div>{% endif %}
+                    </div>
+                </section>
+
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-sliders-h"></i> Classification</h3>
+                    <div class="dfp-grid two">
+                        <div class="dfp-field">
+                            <label for="{{ form.category.id_for_label }}" class="dfp-label required">Category</label>
+                            {{ form.category }}
+                            {% if form.category.errors %}<div class="dfp-error">{{ form.category.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.priority.id_for_label }}" class="dfp-label required">Priority</label>
+                            {{ form.priority }}
+                            {% if form.priority.errors %}<div class="dfp-error">{{ form.priority.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-link"></i> Optional Link</h3>
+                    <div class="dfp-grid two">
+                        <div class="dfp-field">
+                            <label for="{{ form.link_url.id_for_label }}" class="dfp-label">External URL</label>
+                            {{ form.link_url }}
+                            {% if form.link_url.errors %}<div class="dfp-error">{{ form.link_url.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.link_text.id_for_label }}" class="dfp-label">Link Text</label>
+                            {{ form.link_text }}
+                            {% if form.link_text.errors %}<div class="dfp-error">{{ form.link_text.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-toggle-on"></i> Visibility</h3>
+                    <div class="dfp-grid three">
+                        <div class="dfp-check-wrap"><label class="dfp-check">{{ form.is_active }} <span>Is Active</span></label></div>
+                        <div class="dfp-check-wrap"><label class="dfp-check">{{ form.show_on_homepage }} <span>Show on Homepage</span></label></div>
+                        <div class="dfp-check-wrap"><label class="dfp-check">{{ form.is_pinned }} <span>Pin to Top</span></label></div>
+                    </div>
+                    {% if form.instance.pk %}
+                    <div class="dfp-check-wrap" style="margin-top:.75rem;">
+                        <label class="dfp-check"><input type="checkbox" name="send_update_email" id="id_send_update_email" checked> <span>Send update email to members</span></label>
+                        <small class="dfp-help">Uncheck to update silently.</small>
+                    </div>
                     {% endif %}
-                </div>
+                </section>
 
-                <div class="form-group field-grow">
-                    <div class="form-check">
-                        {{ form.show_on_homepage }}
-                        <label for="id_show_on_homepage" class="form-check-label">
-                            <i class="fas fa-home"></i> Show on Homepage
-                        </label>
-                    </div>
+                <div class="dfp-actions">
+                    <a href="{% url 'dashboard:announcements_list' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {% if form.instance.pk %}Update{% else %}Create{% endif %} Announcement</button>
                 </div>
-
-                <div class="form-group field-grow">
-                    <div class="form-check">
-                        {{ form.is_pinned }}
-                        <label for="id_is_pinned" class="form-check-label">
-                            <i class="fas fa-thumbtack"></i> Pin to Top
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            {% if form.instance.pk %}
-            <div class="form-row">
-                <div class="form-group">
-                    <div class="form-check">
-                        <input type="checkbox" name="send_update_email" id="id_send_update_email" checked>
-                        <label for="id_send_update_email" class="form-check-label">
-                            <i class="fas fa-envelope"></i> Send update email to members
-                        </label>
-                    </div>
-                    <small class="form-help">Uncheck to update this campaign silently without sending member notifications.</small>
-                </div>
-            </div>
-            {% endif %}
-
-            <div class="form-footer">
-                <a href="{% url 'dashboard:announcements_list' %}" class="btn btn-secondary">
-                    <i class="fas fa-times"></i> Cancel
-                </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> {% if form.instance.pk %}Update{% else %}Create{% endif %} Announcement
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
+
+    <aside class="content-card dfp-side-card">
+        <div class="content-card-body">
+            <h3><i class="fas fa-eye"></i> Live Preview</h3>
+            <div class="dfp-side-block"><div class="dfp-k">Title</div><div class="dfp-v" id="annPreviewTitle">Untitled announcement</div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Category</div><div class="dfp-v" id="annPreviewCategory">Not selected</div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Priority</div><div class="dfp-v"><span class="dfp-pill" id="annPreviewPriority">Normal</span></div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Content Preview</div><div class="dfp-v" id="annPreviewContent">No content yet.</div></div>
+
+            <hr class="dfp-divider">
+            <h4><i class="fas fa-lightbulb"></i> Tips</h4>
+            <ul class="dfp-tips">
+                <li>Use short paragraphs for mobile readability.</li>
+                <li>Pin only urgent and high-impact announcements.</li>
+                <li>Use links when full details are hosted elsewhere.</li>
+            </ul>
+        </div>
+    </aside>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const title = document.getElementById('{{ form.title.id_for_label }}');
+    const content = document.getElementById('{{ form.content.id_for_label }}');
+    const category = document.getElementById('{{ form.category.id_for_label }}');
+    const priority = document.getElementById('{{ form.priority.id_for_label }}');
+
+    const titleCount = document.getElementById('annTitleCount');
+    const contentCount = document.getElementById('annContentCount');
+    const progressBar = document.getElementById('annProgressBar');
+    const progressText = document.getElementById('annProgressText');
+
+    const previewTitle = document.getElementById('annPreviewTitle');
+    const previewCategory = document.getElementById('annPreviewCategory');
+    const previewPriority = document.getElementById('annPreviewPriority');
+    const previewContent = document.getElementById('annPreviewContent');
+
+    const required = [title, content, category, priority].filter(Boolean);
+
+    function update() {
+        if (title && titleCount) titleCount.textContent = String((title.value || '').trim().length);
+        if (content && contentCount) contentCount.textContent = String((content.value || '').trim().length);
+
+        if (previewTitle && title) previewTitle.textContent = (title.value || '').trim() || 'Untitled announcement';
+        if (previewCategory && category) previewCategory.textContent = category.options[category.selectedIndex]?.text || 'Not selected';
+        if (previewPriority && priority) previewPriority.textContent = priority.options[priority.selectedIndex]?.text || 'Normal';
+        if (previewContent && content) {
+            const txt = (content.value || '').trim();
+            previewContent.textContent = txt ? (txt.length > 110 ? txt.slice(0, 110) + '...' : txt) : 'No content yet.';
+        }
+
+        if (progressBar && progressText) {
+            const done = required.filter((el) => String(el.value || '').trim() !== '').length;
+            const pct = required.length ? Math.round((done / required.length) * 100) : 0;
+            progressBar.style.width = pct + '%';
+            progressText.textContent = pct + '%';
+        }
+    }
+
+    [title, content, category, priority].forEach((el) => {
+        if (el) {
+            el.addEventListener('input', update);
+            el.addEventListener('change', update);
+        }
+    });
+    update();
+})();
+</script>
 {% endblock %}

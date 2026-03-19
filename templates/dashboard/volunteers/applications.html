@@ -294,6 +294,50 @@
     </div>
 </div>
 
+<div id="volunteerActionModal" class="details-modal" aria-hidden="true">
+    <div class="details-modal-backdrop" data-close-volunteer-action-modal></div>
+    <div class="details-modal-content action-modal-content">
+        <div class="details-modal-header">
+            <h3><i class="fas fa-sliders-h"></i> Action Form</h3>
+            <button class="modal-close" type="button" data-close-volunteer-action-modal>
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="details-modal-body">
+            <form id="volunteerActionForm" class="action-form-grid">
+                <input type="hidden" id="actionItemType" value="">
+                <input type="hidden" id="actionItemId" value="">
+                <input type="hidden" id="actionVerb" value="">
+
+                <div class="action-form-meta">
+                    <div class="detail-item">
+                        <label>Record</label>
+                        <p id="actionRecordLabel">-</p>
+                    </div>
+                    <div class="detail-item">
+                        <label>Operation</label>
+                        <p id="actionVerbLabel">-</p>
+                    </div>
+                    <div class="detail-item full">
+                        <label>Target</label>
+                        <p id="actionTargetLabel">-</p>
+                    </div>
+                </div>
+
+                <div class="detail-item full">
+                    <label for="actionAdminNote">Admin Note (optional)</label>
+                    <textarea id="actionAdminNote" rows="4" placeholder="Optional audit note for this action"></textarea>
+                </div>
+
+                <div class="action-form-actions">
+                    <button type="button" class="btn btn-secondary" data-close-volunteer-action-modal>Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="actionSubmitBtn">Apply Action</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% csrf_token %}
 <input type="hidden" id="csrfTokenValue" value="{{ csrf_token }}">
 {% endblock %}

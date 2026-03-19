@@ -42,187 +42,236 @@
 </div>
 {% endif %}
 
-<div class="content-card opportunity-card">
-    <div class="content-card-body">
-        <form method="POST" class="opportunity-form">
-            {% csrf_token %}
+<div class="vof-layout">
+    <div class="content-card vof-card">
+        <div class="content-card-body">
+            <form method="POST" class="opportunity-form" id="vofForm">
+                {% csrf_token %}
 
-            {% if form.non_field_errors %}
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle"></i>
-                {{ form.non_field_errors }}
-            </div>
-            {% endif %}
-
-            <div class="form-section">
-                <h3 class="section-title"><i class="fas fa-align-left"></i> Opportunity Details</h3>
-                <div class="form-group">
-                    <label for="{{ form.title.id_for_label }}" class="field-label required">
-                        {{ form.title.label}}</label>
-                    {{ form.title }}
-                    {% if form.title.errors %}
-                    <div class="field-error">{{ form.title.errors.0 }}</div>
-                    {% endif %}
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ form.non_field_errors }}
                 </div>
+                {% endif %}
 
-                <div class="form-group">
-                    <label for="{{ form.description.id_for_label }}" class="field-label required">
-                        {{form.description.label }}</label>
-                    {{ form.description }}
-                    {% if form.description.errors %}
-                    <div class="field-error">{{ form.description.errors.0 }}</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3 class="section-title"><i class="fas fa-map-marked-alt"></i> Location & Type</h3>
-                <div class="form-grid two-col">
-                    <div class="form-group">
-                        <label for="{{ form.category.id_for_label }}" class="field-label">
-                            {{ form.category.label}}</label>
-                        {{ form.category }}
-                        {% if form.category.errors %}
-                        <div class="field-error">{{ form.category.errors.0 }}</div>
-                        {% endif %}
+                <div class="vof-progress-wrap">
+                    <div class="vof-progress-head">
+                        <span><i class="fas fa-sparkles"></i> Completion</span>
+                        <strong id="vofProgressText">0%</strong>
                     </div>
+                    <div class="vof-progress-bar"><span id="vofProgressBar"></span></div>
+                </div>
+
+                <div class="form-section vof-section">
+                    <h3 class="section-title"><i class="fas fa-align-left"></i> Opportunity Details</h3>
                     <div class="form-group">
-                        <label for="{{ form.location.id_for_label }}" class="field-label">
-                            {{ form.location.label}}</label>
-                        {{ form.location }}
-                        {% if form.location.errors %}
-                        <div class="field-error">{{ form.location.errors.0 }}</div>
-                        {% endif %}
+                        <label for="{{ form.title.id_for_label }}" class="field-label required">{{ form.title.label }}</label>
+                        {{ form.title }}
+                        <div class="vof-meta-row"><small class="vof-tip">Use a role + impact title, e.g. "Youth Mentor (Weekend)".</small><small id="vofTitleCount">0</small></div>
+                        {% if form.title.errors %}<div class="field-error">{{ form.title.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.description.id_for_label }}" class="field-label required">{{ form.description.label }}</label>
+                        {{ form.description }}
+                        <div class="vof-meta-row"><small class="vof-tip">Mention tasks, expected outcomes, and ideal candidate profile.</small><small id="vofDescCount">0</small></div>
+                        {% if form.description.errors %}<div class="field-error">{{ form.description.errors.0 }}</div>{% endif %}
                     </div>
                 </div>
 
-                <div class="checkbox-wrap">
-                    <label class="checkbox-label" for="{{ form.is_remote.id_for_label }}">
-                        {{ form.is_remote }}
-                        <span>{{ form.is_remote.label }}</span>
-                    </label>
-                </div>
-            </div>
+                <div class="form-section vof-section">
+                    <h3 class="section-title"><i class="fas fa-map-marked-alt"></i> Location & Type</h3>
+                    <div class="form-grid two-col">
+                        <div class="form-group">
+                            <label for="{{ form.category.id_for_label }}" class="field-label">{{ form.category.label }}</label>
+                            {{ form.category }}
+                            {% if form.category.errors %}<div class="field-error">{{ form.category.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.location.id_for_label }}" class="field-label">{{ form.location.label }}</label>
+                            {{ form.location }}
+                            <small class="vof-tip" id="vofLocationHint">Add a clear venue, neighborhood, or online platform.</small>
+                            {% if form.location.errors %}<div class="field-error">{{ form.location.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
 
-            <div class="form-section">
-                <h3 class="section-title"><i class="fas fa-calendar-week"></i> Schedule & Capacity</h3>
-                <div class="form-grid three-col">
-                    <div class="form-group">
-                        <label for="{{ form.start_date.id_for_label }}" class="field-label">
-                            {{ form.start_date.label}}</label>
-                        {{ form.start_date }}
-                        {% if form.start_date.errors %}
-                        <div class="field-error">{{ form.start_date.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="{{ form.end_date.id_for_label }}" class="field-label">
-                            {{ form.end_date.label}}</label>
-                        {{ form.end_date }}
-                        {% if form.end_date.errors %}
-                        <div class="field-error">{{ form.end_date.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="{{ form.positions_needed.id_for_label }}" class="field-label required">
-                            {{form.positions_needed.label }}</label>
-                        {{ form.positions_needed }}
-                        {% if form.positions_needed.errors %}
-                        <div class="field-error">{{ form.positions_needed.errors.0 }}</div>
-                        {% endif %}
+                    <div class="checkbox-wrap vof-check">
+                        <label class="checkbox-label" for="{{ form.is_remote.id_for_label }}">
+                            {{ form.is_remote }}
+                            <span>{{ form.is_remote.label }}</span>
+                        </label>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="{{ form.time_commitment.id_for_label }}" class="field-label">
-                        {{form.time_commitment.label }}</label>
-                    {{ form.time_commitment }}
-                    {% if form.time_commitment.errors %}
-                    <div class="field-error">{{ form.time_commitment.errors.0 }}</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3 class="section-title"><i class="fas fa-address-card"></i> Contact & Status</h3>
-                <div class="form-grid two-col">
-                    <div class="form-group">
-                        <label for="{{ form.contact_email.id_for_label }}" class="field-label">
-                            {{form.contact_email.label }}</label>
-                        {{ form.contact_email }}
-                        {% if form.contact_email.errors %}
-                        <div class="field-error">{{ form.contact_email.errors.0 }}</div>
-                        {% endif %}
+                <div class="form-section vof-section">
+                    <h3 class="section-title"><i class="fas fa-calendar-week"></i> Schedule & Capacity</h3>
+                    <div class="form-grid three-col">
+                        <div class="form-group">
+                            <label for="{{ form.start_date.id_for_label }}" class="field-label">{{ form.start_date.label }}</label>
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}<div class="field-error">{{ form.start_date.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.end_date.id_for_label }}" class="field-label">{{ form.end_date.label }}</label>
+                            {{ form.end_date }}
+                            {% if form.end_date.errors %}<div class="field-error">{{ form.end_date.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.positions_needed.id_for_label }}" class="field-label required">{{ form.positions_needed.label }}</label>
+                            {{ form.positions_needed }}
+                            {% if form.positions_needed.errors %}<div class="field-error">{{ form.positions_needed.errors.0 }}</div>{% endif %}
+                        </div>
                     </div>
+
                     <div class="form-group">
-                        <label for="{{ form.contact_phone.id_for_label }}" class="field-label">
-                            {{form.contact_phone.label }}</label>
-                        {{ form.contact_phone }}
-                        {% if form.contact_phone.errors %}
-                        <div class="field-error">{{ form.contact_phone.errors.0 }}</div>
-                        {% endif %}
+                        <label for="{{ form.time_commitment.id_for_label }}" class="field-label">{{ form.time_commitment.label }}</label>
+                        {{ form.time_commitment }}
+                        <small class="vof-tip">Examples: "Sat 3-6 PM", "5 hrs/week", "One-time event".</small>
+                        {% if form.time_commitment.errors %}<div class="field-error">{{ form.time_commitment.errors.0 }}</div>{% endif %}
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="{{ form.status.id_for_label }}" class="field-label">{{ form.status.label }}</label>
-                    {{ form.status }}
-                    {% if form.status.errors %}
-                    <div class="field-error">{{ form.status.errors.0 }}</div>
-                    {% endif %}
-                </div>
-            </div>
+                <div class="form-section vof-section">
+                    <h3 class="section-title"><i class="fas fa-address-card"></i> Contact & Status</h3>
+                    <div class="form-grid two-col">
+                        <div class="form-group">
+                            <label for="{{ form.contact_email.id_for_label }}" class="field-label">{{ form.contact_email.label }}</label>
+                            {{ form.contact_email }}
+                            {% if form.contact_email.errors %}<div class="field-error">{{ form.contact_email.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.contact_phone.id_for_label }}" class="field-label">{{ form.contact_phone.label }}</label>
+                            {{ form.contact_phone }}
+                            {% if form.contact_phone.errors %}<div class="field-error">{{ form.contact_phone.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
 
-            <div class="form-actions">
-                <a href="{% url 'dashboard:volunteer_opportunities_list' %}" class="btn btn-secondary">
-                    <i class="fas fa-times"></i> Cancel
-                </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i>
-                    {% if opportunity %}Update Opportunity{% else %}Create Opportunity{% endif %}
-                </button>
-            </div>
-        </form>
+                    <div class="form-group">
+                        <label for="{{ form.status.id_for_label }}" class="field-label">{{ form.status.label }}</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}<div class="field-error">{{ form.status.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-actions vof-actions">
+                    <a href="{% url 'dashboard:volunteer_opportunities_list' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {% if opportunity %}Update Opportunity{% else %}Create Opportunity{% endif %}</button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <aside class="content-card vof-side-card">
+        <div class="content-card-body">
+            <h3><i class="fas fa-bolt"></i> Live Preview</h3>
+            <div class="vof-side-block">
+                <div class="vof-k">Title</div>
+                <div class="vof-v" id="vofPreviewTitle">Untitled opportunity</div>
+            </div>
+            <div class="vof-side-block">
+                <div class="vof-k">Category</div>
+                <div class="vof-v" id="vofPreviewCategory">Not selected</div>
+            </div>
+            <div class="vof-side-block">
+                <div class="vof-k">Format</div>
+                <div class="vof-v" id="vofPreviewFormat">On-site</div>
+            </div>
+            <div class="vof-side-block">
+                <div class="vof-k">Capacity</div>
+                <div class="vof-v"><span id="vofPreviewPositions">0</span> positions</div>
+            </div>
+            <div class="vof-side-block">
+                <div class="vof-k">Status</div>
+                <div class="vof-v"><span class="vof-status-pill" id="vofPreviewStatus">Draft</span></div>
+            </div>
+
+            <hr class="vof-divider">
+            <h4><i class="fas fa-lightbulb"></i> Quick Tips</h4>
+            <ul class="vof-tips">
+                <li>Write action-based tasks to improve volunteer signups.</li>
+                <li>Add a precise time commitment to set clear expectations.</li>
+                <li>Keep status as Open only when capacity is available.</li>
+            </ul>
+        </div>
+    </aside>
 </div>
 {% endblock %}
 
 {% block extra_css %}
 <style>
-    .opportunity-card {
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
+    .vof-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 1rem;
+        align-items: start;
+    }
+
+    .vof-card,
+    .vof-side-card {
+        overflow: hidden;
     }
 
     .opportunity-form {
         display: grid;
-        gap: 22px;
+        gap: 1rem;
     }
 
-    .form-section {
-        background: #fff;
-        border: 1px solid #edf2f7;
+    .vof-progress-wrap {
+        padding: 0.85rem;
+        border: 1px solid #dbeafe;
         border-radius: 12px;
-        padding: 18px;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(124, 58, 237, 0.1));
+    }
+
+    .vof-progress-head {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.83rem;
+        font-weight: 700;
+        color: #1e3a8a;
+        margin-bottom: 0.45rem;
+    }
+
+    .vof-progress-bar {
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(30, 64, 175, 0.12);
+        overflow: hidden;
+    }
+
+    .vof-progress-bar span {
+        display: block;
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, #2563eb, #7c3aed, #0ea5e9);
+        transition: width .25s ease;
+    }
+
+    .vof-section {
+        border: 1px solid #e6ebf2;
+        border-radius: 12px;
+        padding: 1rem;
+        background: linear-gradient(180deg, rgba(248, 250, 252, 0.55), #fff 34%);
     }
 
     .section-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 14px;
+        font-size: 0.98rem;
+        font-weight: 800;
+        margin: 0 0 0.8rem;
+        color: #0f172a;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 0.45rem;
     }
 
     .section-title i {
-        color: #2563eb;
+        color: #4f46e5;
     }
 
     .form-grid {
         display: grid;
-        gap: 14px;
+        gap: 0.75rem;
     }
 
     .two-col {
@@ -233,16 +282,14 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    .form-group {
-        margin-bottom: 12px;
-    }
-
     .field-label {
         display: block;
-        margin-bottom: 6px;
-        color: #374151;
-        font-weight: 600;
-        font-size: 13px;
+        margin-bottom: 0.35rem;
+        font-size: 0.79rem;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        font-weight: 800;
+        color: #64748b;
     }
 
     .field-label.required::after {
@@ -257,58 +304,251 @@
     .form-group select,
     .form-group textarea {
         width: 100%;
-        border: 1px solid #d1d5db;
+        border: 1.5px solid #dbe2ea;
         border-radius: 10px;
-        padding: 10px 12px;
-        font-size: 14px;
+        padding: 0.62rem 0.74rem;
+        font-size: 0.9rem;
+        background: #f8fafc;
+        transition: border-color .2s, box-shadow .2s, background .2s;
     }
 
     .form-group textarea {
-        min-height: 120px;
+        min-height: 130px;
+        resize: vertical;
     }
 
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
         outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        background: #fff;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.13);
+    }
+
+    .vof-meta-row {
+        margin-top: 0.35rem;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.6rem;
+        color: #64748b;
+        font-size: 0.75rem;
+    }
+
+    .vof-tip {
+        color: #64748b;
+        font-size: 0.75rem;
     }
 
     .field-error {
         color: #dc2626;
-        margin-top: 5px;
-        font-size: 12px;
+        margin-top: 0.3rem;
+        font-size: 0.77rem;
+        font-weight: 600;
     }
 
-    .checkbox-wrap {
-        background: #f8fafc;
-        border: 1px dashed #bfdbfe;
+    .vof-check {
+        border: 1px dashed #c7d2fe;
         border-radius: 10px;
-        padding: 10px 12px;
+        padding: 0.62rem 0.75rem;
+        background: rgba(79, 70, 229, 0.04);
     }
 
     .checkbox-label {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        font-weight: 500;
-        color: #1f2937;
+        gap: 0.6rem;
+        font-weight: 600;
+        color: #0f172a;
     }
 
-    .form-actions {
+    .vof-actions {
         display: flex;
         justify-content: flex-end;
-        gap: 10px;
-        padding-top: 6px;
+        gap: 0.6rem;
+        padding-top: 0.35rem;
+    }
+
+    .vof-side-card h3,
+    .vof-side-card h4 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: #0f172a;
+    }
+
+    .vof-side-card h3 {
+        font-size: 0.96rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .vof-side-card h4 {
+        font-size: 0.84rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .vof-side-block {
+        border: 1px solid #e8edf4;
+        border-radius: 10px;
+        background: #f8fafc;
+        padding: 0.62rem 0.7rem;
+        margin-bottom: 0.55rem;
+    }
+
+    .vof-k {
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: #64748b;
+        font-size: 0.67rem;
+        font-weight: 800;
+        margin-bottom: 0.2rem;
+    }
+
+    .vof-v {
+        color: #0f172a;
+        font-size: 0.86rem;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .vof-status-pill {
+        display: inline-flex;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        background: rgba(59, 130, 246, 0.12);
+        color: #1d4ed8;
+        font-size: 0.75rem;
+    }
+
+    .vof-divider {
+        border: 0;
+        border-top: 1px solid #e8edf4;
+        margin: 0.75rem 0;
+    }
+
+    .vof-tips {
+        margin: 0;
+        padding-left: 1rem;
+        color: #334155;
+        font-size: 0.79rem;
+        line-height: 1.45;
+    }
+
+    @media (max-width: 1080px) {
+        .vof-layout {
+            grid-template-columns: 1fr;
+        }
     }
 
     @media (max-width: 900px) {
-
         .two-col,
         .three-col {
             grid-template-columns: 1fr;
         }
     }
+
+    @media (max-width: 560px) {
+        .vof-actions {
+            flex-direction: column-reverse;
+        }
+
+        .vof-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const title = document.getElementById('{{ form.title.id_for_label }}');
+    const description = document.getElementById('{{ form.description.id_for_label }}');
+    const category = document.getElementById('{{ form.category.id_for_label }}');
+    const remote = document.getElementById('{{ form.is_remote.id_for_label }}');
+    const location = document.getElementById('{{ form.location.id_for_label }}');
+    const positions = document.getElementById('{{ form.positions_needed.id_for_label }}');
+    const status = document.getElementById('{{ form.status.id_for_label }}');
+
+    const titleCount = document.getElementById('vofTitleCount');
+    const descCount = document.getElementById('vofDescCount');
+    const progressBar = document.getElementById('vofProgressBar');
+    const progressText = document.getElementById('vofProgressText');
+
+    const previewTitle = document.getElementById('vofPreviewTitle');
+    const previewCategory = document.getElementById('vofPreviewCategory');
+    const previewFormat = document.getElementById('vofPreviewFormat');
+    const previewPositions = document.getElementById('vofPreviewPositions');
+    const previewStatus = document.getElementById('vofPreviewStatus');
+    const locationHint = document.getElementById('vofLocationHint');
+
+    const requiredFields = [title, description, positions].filter(Boolean);
+
+    function updateCounts() {
+        if (title && titleCount) {
+            titleCount.textContent = String((title.value || '').trim().length);
+        }
+        if (description && descCount) {
+            descCount.textContent = String((description.value || '').trim().length);
+        }
+    }
+
+    function updatePreview() {
+        if (previewTitle && title) {
+            previewTitle.textContent = (title.value || '').trim() || 'Untitled opportunity';
+        }
+        if (previewCategory && category) {
+            const cat = category.options[category.selectedIndex]?.text || '';
+            previewCategory.textContent = cat || 'Not selected';
+        }
+        if (previewFormat && remote) {
+            previewFormat.textContent = remote.checked ? 'Remote / Virtual' : 'On-site';
+        }
+        if (previewPositions && positions) {
+            previewPositions.textContent = (positions.value || '0').trim() || '0';
+        }
+        if (previewStatus && status) {
+            const st = status.options[status.selectedIndex]?.text || 'Draft';
+            previewStatus.textContent = st;
+        }
+    }
+
+    function updateHint() {
+        if (!remote || !location || !locationHint) return;
+        if (remote.checked) {
+            location.placeholder = 'Zoom, Google Meet, Teams, or "Remote"';
+            locationHint.textContent = 'Remote selected: include platform and access instructions.';
+        } else {
+            location.placeholder = 'Location';
+            locationHint.textContent = 'Add a clear venue, neighborhood, or online platform.';
+        }
+    }
+
+    function updateProgress() {
+        if (!progressBar || !progressText || requiredFields.length === 0) return;
+        const done = requiredFields.filter((el) => String(el.value || '').trim() !== '').length;
+        const pct = Math.round((done / requiredFields.length) * 100);
+        progressBar.style.width = pct + '%';
+        progressText.textContent = pct + '%';
+    }
+
+    function updateAll() {
+        updateCounts();
+        updatePreview();
+        updateHint();
+        updateProgress();
+    }
+
+    [title, description, category, remote, location, positions, status].forEach((el) => {
+        if (el) {
+            el.addEventListener('input', updateAll);
+            el.addEventListener('change', updateAll);
+        }
+    });
+
+    updateAll();
+})();
+</script>
 {% endblock %}

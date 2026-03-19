@@ -1,10 +1,98 @@
 {% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}System Design — Live Globe Architecture{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">System</li>
+<li class="breadcrumb-item active">Globe Design</li>
+{% endblock %}
+
+{% block page_header %}
+{% include 'dashboard/includes/page_header.html' with title='System Design' subtitle='Interactive globe — every page, every URL, every button connected' icon_class='fas fa-globe' %}
+{% endblock %}
+
 {% block content %}
-<div class="system-chain-container" style="height: 100vh; background: #101020;">
-  <div id="systemChain3D" style="width:100%; height:100vh;"></div>
-  <div id="systemChainPanel" class="system-chain-panel" style="display:none;"></div>
+<div class="sc-wrapper">
+
+  <!-- Top toolbar -->
+  <div class="sc-toolbar">
+    <div class="sc-toolbar-left">
+      <div class="sc-search-wrap">
+        <i class="fas fa-search sc-search-icon"></i>
+        <input id="sc_search" class="sc-search" type="text" placeholder="Search pages…" autocomplete="off">
+      </div>
+      <!-- Category filters -->
+      <div class="sc-filters">
+        <button class="sc-filter-btn active" data-category="all">All</button>
+        <button class="sc-filter-btn" data-category="core">Core</button>
+        <button class="sc-filter-btn" data-category="dashboard">Dashboard</button>
+        <button class="sc-filter-btn" data-category="content">Content</button>
+        <button class="sc-filter-btn" data-category="people">People</button>
+        <button class="sc-filter-btn" data-category="system">System</button>
+        <button class="sc-filter-btn" data-category="finance">Finance</button>
+        <button class="sc-filter-btn" data-category="public">Public</button>
+      </div>
+    </div>
+    <div class="sc-toolbar-right">
+      <button id="sc_rotate" class="sc-tool-btn active" title="Toggle auto-rotate">
+        <i class="fas fa-sync-alt"></i><span>Rotate</span>
+      </button>
+      <button id="sc_reset" class="sc-tool-btn" title="Reset camera">
+        <i class="fas fa-compress-arrows-alt"></i><span>Reset</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Globe canvas -->
+  <div class="sc-globe-wrap">
+    <div id="systemChain3D"></div>
+    <!-- Info panel (right side) -->
+    <div id="systemChainPanel" class="sc-info-panel" style="display:none;"></div>
+    <!-- Hover tooltip -->
+    <div id="sc_tooltip" class="sc-tooltip" style="display:none;"></div>
+    <!-- Legend -->
+    <div class="sc-legend">
+      <div class="sc-legend-title">Legend</div>
+      <div class="sc-legend-item"><span class="sc-dot" style="background:#00d4ff"></span>Core / Central</div>
+      <div class="sc-legend-item"><span class="sc-dot" style="background:#4a90e2"></span>Dashboard</div>
+      <div class="sc-legend-item"><span class="sc-dot" style="background:#4caf50"></span>Content</div>
+      <div class="sc-legend-item"><span class="sc-dot" style="background:#ff6b4a"></span>People</div>
+      <div class="sc-legend-item"><span class="sc-dot" style="background:#7c6cff"></span>System</div>
+      <div class="sc-legend-item"><span class="sc-dot" style="background:#ffd700"></span>Finance</div>
+      <div class="sc-legend-item"><span class="sc-dot" style="background:#29b6f6"></span>Public</div>
+        <div class="sc-legend-sep"></div>
+        <div class="sc-legend-item"><span class="sc-line-swatch" style="background:#00e676"></span>Healthy link</div>
+        <div class="sc-legend-item"><span class="sc-line-swatch" style="background:#ff1744"></span>Issue / broken</div>
+      <div class="sc-legend-hint"><i class="fas fa-mouse-pointer"></i> Click node for details</div>
+      <div class="sc-legend-hint"><i class="fas fa-arrows-alt"></i> Drag to rotate</div>
+      <div class="sc-legend-hint"><i class="fas fa-search-plus"></i> Scroll to zoom</div>
+    </div>
+    <!-- Node count badge -->
+    <div class="sc-stats">
+      <span id="sc_node_count">22</span> pages &nbsp;·&nbsp;
+      <span id="sc_conn_count">—</span> connections
+    </div>
+  </div>
 </div>
-<link rel="stylesheet" href="/static/dashboard/css/pages/system-chain.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-<script src="/static/dashboard/js/pages/system-chain.js"></script>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/system-chain.css' %}">
+<style>body, .dashboard-content { background:#000308 !important; }</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"
+        crossorigin="anonymous"></script>
+<script src="{% static 'dashboard/js/pages/system-chain.js' %}"></script>
+<script>
+  // Update stats once globe initialises
+  window.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      var cc = document.getElementById('sc_conn_count');
+      if (cc && typeof connectionLines !== 'undefined') cc.textContent = connectionLines.length;
+    }, 2000);
+  });
+</script>
 {% endblock %}

@@ -26,6 +26,7 @@
                         <th>ID</th>
                         <th>Title</th>
                         <th>Requester</th>
+                        <th>Phone</th>
                         <th>Date</th>
                         <th>Status</th>
                         <th>Action</th>
@@ -43,6 +44,7 @@
                                 {{ event.requester_name|default:'—' }}
                             {% endif %}
                         </td>
+                        <td>{{ event.requester_phone|default:'-' }}</td>
                         <td>{{ event.submitted_at|date:"M d, Y" }}</td>
                         <td><span class="status-badge status-rejected">Rejected</span></td>
                         <td>
@@ -54,7 +56,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center text-muted">No rejected events</td>
+                        <td colspan="7" class="text-center text-muted">No rejected events</td>
                     </tr>
                     {% endfor %}
                 </tbody>

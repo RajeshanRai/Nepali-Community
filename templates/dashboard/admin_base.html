@@ -24,9 +24,34 @@
             <div class="logo">
                 <span class="logo-text">Administrator</span>
             </div>
-            <button class="sidebar-toggle" id="sidebarToggle">
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="true">
                 <i class="fas fa-bars"></i>
             </button>
+        </div>
+
+        <div class="sidebar-tools">
+            <label class="sidebar-quick-filter" for="sidebarQuickFilter">
+                <i class="fas fa-compass"></i>
+                <input type="search" id="sidebarQuickFilter" placeholder="Quick filter" autocomplete="off">
+            </label>
+            <div class="sidebar-favorites" aria-label="Favorites">
+                <a href="{% url 'dashboard:admin_overview' %}" class="sidebar-favorite-link {% if request.resolver_match.url_name == 'admin_overview' %}active{% endif %}" title="Dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'dashboard:projects_pending' %}" class="sidebar-favorite-link {% if 'projects/pending' in request.path %}active{% endif %}" title="Pending Approval">
+                    <i class="fas fa-clock"></i>
+                    <span>Pending</span>
+                </a>
+                <a href="{% url 'dashboard:volunteers_applications' %}" class="sidebar-favorite-link {% if 'volunteers/applications' in request.path %}active{% endif %}" title="Volunteer Applications">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Applications</span>
+                </a>
+                <a href="{% url 'dashboard:notifications' %}" class="sidebar-favorite-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span>Alerts</span>
+                </a>
+            </div>
         </div>
 
         <nav class="sidebar-nav">
@@ -139,6 +164,10 @@
                     <i class="fas fa-handshake"></i>
                     <span>Partners</span>
                 </a>
+                <a href="{% url 'dashboard:contact_messages_list' %}" data-tooltip="Contact Messages" class="nav-item {% if 'contact-messages' in request.path %}active{% endif %}">
+                    <i class="fas fa-envelope"></i>
+                    <span>Contact Messages</span>
+                </a>
             </div>
 
             <!-- Reports Section -->
@@ -161,18 +190,22 @@
             <!-- Settings Section -->
             <div class="nav-section">
                 <div class="nav-section-title">SYSTEM</div>
-                <a href="{% url 'dashboard:notifications' %}" data-tooltip="Notifications" class="nav-item">
+                <a href="{% url 'dashboard:notifications' %}" data-tooltip="Notifications" class="nav-item {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
                     <i class="fas fa-bell"></i>
                     <span>Notifications</span>
                     {% if unread_notifications_count %}
                     <span class="badge badge-danger">{{ unread_notifications_count }}</span>
                     {% endif %}
                 </a>
-                <a href="{% url 'dashboard:settings' %}" data-tooltip="Settings" class="nav-item">
+                <a href="{% url 'dashboard:settings' %}" data-tooltip="Settings" class="nav-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
                     <i class="fas fa-cog"></i>
                     <span>Settings</span>
                 </a>
-                    
+                <a href="{% url 'dashboard:system_design' %}" data-tooltip="System Design" class="nav-item {% if request.resolver_match.url_name == 'system_design' %}active{% endif %}">
+                    <i class="fas fa-project-diagram"></i>
+                    <span>System Live</span>
+                </a>
+            
             </div>
         </nav>
 
@@ -188,6 +221,8 @@
             </a>
         </div>
     </aside>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
 
     <!-- Main Content Area -->
     <div class="main-wrapper" id="mainWrapper">
@@ -323,11 +358,29 @@
         <!-- Footer -->
         <footer class="dashboard-footer">
             <div class="footer-content">
-                <p>&copy; 2026 Nepali Community of Vancouver. All rights reserved.</p>
-                <div class="footer-links">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                    <a href="#">Support</a>
+                <div class="footer-left">
+                    <p class="footer-copy">&copy; 2026 Nepali Community of Vancouver. All rights reserved.</p>
+                    <div class="footer-meta">
+                        <span class="footer-status-dot" aria-hidden="true"></span>
+                        <span>Dashboard systems operational</span>
+                    </div>
+                </div>
+
+                <div class="footer-right">
+                    <div class="footer-links" role="navigation" aria-label="Footer Links">
+                        <a href="#" class="footer-link-pill" aria-label="Privacy Policy">
+                            <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                            <span>Privacy Policy</span>
+                        </a>
+                        <a href="#" class="footer-link-pill" aria-label="Terms of Service">
+                            <i class="fas fa-file-contract" aria-hidden="true"></i>
+                            <span>Terms of Service</span>
+                        </a>
+                        <a href="#" class="footer-link-pill" aria-label="Support">
+                            <i class="fas fa-life-ring" aria-hidden="true"></i>
+                            <span>Support</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </footer>

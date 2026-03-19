@@ -127,14 +127,73 @@
         document.body.style.overflow = '';
     }
 
+    function openActionModal(row, type, action, id) {
+        const modal = document.getElementById('volunteerActionModal');
+        const itemType = document.getElementById('actionItemType');
+        const itemId = document.getElementById('actionItemId');
+        const actionVerb = document.getElementById('actionVerb');
+        const recordLabel = document.getElementById('actionRecordLabel');
+        const verbLabel = document.getElementById('actionVerbLabel');
+        const targetLabel = document.getElementById('actionTargetLabel');
+        const note = document.getElementById('actionAdminNote');
+        const submitBtn = document.getElementById('actionSubmitBtn');
+
+        if (!modal || !itemType || !itemId || !actionVerb || !recordLabel || !verbLabel || !targetLabel || !submitBtn) {
+            return;
+        }
+
+        const typeLabel = type === 'application' ? 'Opportunity Application' : 'Volunteer Request';
+        const actionLabel = action === 'approve'
+            ? 'Approve'
+            : action === 'reject'
+                ? 'Reject'
+                : 'Delete';
+        const statusText = row?.dataset?.statusText || 'Unknown';
+        const nameText = row?.dataset?.name || 'Unknown';
+        const emailText = row?.dataset?.email || 'No email';
+
+        itemType.value = type;
+        itemId.value = id;
+        actionVerb.value = action;
+        recordLabel.textContent = `${typeLabel} #${id}`;
+        verbLabel.textContent = actionLabel;
+        targetLabel.textContent = `${nameText} (${emailText}) - current status: ${statusText}`;
+        submitBtn.textContent = actionLabel;
+        submitBtn.classList.toggle('btn-danger', action === 'reject' || action === 'delete');
+        submitBtn.classList.toggle('btn-primary', action !== 'reject' && action !== 'delete');
+
+        if (note) {
+            note.value = '';
+        }
+
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeActionModal() {
+        const modal = document.getElementById('volunteerActionModal');
+        if (!modal) {
+            return;
+        }
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
     function bindDetailsModalClose() {
         document.querySelectorAll('[data-close-volunteer-modal]').forEach((node) => {
             node.addEventListener('click', closeDetailsModal);
         });
 
+        document.querySelectorAll('[data-close-volunteer-action-modal]').forEach((node) => {
+            node.addEventListener('click', closeActionModal);
+        });
+
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
                 closeDetailsModal();
+                closeActionModal();
             }
         });
     }
@@ -244,7 +303,7 @@
             if (type === 'application' && action === 'approve') {
                 // For accepted applications, show assign button
                 actionsHtml += `
-                    <button class="btn-icon btn-assign volunteer-assign-btn" data-id="${id}" data-name="${data.name || ''}" title="Assign to Program">
+                    <button class="btn-icon btn-assign volunteer-assign-btn" data-id="${id}" data-name="${row.dataset.name || ''}" title="Assign to Program">
                         <i class="fas fa-tasks"></i>
                     </button>`;
             }
@@ -290,10 +349,58 @@
         ];
     }
 
-    function actionVerb(action) {
-        if (action === 'approve') return 'approve';
-        if (action === 'reject') return 'reject';
-        return 'delete';
+    function bindActionFormSubmit() {
+        const form = document.getElementById('volunteerActionForm');
+        if (!form) {
+            return;
+        }
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const itemType = document.getElementById('actionItemType')?.value;
+            const itemId = document.getElementById('actionItemId')?.value;
+            const action = document.getElementById('actionVerb')?.value;
+            const note = document.getElementById('actionAdminNote')?.value || '';
+            const submitBtn = document.getElementById('actionSubmitBtn');
+
+            if (!itemType || !itemId || !action) {
+                notify('Missing action details. Please retry.', 'error');
+                return;
+            }
+
+            const basePath = itemType === 'application'
+                ? '/dashboard/volunteers/applications/'
+                : '/dashboard/volunteers/requests/';
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+            }
+
+            try {
+                const response = await postAction(`${basePath}${itemId}/${action}/`, {
+                    admin_note: note.trim(),
+                    reason: note.trim()
+                });
+
+                const selector = itemType === 'application' ? '.action-application' : '.action-request';
+                const row = Array.from(document.querySelectorAll(selector))
+                    .find((btn) => btn.dataset.id === String(itemId))
+                    ?.closest('tr');
+
+                updateRowAfterAction(row, itemType, action);
+                notify(response.message || 'Action completed successfully.', 'success');
+                closeActionModal();
+                bindActions();
+                document.dispatchEvent(new CustomEvent('volunteerDataUpdated'));
+            } catch (error) {
+                notify(error.message || 'Action failed.', 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                }
+            }
+        });
     }
 
     function bindActionHandlers(scopeSelector, type) {
@@ -312,33 +419,7 @@
                     return;
                 }
 
-                const noun = type === 'application' ? 'application' : 'request';
-                const confirmed = await window.GlobalUI.confirm({
-                    title: `${actionVerb(action).charAt(0).toUpperCase()}${actionVerb(action).slice(1)} ${noun}`,
-                    message: `Are you sure you want to ${actionVerb(action)} this ${noun}?`,
-                    okText: actionVerb(action).charAt(0).toUpperCase() + actionVerb(action).slice(1),
-                    variant: action === 'reject' || action === 'delete' ? 'danger' : 'primary'
-                });
-                if (!confirmed) {
-                    return;
-                }
-
-                const basePath = type === 'application'
-                    ? '/dashboard/volunteers/applications/'
-                    : '/dashboard/volunteers/requests/';
-
-                button.disabled = true;
-
-                try {
-                    const response = await postAction(`${basePath}${id}/${action}/`);
-                    updateRowAfterAction(row, type, action);
-                    notify(response.message || 'Action completed successfully.', 'success');
-                    bindActions();
-                } catch (error) {
-                    notify(error.message || 'Action failed.', 'error');
-                } finally {
-                    button.disabled = false;
-                }
+                openActionModal(row, type, action, id);
             });
         });
     }
@@ -402,6 +483,7 @@
         bindSearch('request-search', 'requests-table', [1, 2, 3]);
         bindRequestAssignmentDropdowns();
         bindDetailsModalClose();
+        bindActionFormSubmit();
         bindActions();
     });
 })();

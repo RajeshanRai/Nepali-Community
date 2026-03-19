@@ -4,7 +4,7 @@
 {% block title %}{% if form.instance.pk %}Edit FAQ{% else %}Create FAQ{% endif %}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'dashboard/css/pages/faqs-form.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/dynamic-form-pattern.css' %}">
 {% endblock %}
 
 {% block breadcrumb_items %}
@@ -22,99 +22,134 @@
 {% endblock %}
 
 {% block content %}
-<div class="content-card">
-    <div class="content-card-body">
-        <form method="POST" class="faq-form">
-            {% csrf_token %}
+<div class="dfp-layout">
+    <div class="content-card dfp-main-card">
+        <div class="content-card-body">
+            <form method="POST" class="dfp-form" id="faqForm">
+                {% csrf_token %}
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="id_question" class="form-label">
-                        <i class="fas fa-question"></i> Question
-                    </label>
-                    {{ form.question }}
-                    {% if form.question.errors %}
-                    <div class="form-error">{{ form.question.errors }}</div>
-                    {% endif %}
-                </div>
-            </div>
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
 
-            <div class="form-row">
-                <div class="form-group field-grow">
-                    <label for="id_category" class="form-label">
-                        <i class="fas fa-folder"></i> Category
-                    </label>
-                    {{ form.category }}
-                    {% if form.category.errors %}
-                    <div class="form-error">{{ form.category.errors }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="form-group field-grow">
-                    <label for="id_order" class="form-label">
-                        <i class="fas fa-sort"></i> Display Order
-                    </label>
-                    {{ form.order }}
-                    {% if form.order.errors %}
-                    <div class="form-error">{{ form.order.errors }}</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="id_answer" class="form-label">
-                        <i class="fas fa-align-left"></i> Answer
-                    </label>
-                    {{ form.answer }}
-                    {% if form.answer.errors %}
-                    <div class="form-error">{{ form.answer.errors }}</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group field-grow">
-                    <label for="id_meta_keywords" class="form-label">
-                        <i class="fas fa-tags"></i> Keywords (SEO)
-                    </label>
-                    {{ form.meta_keywords }}
-                    {% if form.meta_keywords.errors %}
-                    <div class="form-error">{{ form.meta_keywords.errors }}</div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group field-grow">
-                    <div class="form-check">
-                        {{ form.is_published }}
-                        <label for="id_is_published" class="form-check-label">
-                            <i class="fas fa-eye"></i> Published
-                        </label>
+                <div class="dfp-progress-wrap">
+                    <div class="dfp-progress-head">
+                        <span><i class="fas fa-rocket"></i> Readiness</span>
+                        <strong id="faqProgressText">0%</strong>
                     </div>
+                    <div class="dfp-progress-bar"><span id="faqProgressBar"></span></div>
                 </div>
 
-                <div class="form-group field-grow">
-                    <div class="form-check">
-                        {{ form.is_featured }}
-                        <label for="id_is_featured" class="form-check-label">
-                            <i class="fas fa-star"></i> Featured
-                        </label>
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-question-circle"></i> FAQ Content</h3>
+                    <div class="dfp-field">
+                        <label for="{{ form.question.id_for_label }}" class="dfp-label required">Question</label>
+                        {{ form.question }}
+                        <div class="dfp-meta-row"><small>Make this easy to scan in search results.</small><small id="faqQuestionCount">0</small></div>
+                        {% if form.question.errors %}<div class="dfp-error">{{ form.question.errors.0 }}</div>{% endif %}
                     </div>
-                </div>
-            </div>
 
-            <div class="form-footer">
-                <a href="{% url 'dashboard:faqs_list' %}" class="btn btn-secondary">
-                    <i class="fas fa-times"></i> Cancel
-                </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> {% if form.instance.pk %}Update{% else %}Create{% endif %} FAQ
-                </button>
-            </div>
-        </form>
+                    <div class="dfp-field">
+                        <label for="{{ form.answer.id_for_label }}" class="dfp-label required">Answer</label>
+                        {{ form.answer }}
+                        <div class="dfp-meta-row"><small>Use short paragraphs and direct language.</small><small id="faqAnswerCount">0</small></div>
+                        {% if form.answer.errors %}<div class="dfp-error">{{ form.answer.errors.0 }}</div>{% endif %}
+                    </div>
+                </section>
+
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-sliders-h"></i> Publishing Options</h3>
+                    <div class="dfp-grid two">
+                        <div class="dfp-field">
+                            <label for="{{ form.category.id_for_label }}" class="dfp-label required">Category</label>
+                            {{ form.category }}
+                            {% if form.category.errors %}<div class="dfp-error">{{ form.category.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-check-wrap"><label class="dfp-check">{{ form.is_published }} <span>Published</span></label></div>
+                    </div>
+
+                    <div class="dfp-check-wrap" style="margin-top:.75rem;">
+                        <label class="dfp-check">{{ form.is_featured }} <span>Featured FAQ</span></label>
+                        <small class="dfp-help">Featured FAQs are highlighted in the public view.</small>
+                    </div>
+                </section>
+
+                <div class="dfp-actions">
+                    <a href="{% url 'dashboard:faqs_list' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {% if form.instance.pk %}Update{% else %}Create{% endif %} FAQ</button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <aside class="content-card dfp-side-card">
+        <div class="content-card-body">
+            <h3><i class="fas fa-eye"></i> Live Preview</h3>
+            <div class="dfp-side-block"><div class="dfp-k">Question</div><div class="dfp-v" id="faqPreviewQuestion">No question yet</div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Category</div><div class="dfp-v" id="faqPreviewCategory">Not selected</div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Status</div><div class="dfp-v"><span class="dfp-pill" id="faqPreviewStatus">Draft</span></div></div>
+            <div class="dfp-side-block"><div class="dfp-k">Answer Preview</div><div class="dfp-v" id="faqPreviewAnswer">No answer yet.</div></div>
+
+            <hr class="dfp-divider">
+            <h4><i class="fas fa-lightbulb"></i> Tips</h4>
+            <ul class="dfp-tips">
+                <li>Start with the direct answer, then add context.</li>
+                <li>Keep one key intent per FAQ entry.</li>
+                <li>Feature only the most frequent questions.</li>
+            </ul>
+        </div>
+    </aside>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const question = document.getElementById('{{ form.question.id_for_label }}');
+    const answer = document.getElementById('{{ form.answer.id_for_label }}');
+    const category = document.getElementById('{{ form.category.id_for_label }}');
+    const published = document.getElementById('{{ form.is_published.id_for_label }}');
+
+    const questionCount = document.getElementById('faqQuestionCount');
+    const answerCount = document.getElementById('faqAnswerCount');
+    const progressBar = document.getElementById('faqProgressBar');
+    const progressText = document.getElementById('faqProgressText');
+
+    const previewQuestion = document.getElementById('faqPreviewQuestion');
+    const previewCategory = document.getElementById('faqPreviewCategory');
+    const previewStatus = document.getElementById('faqPreviewStatus');
+    const previewAnswer = document.getElementById('faqPreviewAnswer');
+
+    const required = [question, answer, category].filter(Boolean);
+
+    function update() {
+        if (question && questionCount) questionCount.textContent = String((question.value || '').trim().length);
+        if (answer && answerCount) answerCount.textContent = String((answer.value || '').trim().length);
+
+        if (previewQuestion && question) previewQuestion.textContent = (question.value || '').trim() || 'No question yet';
+        if (previewCategory && category) previewCategory.textContent = category.options[category.selectedIndex]?.text || 'Not selected';
+        if (previewStatus && published) previewStatus.textContent = published.checked ? 'Published' : 'Draft';
+        if (previewAnswer && answer) {
+            const txt = (answer.value || '').trim();
+            previewAnswer.textContent = txt ? (txt.length > 110 ? txt.slice(0, 110) + '...' : txt) : 'No answer yet.';
+        }
+
+        if (progressBar && progressText) {
+            const done = required.filter((el) => String(el.value || '').trim() !== '').length;
+            const pct = required.length ? Math.round((done / required.length) * 100) : 0;
+            progressBar.style.width = pct + '%';
+            progressText.textContent = pct + '%';
+        }
+    }
+
+    [question, answer, category, published].forEach((el) => {
+        if (el) {
+            el.addEventListener('input', update);
+            el.addEventListener('change', update);
+        }
+    });
+    update();
+})();
+</script>
 {% endblock %}

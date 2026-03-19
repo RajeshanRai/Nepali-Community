@@ -128,81 +128,47 @@
             <div class="section-header">
                 <div class="section-label">Meet The People</div>
                 <h2 class="section-title">Leadership Team</h2>
-                <p class="section-description">Dedicated volunteers and leaders driving our community forward</p>
+                <p class="section-description">Dedicated leaders and volunteers shaping a stronger, more connected community.</p>
+            </div>
+
+            <div class="team-meta-strip" aria-label="Leadership values">
+                <span><i class="fas fa-handshake"></i> Service First</span>
+                <span><i class="fas fa-globe-asia"></i> Cultural Stewardship</span>
+                <span><i class="fas fa-users"></i> Inclusive Leadership</span>
             </div>
 
             <div class="team-grid">
+                {% for member in team_members %}
                 <div class="team-member-card">
                     <div class="member-image-wrapper">
                         <div class="member-image"
-                            style="background-image: url('https://randomuser.me/api/portraits/men/1.jpg')"></div>
+                            style="background-image: url('{% if member.photo %}{{ member.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ member.name|urlencode }}&size=400&background=c0392b&color=fff{% endif %}'); background-size: cover; background-position: center top;"></div>
                         <div class="member-overlay"></div>
+                        {% if member.badge %}<span class="member-badge">{{ member.badge }}</span>{% endif %}
                     </div>
                     <div class="member-content">
-                        <h3 class="member-name">Rajesh Sharma</h3>
-                        <p class="member-role">Founder & Community Director</p>
-                        <p class="member-bio">Visionary leader passionate about preserving Nepali heritage and fostering
-                            community bonds.</p>
+                        <h3 class="member-name">{{ member.name }}</h3>
+                        <p class="member-role">{{ member.role }}</p>
+                        {% if member.bio %}<p class="member-bio">{{ member.bio }}</p>{% endif %}
+                        {% if member.focus %}
+                        <div class="member-focus">
+                            <span>Focus:</span>
+                            <p>{{ member.focus }}</p>
+                        </div>
+                        {% endif %}
                         <div class="member-socials">
-                            <a href="#" class="social-link social-link--linkedin" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#" class="social-link social-link--email" title="Email"><i class="fas fa-envelope"></i></a>
+                            {% if member.linkedin_url %}
+                            <a href="{{ member.linkedin_url }}" class="social-link social-link--linkedin" title="LinkedIn" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin-in"></i></a>
+                            {% endif %}
+                            {% if member.email %}
+                            <a href="mailto:{{ member.email }}" class="social-link social-link--email" title="Email"><i class="fas fa-envelope"></i></a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-
-                <div class="team-member-card">
-                    <div class="member-image-wrapper">
-                        <div class="member-image"
-                            style="background-image: url('https://randomuser.me/api/portraits/women/2.jpg')"></div>
-                        <div class="member-overlay"></div>
-                    </div>
-                    <div class="member-content">
-                        <h3 class="member-name">Priya Poudel</h3>
-                        <p class="member-role">Cultural Programs Lead</p>
-                        <p class="member-bio">Expert in cultural education, bringing festivals and traditions to life
-                            for all ages.</p>
-                        <div class="member-socials">
-                            <a href="#" class="social-link social-link--linkedin" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#" class="social-link social-link--email" title="Email"><i class="fas fa-envelope"></i></a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="team-member-card">
-                    <div class="member-image-wrapper">
-                        <div class="member-image"
-                            style="background-image: url('https://randomuser.me/api/portraits/men/3.jpg')"></div>
-                        <div class="member-overlay"></div>
-                    </div>
-                    <div class="member-content">
-                        <h3 class="member-name">Bikash Thapa</h3>
-                        <p class="member-role">Community Outreach Coordinator</p>
-                        <p class="member-bio">Building bridges between different communities and fostering meaningful
-                            connections.</p>
-                        <div class="member-socials">
-                            <a href="#" class="social-link social-link--linkedin" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#" class="social-link social-link--email" title="Email"><i class="fas fa-envelope"></i></a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="team-member-card">
-                    <div class="member-image-wrapper">
-                        <div class="member-image"
-                            style="background-image: url('https://randomuser.me/api/portraits/women/4.jpg')"></div>
-                        <div class="member-overlay"></div>
-                    </div>
-                    <div class="member-content">
-                        <h3 class="member-name">Mina Sharma</h3>
-                        <p class="member-role">Volunteer Program Manager</p>
-                        <p class="member-bio">Empowering volunteers and creating opportunities for community members to
-                            give back.</p>
-                        <div class="member-socials">
-                            <a href="#" class="social-link social-link--linkedin" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#" class="social-link social-link--email" title="Email"><i class="fas fa-envelope"></i></a>
-                        </div>
-                    </div>
-                </div>
+                {% empty %}
+                <p class="text-center" style="grid-column: 1/-1; color: var(--text-muted);">No team members added yet.</p>
+                {% endfor %}
             </div>
         </div>
     </section>

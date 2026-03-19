@@ -11,6 +11,7 @@ Modules:
 from dashboard.views.admin_panel import (
     DashboardView,
     advanced_admin_panel,
+    system_chain_view,
     staff_required,
     admin_required,
 )
