@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load text_filters %}
 
 {% block title %}Home - Nepali Community of Vancouver{% endblock %}
 
@@ -37,27 +38,27 @@
                     <span><i class="fas fa-hands-helping"></i> Volunteering</span>
                 </div>
             </div>
-            <div class="home-v2-hero-right">
-                <div class="home-v2-glass-card">
-                    <div class="home-v2-glass-card-icon">
+            <div class="home-v2-hero-side">
+                <article class="hero-side-card hero-side-card--week">
+                    <div class="hero-side-card-icon">
                         <i class="fas fa-calendar-week"></i>
                     </div>
-                    <div class="home-v2-glass-card-body">
+                    <div class="hero-side-card-body">
                         <h3>This Week</h3>
                         <p>{{ upcoming_programs|length }} upcoming program{{ upcoming_programs|length|pluralize }} scheduled for the community.</p>
-                        <a href="{% url 'program_list' %}" class="home-v2-glass-cta">View Calendar <i class="fas fa-arrow-right"></i></a>
+                        <a href="{% url 'program_list' %}" class="hero-side-card-cta">View Calendar <i class="fas fa-arrow-right"></i></a>
                     </div>
-                </div>
-                <div class="home-v2-glass-card">
-                    <div class="home-v2-glass-card-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                </article>
+                <article class="hero-side-card hero-side-card--involved">
+                    <div class="hero-side-card-icon">
                         <i class="fas fa-hands-helping"></i>
                     </div>
-                    <div class="home-v2-glass-card-body">
+                    <div class="hero-side-card-body">
                         <h3>Get Involved</h3>
                         <p>Volunteer, donate, or partner to grow our community's impact together.</p>
-                        <a href="{% url 'volunteer_list' %}" class="home-v2-glass-cta">Join as Volunteer <i class="fas fa-arrow-right"></i></a>
+                        <a href="{% url 'volunteer_list' %}" class="hero-side-card-cta">Join as Volunteer <i class="fas fa-arrow-right"></i></a>
                     </div>
-                </div>
+                </article>
             </div>
         </div>
     </section>
@@ -143,11 +144,11 @@
                     <strong>{{ program.date|date:"d" }}</strong>
                 </div>
                 <div class="home-v2-program-info">
-                    <h3>{{ program.title }}</h3>
-                    <p>{{ program.description|truncatechars:120 }}</p>
+                    <h3>{{ program.title|fix_mojibake }}</h3>
+                    <p>{{ program.description|fix_mojibake|truncatechars:120 }}</p>
                     <div class="home-v2-meta">
                         <span><i class="fas fa-tag"></i> {{ program.get_event_type_display }}</span>
-                        <span><i class="fas fa-map-marker-alt"></i> {{ program.location|default:"Location TBA" }}</span>
+                        <span><i class="fas fa-map-marker-alt"></i> {{ program.location|fix_mojibake|default:"Location TBA" }}</span>
                         <span><i class="fas fa-user-check"></i> {{ program.registered_count }} attending</span>
                     </div>
                 </div>
@@ -185,8 +186,8 @@
                 </div>
 
                 <div class="home-v2-program-info home-v2-announcement-info">
-                    <h3>{{ item.title }}</h3>
-                    <p>{{ item.content|truncatechars:120 }}</p>
+                    <h3>{{ item.title|fix_mojibake }}</h3>
+                    <p>{{ item.content|fix_mojibake|truncatechars:120 }}</p>
                     <div class="home-v2-meta">
                         <span class="announcement-meta-chip announcement-category-{{ item.category }}"><i class="fas fa-tag"></i> {{ item.get_category_display }}</span>
                         <span class="announcement-meta-chip announcement-priority-{{ item.priority }}"><i class="fas fa-flag"></i> {{ item.get_priority_display }} priority</span>
@@ -210,10 +211,63 @@
         {% endif %}
     </section>
 
+    <section class="home-v2-volunteer-opportunities container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>Volunteer Opportunities</h2>
+            <a href="{% url 'volunteer_list' %}">View all opportunities <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        {% if featured_volunteer_opportunities %}
+        <div class="home-v2-program-list">
+            {% for opportunity in featured_volunteer_opportunities %}
+            <article class="home-v2-program-card">
+                <div class="home-v2-date-chip">
+                    {% if opportunity.start_date %}
+                    <span>{{ opportunity.start_date|date:"M" }}</span>
+                    <strong>{{ opportunity.start_date|date:"d" }}</strong>
+                    {% else %}
+                    <span>Open</span>
+                    <strong>Now</strong>
+                    {% endif %}
+                </div>
+
+                <div class="home-v2-program-info">
+                    <h3>{{ opportunity.title|fix_mojibake }}</h3>
+                    <p>{{ opportunity.description|fix_mojibake|truncatechars:120 }}</p>
+                    <div class="home-v2-meta">
+                        <span><i class="fas fa-tag"></i> {{ opportunity.get_category_display }}</span>
+                        <span><i class="fas fa-map-marker-alt"></i> {{ opportunity.location|fix_mojibake|default:"Location flexible" }}</span>
+                        <span><i class="fas fa-user-check"></i> {{ opportunity.positions_remaining }} spot{{ opportunity.positions_remaining|pluralize }} left</span>
+                    </div>
+                </div>
+
+                <div class="home-v2-program-action">
+                    <a class="btn btn-primary" href="{% url 'volunteer_detail' opportunity.pk %}">View Opportunity</a>
+                    <a class="btn btn-secondary" href="{% url 'volunteer_apply' opportunity.pk %}">Apply Now</a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="home-v2-empty-state">
+            <i class="fas fa-hands-helping"></i>
+            <p>No open volunteer opportunities right now. Please check back soon.</p>
+        </div>
+        {% endif %}
+    </section>
+
     <section class="home-v2-testimonials container reveal-up">
         <div class="home-v2-section-head">
             <h2>Voices from Our Community</h2>
             <a href="{% url 'contact' %}">Share your story <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="home-v2-smile-field" aria-hidden="true">
+            <span><i class="far fa-smile"></i></span>
+            <span><i class="far fa-smile"></i></span>
+            <span><i class="far fa-smile"></i></span>
+            <span><i class="far fa-smile"></i></span>
+            <span><i class="far fa-smile"></i></span>
+            <span><i class="far fa-smile"></i></span>
         </div>
         <div class="home-v2-testimonial-strip">
             <article class="home-v2-testimonial-card">
@@ -236,6 +290,41 @@
                 <div class="author">
                     <strong>Mina G.</strong>
                     <span>Parent</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"The volunteer team made my first community event easy and joyful. I felt supported throughout."</p>
+                <div class="author">
+                    <strong>Ritesh K.</strong>
+                    <span>Volunteer</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"From music sessions to youth workshops, this community gives our teens confidence and belonging."</p>
+                <div class="author">
+                    <strong>Sarika L.</strong>
+                    <span>Youth Mentor</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"Every festival is organized with heart. It is the closest feeling to home we have in Vancouver."</p>
+                <div class="author">
+                    <strong>Dawa T.</strong>
+                    <span>Community Member</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"I came here as a newcomer and left with friends, mentors, and real opportunities to contribute."</p>
+                <div class="author">
+                    <strong>Kripa B.</strong>
+                    <span>Newcomer</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"The language and dance programs keep our traditions alive while helping children stay connected."</p>
+                <div class="author">
+                    <strong>Prabin S.</strong>
+                    <span>Program Parent</span>
                 </div>
             </article>
         </div>
@@ -264,22 +353,6 @@
             <a href="{% url 'donation' %}">Donate now</a>
         </article>
     </section>
-</div>
-
-<div id="notification-overlay" class="notification-overlay">
-    <div id="notification-modal" class="notification-modal info">
-        <button class="notification-close-auto" onclick="closeNotification()">&times;</button>
-        <div class="notification-icon">
-            <span id="notification-icon-content">ℹ️</span>
-        </div>
-        <h2 class="notification-title" id="notification-title">Notification</h2>
-        <p class="notification-message" id="notification-message">Message goes here</p>
-        <div class="notification-actions">
-            <button class="notification-btn notification-btn-close" onclick="closeNotification()">Close</button>
-            <button class="notification-btn notification-btn-confirm" onclick="closeNotification()">OK</button>
-        </div>
-        <div class="progress-bar"></div>
-    </div>
 </div>
 {% endblock content %}
 

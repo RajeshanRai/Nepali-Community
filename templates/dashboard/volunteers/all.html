@@ -3,6 +3,267 @@
 
 {% block title %}All Volunteers{% endblock %}
 
+{% block extra_css %}
+<style>
+    .volunteer-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        max-width: 380px;
+        max-height: 150px;
+        overflow-y: auto;
+        padding-right: 0.2rem;
+    }
+
+    .volunteer-chips::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .volunteer-chips::-webkit-scrollbar-thumb {
+        background: #c9d8f4;
+        border-radius: 999px;
+    }
+
+    .volunteer-count-label {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-size: 0.74rem;
+        font-weight: 700;
+        color: #475569;
+    }
+
+    .volunteer-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.28rem;
+        padding: 0.16rem 0.46rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        background: #eef4ff;
+        color: #1e3a8a;
+        border: 1px solid #d6e3ff;
+        white-space: nowrap;
+    }
+
+    .volunteer-chip.status-pending {
+        background: #fff7e6;
+        color: #8a5a00;
+        border-color: #f7dfa8;
+    }
+
+    .volunteer-chip.status-accepted,
+    .volunteer-chip.status-assigned {
+        background: #e9fbf1;
+        color: #166534;
+        border-color: #b6e8c9;
+    }
+
+    .volunteer-chip.status-rejected {
+        background: #ffeef0;
+        color: #991b1b;
+        border-color: #f7c5cd;
+    }
+
+    .view-all-volunteers-btn {
+        margin-top: 0.45rem;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: #1d4ed8;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    .volunteer-full-list {
+        display: none;
+    }
+
+    .volunteer-modal-list {
+        display: grid;
+        gap: 0.45rem;
+        padding-right: 0.25rem;
+    }
+
+    .volunteer-modal-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.8rem;
+        border: 1px solid #dce9ff;
+        border-radius: 12px;
+        padding: 0.7rem 0.8rem;
+        background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
+        font-size: 0.82rem;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    }
+
+    .volunteer-modal-main {
+        min-width: 0;
+    }
+
+    .volunteer-modal-item .name {
+        color: #0f172a;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+
+    .volunteer-modal-item .meta {
+        color: #334155;
+        font-size: 0.74rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+    }
+
+    .volunteer-modal-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.16rem 0.5rem;
+        border-radius: 999px;
+        border: 1px solid #d6e3ff;
+        background: #eef4ff;
+        color: #1e3a8a;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .volunteer-modal-status.status-pending {
+        background: #fff7e6;
+        color: #8a5a00;
+        border-color: #f7dfa8;
+    }
+
+    .volunteer-modal-status.status-accepted,
+    .volunteer-modal-status.status-assigned {
+        background: #e9fbf1;
+        color: #166534;
+        border-color: #b6e8c9;
+    }
+
+    .volunteer-modal-status.status-rejected {
+        background: #ffeef0;
+        color: #991b1b;
+        border-color: #f7c5cd;
+    }
+
+    .volunteer-modal-actions {
+        display: flex;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        align-content: start;
+    }
+
+    .volunteer-action-btn {
+        border: 1px solid #cddcf6;
+        background: #ffffff;
+        color: #1e3a8a;
+        border-radius: 8px;
+        padding: 0.26rem 0.55rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .volunteer-action-btn:hover {
+        background: #eef4ff;
+    }
+
+    .volunteer-action-btn.action-approve {
+        border-color: #b6e8c9;
+        color: #166534;
+    }
+
+    .volunteer-action-btn.action-reject,
+    .volunteer-action-btn.action-delete {
+        border-color: #f7c5cd;
+        color: #991b1b;
+    }
+
+    #volOpportunityModal .details-modal-content {
+        width: min(980px, 94vw);
+        max-height: none;
+    }
+
+    #volOpportunityModal .details-modal-body {
+        overflow-y: auto;
+        max-height: min(72vh, 760px);
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    #volOpportunityModal .details-modal-body::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .volunteer-modal-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 0.55rem;
+        padding: 0.55rem 0.7rem;
+        border: 1px solid #dce9ff;
+        border-radius: 10px;
+        background: #f8fbff;
+    }
+
+    .volunteer-modal-toolbar .hint {
+        font-size: 0.74rem;
+        color: #475569;
+        margin: 0;
+    }
+
+    .volunteer-search-box {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        border: 1px solid #cfe0ff;
+        border-radius: 10px;
+        background: #ffffff;
+        padding: 0.36rem 0.58rem;
+        min-width: 280px;
+    }
+
+    .volunteer-search-box i {
+        color: #64748b;
+        font-size: 0.78rem;
+    }
+
+    .volunteer-search-box input {
+        border: 0;
+        outline: none;
+        background: transparent;
+        width: 100%;
+        font-size: 0.78rem;
+        color: #0f172a;
+    }
+
+    @media (max-width: 700px) {
+        .volunteer-modal-item {
+            grid-template-columns: 1fr;
+        }
+
+        .volunteer-modal-actions {
+            justify-content: flex-start;
+        }
+
+        .volunteer-modal-toolbar {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .volunteer-search-box {
+            width: 100%;
+            min-width: 0;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block breadcrumb_items %}
 <li class="breadcrumb-item">Volunteers</li>
 <li class="breadcrumb-item active">All Volunteers</li>
@@ -23,6 +284,7 @@
                         <th>ID</th>
                         <th>Title</th>
                         <th>Location</th>
+                        <th>Volunteers</th>
                         <th>Positions</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -37,6 +299,69 @@
                             <br><small class="text-muted">{{ opportunity.description|truncatewords:10 }}</small>
                         </td>
                         <td>{{ opportunity.location }}</td>
+                        <td>
+                            {% if opportunity.applications.all %}
+                            <span class="volunteer-count-label">Total: {{ opportunity.applications.all|length }}</span>
+                            <button type="button" class="view-all-volunteers-btn action-view-all-volunteers" data-opp-id="{{ opportunity.id }}">
+                                View all volunteers
+                            </button>
+                            <div id="volunteer-full-list-{{ opportunity.id }}" class="volunteer-full-list">
+                                <div class="volunteer-modal-list">
+                                    {% for application in opportunity.applications.all %}
+                                    <div class="volunteer-modal-item"
+                                        data-app-id="{{ application.id }}"
+                                        data-app-name="{{ application.name|escape }}"
+                                        data-current-status="{{ application.status }}"
+                                        data-url-approve="{% url 'dashboard:volunteer_application_approve' application.id %}"
+                                        data-url-reject="{% url 'dashboard:volunteer_application_reject' application.id %}"
+                                        data-url-assign="{% url 'dashboard:volunteer_application_assign' application.id %}"
+                                        data-url-delete="{% url 'dashboard:volunteer_application_delete' application.id %}"
+                                        data-search="{{ application.name|lower }} {{ application.email|default:''|lower }}">
+                                        <div class="volunteer-modal-main">
+                                            <div class="name">{{ application.name }}</div>
+                                            <div class="meta">
+                                                <span>{{ application.email }}</span>
+                                                <span>Applied: {{ application.applied_at|date:"M d, Y" }}</span>
+                                                <span class="volunteer-modal-status status-{{ application.status }}">{{ application.get_status_display }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="volunteer-modal-actions">
+                                            {% if application.status == 'pending' %}
+                                            <button type="button" class="volunteer-action-btn action-approve js-volunteer-action"
+                                                data-action="approve"
+                                                data-url="{% url 'dashboard:volunteer_application_approve' application.id %}"
+                                                data-label="accept {{ application.name|escapejs }}">
+                                                Accept
+                                            </button>
+                                            <button type="button" class="volunteer-action-btn action-reject js-volunteer-action"
+                                                data-action="reject"
+                                                data-url="{% url 'dashboard:volunteer_application_reject' application.id %}"
+                                                data-label="reject {{ application.name|escapejs }}">
+                                                Reject
+                                            </button>
+                                            {% elif application.status == 'accepted' %}
+                                            <button type="button" class="volunteer-action-btn js-volunteer-action"
+                                                data-action="assign"
+                                                data-url="{% url 'dashboard:volunteer_application_assign' application.id %}"
+                                                data-label="assign {{ application.name|escapejs }} to this opportunity">
+                                                Assign
+                                            </button>
+                                            {% endif %}
+                                            <button type="button" class="volunteer-action-btn action-delete js-volunteer-action"
+                                                data-action="delete"
+                                                data-url="{% url 'dashboard:volunteer_application_delete' application.id %}"
+                                                data-label="delete {{ application.name|escapejs }}">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <small class="text-muted">No volunteers yet</small>
+                            {% endif %}
+                        </td>
                         <td>
                             <span class="badge badge-info">
                                 {{ opportunity.positions_filled }}/{{ opportunity.positions_needed }}
@@ -55,6 +380,7 @@
                             <div class="action-buttons">
                                
                                 <button class="btn-icon btn-view action-vol-opportunity" title="View Details"
+                                    data-opp-id="{{ opportunity.id }}"
                                     data-opp-title="{{ opportunity.title|escapejs }}"
                                     data-opp-description="{{ opportunity.description|truncatewords:40|striptags|escapejs }}"
                                     data-opp-location="{{ opportunity.location|default:'N/A'|escapejs }}"
@@ -77,7 +403,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center text-muted">No volunteer opportunities found</td>
+                        <td colspan="7" class="text-center text-muted">No volunteer opportunities found</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -104,6 +430,17 @@
                 <div class="detail-item"><label>Time Commitment</label><p id="volOppDetailTime"></p></div>
                 <div class="detail-item"><label>Positions</label><p id="volOppDetailPositions"></p></div>
                 <div class="detail-item"><label>Status</label><p id="volOppDetailStatus"></p></div>
+                <div class="detail-item full">
+                    <label>All Volunteers</label>
+                    <div class="volunteer-modal-toolbar">
+                        <p class="hint">Use actions below to accept, reject, assign, or delete volunteer applications.</p>
+                        <label class="volunteer-search-box" for="volOppVolunteerSearch">
+                            <i class="fas fa-search" aria-hidden="true"></i>
+                            <input id="volOppVolunteerSearch" type="search" placeholder="Search by name or email">
+                        </label>
+                    </div>
+                    <div id="volOppDetailVolunteers"></div>
+                </div>
                 <div class="detail-item full"><label>Description</label><p id="volOppDetailDescription"></p></div>
             </div>
         </div>
@@ -115,6 +452,141 @@
 {% block extra_js %}
 <script>
 (function () {
+    function getCsrfToken() {
+        const cookie = document.cookie.split('; ').find(function (row) {
+            return row.startsWith('csrftoken=');
+        });
+        return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
+    }
+
+    async function postVolunteerAction(url, payload) {
+        const body = new URLSearchParams(payload || {});
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            },
+            body: body.toString()
+        });
+
+        let result = {};
+        try {
+            result = await response.json();
+        } catch (e) {
+            result = {};
+        }
+
+        if (!response.ok || result.success === false) {
+            throw new Error(result.message || 'Action failed');
+        }
+        return result;
+    }
+
+    function notify(message, type) {
+        if (typeof showToast === 'function') {
+            showToast(message, type || 'info');
+            return;
+        }
+        alert(message);
+    }
+
+    async function confirmAction(options) {
+        if (window.GlobalUI && typeof window.GlobalUI.confirm === 'function') {
+            return window.GlobalUI.confirm(options);
+        }
+        return Promise.resolve(window.confirm(options.message || 'Are you sure?'));
+    }
+
+    function statusLabel(status) {
+        const labels = {
+            pending: 'Pending',
+            accepted: 'Accepted',
+            assigned: 'Assigned',
+            rejected: 'Rejected'
+        };
+        return labels[status] || status;
+    }
+
+    function renderVolunteerActions(item) {
+        const status = item.dataset.currentStatus || 'pending';
+        const name = item.dataset.appName || 'this volunteer';
+        const actionsEl = item.querySelector('.volunteer-modal-actions');
+        if (!actionsEl) {
+            return;
+        }
+
+        let html = '';
+        if (status === 'pending') {
+            html += `<button type="button" class="volunteer-action-btn action-approve js-volunteer-action" data-action="approve" data-url="${item.dataset.urlApprove || ''}" data-label="accept ${name}">Accept</button>`;
+            html += `<button type="button" class="volunteer-action-btn action-reject js-volunteer-action" data-action="reject" data-url="${item.dataset.urlReject || ''}" data-label="reject ${name}">Reject</button>`;
+        } else if (status === 'accepted') {
+            html += `<button type="button" class="volunteer-action-btn js-volunteer-action" data-action="assign" data-url="${item.dataset.urlAssign || ''}" data-label="assign ${name} to this opportunity">Assign</button>`;
+        }
+        html += `<button type="button" class="volunteer-action-btn action-delete js-volunteer-action" data-action="delete" data-url="${item.dataset.urlDelete || ''}" data-label="delete ${name}">Delete</button>`;
+        actionsEl.innerHTML = html;
+    }
+
+    function setVolunteerStatus(item, status) {
+        item.dataset.currentStatus = status;
+        const badge = item.querySelector('.volunteer-modal-status');
+        if (badge) {
+            badge.className = `volunteer-modal-status status-${status}`;
+            badge.textContent = statusLabel(status);
+        }
+        renderVolunteerActions(item);
+    }
+
+    function syncVolunteerItemFromModal(modalItem, oppId) {
+        const appId = modalItem ? modalItem.dataset.appId : '';
+        if (!appId || !oppId) {
+            return;
+        }
+        const sourceRoot = document.getElementById(`volunteer-full-list-${oppId}`);
+        if (!sourceRoot) {
+            return;
+        }
+        const sourceItem = sourceRoot.querySelector(`.volunteer-modal-item[data-app-id="${appId}"]`);
+        if (!sourceItem) {
+            return;
+        }
+
+        if (modalItem.isConnected) {
+            sourceItem.dataset.currentStatus = modalItem.dataset.currentStatus || sourceItem.dataset.currentStatus;
+            const sourceBadge = sourceItem.querySelector('.volunteer-modal-status');
+            const modalBadge = modalItem.querySelector('.volunteer-modal-status');
+            if (sourceBadge && modalBadge) {
+                sourceBadge.className = modalBadge.className;
+                sourceBadge.textContent = modalBadge.textContent;
+            }
+            renderVolunteerActions(sourceItem);
+        } else {
+            sourceItem.remove();
+        }
+    }
+
+    function updateVolunteerCountForOpportunity(oppId) {
+        if (!oppId) {
+            return;
+        }
+        const sourceRoot = document.getElementById(`volunteer-full-list-${oppId}`);
+        const count = sourceRoot ? sourceRoot.querySelectorAll('.volunteer-modal-item').length : 0;
+        const countLabel = document.querySelector(`.action-view-all-volunteers[data-opp-id="${oppId}"]`)?.closest('td')?.querySelector('.volunteer-count-label');
+        if (countLabel) {
+            countLabel.textContent = `Total: ${count}`;
+        }
+    }
+
+    function filterVolunteersInModal(query) {
+        const normalized = (query || '').trim().toLowerCase();
+        const items = document.querySelectorAll('#volOppDetailVolunteers .volunteer-modal-item');
+        items.forEach(function (item) {
+            const haystack = (item.dataset.search || item.textContent || '').toLowerCase();
+            item.style.display = (!normalized || haystack.indexOf(normalized) !== -1) ? '' : 'none';
+        });
+    }
+
     function openVolOpportunityModal(btn) {
         document.getElementById('volOppDetailTitle').textContent = btn.dataset.oppTitle || '-';
         document.getElementById('volOppDetailCategory').textContent = btn.dataset.oppCategory || '-';
@@ -124,7 +596,19 @@
         document.getElementById('volOppDetailStatus').textContent = btn.dataset.oppStatus || '-';
         document.getElementById('volOppDetailDescription').textContent = btn.dataset.oppDescription || '-';
 
+        const oppId = btn.dataset.oppId;
+        const volunteersContainer = document.getElementById('volOppDetailVolunteers');
+        const source = oppId ? document.getElementById(`volunteer-full-list-${oppId}`) : null;
+        volunteersContainer.innerHTML = source ? source.innerHTML : '<p class="text-muted">No volunteers yet.</p>';
+
+        const searchInput = document.getElementById('volOppVolunteerSearch');
+        if (searchInput) {
+            searchInput.value = '';
+            filterVolunteersInModal('');
+        }
+
         const modal = document.getElementById('volOpportunityModal');
+        modal.dataset.oppId = oppId || '';
         modal.classList.add('show');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
@@ -137,12 +621,88 @@
         document.body.style.overflow = '';
     }
 
+    document.getElementById('volOppDetailVolunteers').addEventListener('click', async function (event) {
+        const btn = event.target.closest('.js-volunteer-action');
+        if (!btn) {
+            return;
+        }
+
+        const action = btn.dataset.action;
+        const url = btn.dataset.url;
+        const label = btn.dataset.label || 'this volunteer';
+        const modal = document.getElementById('volOpportunityModal');
+        const oppId = modal.dataset.oppId;
+        const item = btn.closest('.volunteer-modal-item');
+
+        if (!url || !action || !item) {
+            return;
+        }
+
+        const confirmed = await confirmAction({
+            title: 'Confirm volunteer action',
+            message: `Are you sure you want to ${label}?`,
+            okText: action === 'delete' ? 'Delete' : 'Confirm',
+            variant: action === 'delete' || action === 'reject' ? 'danger' : 'primary'
+        });
+        if (!confirmed) {
+            return;
+        }
+
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        btn.textContent = 'Working...';
+
+        try {
+            const payload = action === 'assign' && oppId ? { opportunity_id: oppId } : {};
+            const result = await postVolunteerAction(url, payload);
+
+            if (action === 'delete') {
+                item.remove();
+                syncVolunteerItemFromModal(item, oppId);
+                updateVolunteerCountForOpportunity(oppId);
+            } else {
+                const nextStatus = action === 'approve'
+                    ? 'accepted'
+                    : action === 'reject'
+                        ? 'rejected'
+                        : action === 'assign'
+                            ? 'assigned'
+                            : item.dataset.currentStatus;
+                setVolunteerStatus(item, nextStatus);
+                syncVolunteerItemFromModal(item, oppId);
+            }
+
+            notify(result.message || 'Volunteer updated successfully.', 'success');
+        } catch (error) {
+            notify(error.message || 'Unable to complete action right now.', 'error');
+            btn.disabled = false;
+            btn.textContent = originalText;
+            return;
+        }
+
+        btn.disabled = false;
+        btn.textContent = originalText;
+    });
+
     document.querySelectorAll('.action-vol-opportunity').forEach(function (btn) {
         btn.addEventListener('click', function () { openVolOpportunityModal(btn); });
     });
 
+    document.querySelectorAll('.action-view-all-volunteers').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const row = btn.closest('tr');
+            const detailBtn = row ? row.querySelector('.action-vol-opportunity') : null;
+            if (detailBtn) {
+                openVolOpportunityModal(detailBtn);
+            }
+        });
+    });
+
     document.getElementById('volOpportunityModalClose').addEventListener('click', closeVolOpportunityModal);
     document.getElementById('volOpportunityModalBackdrop').addEventListener('click', closeVolOpportunityModal);
+    document.getElementById('volOppVolunteerSearch').addEventListener('input', function (event) {
+        filterVolunteersInModal(event.target.value);
+    });
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') { closeVolOpportunityModal(); }
     });

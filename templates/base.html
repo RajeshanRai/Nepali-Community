@@ -60,6 +60,54 @@
     {% include 'includes/site_head_assets.html' %}
 
     <style>
+        .site-flash-wrap {
+            width: min(1100px, calc(100% - 2rem));
+            margin: 1rem auto 0;
+            display: grid;
+            gap: 0.65rem;
+        }
+
+        .site-flash {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            border: 1px solid transparent;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+            font-size: 0.94rem;
+            line-height: 1.45;
+        }
+
+        .site-flash i {
+            margin-top: 0.15rem;
+            font-size: 1rem;
+        }
+
+        .site-flash-success {
+            background: #e9fbf1;
+            border-color: #8fd9aa;
+            color: #135c33;
+        }
+
+        .site-flash-error {
+            background: #ffeef0;
+            border-color: #f4a4ad;
+            color: #8a1f2b;
+        }
+
+        .site-flash-warning {
+            background: #fff8e6;
+            border-color: #f2d18b;
+            color: #7a4d00;
+        }
+
+        .site-flash-info {
+            background: #edf6ff;
+            border-color: #9bc4ef;
+            color: #0d4d86;
+        }
+
         @media (max-width: 1024px) {
             #mobileMenuToggle.mobile-menu-toggle {
                 display: inline-flex !important;
@@ -258,6 +306,21 @@
             </div>
         </nav>
     </div>
+
+    {% block page_messages %}
+    {% if request.resolver_match.namespace != 'dashboard' and messages %}
+    <div class="site-flash-wrap" aria-live="polite" aria-label="Page messages">
+        {% for message in messages %}
+        <div class="site-flash site-flash-{% if 'success' in message.tags %}success{% elif 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}"
+            role="alert">
+            <i class="fas fa-{% if 'success' in message.tags %}circle-check{% elif 'error' in message.tags %}triangle-exclamation{% elif 'warning' in message.tags %}circle-exclamation{% else %}circle-info{% endif %}"
+                aria-hidden="true"></i>
+            <div>{{ message }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endblock %}
 
     {% block content %}{% endblock %}
 

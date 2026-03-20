@@ -144,3 +144,7 @@ class VolunteerApplyView(CreateView):
             context['needs_phone'] = True
 
         return context
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Please correct the highlighted fields and submit again.')
+        return super().form_invalid(form)

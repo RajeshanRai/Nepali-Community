@@ -6,7 +6,7 @@ Provides JSON responses for dashboard charts and statistics
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Count, Sum, Q, Avg
+from django.db.models import Count, Sum, Q, Avg, F, Value, IntegerField, Case, When
 from django.utils import timezone
 from datetime import timedelta
 import json
@@ -224,9 +224,19 @@ def get_available_opportunities(request):
     """Get list of available volunteer opportunities for assignment"""
     from volunteers.models import VolunteerOpportunity
     try:
-        opportunities = VolunteerOpportunity.objects.filter(
-            status='open'
-        ).values('id', 'title', 'category', 'start_date', 'end_date', 'positions_remaining').order_by('-created_at')
+        opportunities = (
+            VolunteerOpportunity.objects
+            .filter(status='open', positions_needed__gt=F('positions_filled'))
+            .annotate(
+                positions_remaining=Case(
+                    When(positions_needed__gt=F('positions_filled'), then=F('positions_needed') - F('positions_filled')),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                )
+            )
+            .values('id', 'title', 'category', 'start_date', 'end_date', 'positions_remaining')
+            .order_by('-created_at')
+        )
         
         return JsonResponse({
             'success': True,

@@ -5,6 +5,7 @@ from django.utils.decorators import method_decorator
 from django.http import JsonResponse, HttpResponseRedirect
 from django.views.decorators.http import require_GET
 from django.urls import reverse_lazy
+from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import render
 from communities.models import Community
@@ -366,6 +367,7 @@ class ProgramListView(ListView):
 class RequestEventCreateView(View):
     def post(self, request):
         form = RequestEventForm(request.POST)
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
         if form.is_valid():
             inst = form.save(commit=False)
             if request.user.is_authenticated:
@@ -391,8 +393,15 @@ class RequestEventCreateView(View):
                 f"{field}: {', '.join(errors)}"
                 for field, errors in form.errors.items()
             ]) or 'Please fill required fields.'
-        # always return JSON for POSTs; front-end expects it
-        return JsonResponse({'success': success, 'message': message})
+
+        if is_ajax:
+            return JsonResponse({'success': success, 'message': message})
+
+        if success:
+            messages.success(request, message)
+        else:
+            messages.error(request, message)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/programs/'))
 
 
 class ProgramDetailView(DetailView):
@@ -523,6 +532,10 @@ class RegisterForEventView(View):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': success, 'message': message})
             else:
+                if success:
+                    messages.success(request, message)
+                else:
+                    messages.error(request, message)
                 # Redirect back to referrer or programs page
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/programs/'))
                 
@@ -531,6 +544,7 @@ class RegisterForEventView(View):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': False, 'message': message}, status=404)
             else:
+                messages.error(request, message)
                 return HttpResponseRedirect('/programs/')
 
 
@@ -559,12 +573,17 @@ class UnregisterForEventView(View):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': success, 'message': message})
             else:
+                if success:
+                    messages.success(request, message)
+                else:
+                    messages.error(request, message)
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/programs/'))
         except Program.DoesNotExist:
             message = "Program not found."
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': False, 'message': message}, status=404)
             else:
+                messages.error(request, message)
                 return HttpResponseRedirect('/programs/')
 
 

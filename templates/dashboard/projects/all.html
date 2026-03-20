@@ -70,14 +70,17 @@
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <button type="button" class="btn-icon btn-view action-all-event" title="View"
+                                <button type="button" class="btn-icon btn-view project-view-trigger" title="View"
                                     data-event-title="{{ event.title|escapejs }}"
                                     data-event-category="{{ event.get_event_type_display|escapejs }}"
                                     data-event-date="{{ event.date|date:'M d, Y'|escapejs }}"
                                     data-event-location="{{ event.location|truncatewords:5|escapejs }}"
                                     data-event-description="{{ event.description|truncatewords:40|striptags|escapejs }}"
                                     data-event-registered="{{ event.registrations.count }}"
-                                    data-event-status="{% if event.date < today %}Completed{% else %}Active{% endif %}">
+                                    data-event-status="{% if event.date < today %}Completed{% else %}Active{% endif %}"
+                                    data-event-requester="N/A"
+                                    data-event-email="N/A"
+                                    data-event-phone="N/A">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <a class="btn-icon btn-edit" title="Edit" href="{% url 'dashboard:event_edit' event.id %}">
@@ -117,9 +120,12 @@
             <div class="details-grid">
                 <div class="detail-item"><label>Title</label><p id="allEventDetailTitle"></p></div>
                 <div class="detail-item"><label>Category</label><p id="allEventDetailCategory"></p></div>
+                <div class="detail-item"><label>Requester</label><p id="allEventDetailRequester"></p></div>
+                <div class="detail-item"><label>Email</label><p id="allEventDetailEmail"></p></div>
+                <div class="detail-item"><label>Phone</label><p id="allEventDetailPhone"></p></div>
                 <div class="detail-item"><label>Date</label><p id="allEventDetailDate"></p></div>
                 <div class="detail-item"><label>Location</label><p id="allEventDetailLocation"></p></div>
-                <div class="detail-item"><label>Registered</label><p id="allEventDetailRegistered"></p></div>
+                <div class="detail-item"><label>Attendees</label><p id="allEventDetailRegistered"></p></div>
                 <div class="detail-item"><label>Status</label><p id="allEventDetailStatus"></p></div>
                 <div class="detail-item full"><label>Description</label><p id="allEventDetailDescription"></p></div>
             </div>
@@ -133,19 +139,30 @@
 <script src="{% static 'dashboard/js/pages/projects-all.js' %}"></script>
 <script>
 (function () {
+    let activeTrigger = null;
+
     function openAllEventModal(btn) {
+        const modal = document.getElementById('allEventModal');
+        if (modal.classList.contains('show') && activeTrigger === btn) {
+            closeAllEventModal();
+            return;
+        }
+
         document.getElementById('allEventDetailTitle').textContent = btn.dataset.eventTitle || '-';
         document.getElementById('allEventDetailCategory').textContent = btn.dataset.eventCategory || '-';
+        document.getElementById('allEventDetailRequester').textContent = btn.dataset.eventRequester || 'N/A';
+        document.getElementById('allEventDetailEmail').textContent = btn.dataset.eventEmail || 'N/A';
+        document.getElementById('allEventDetailPhone').textContent = btn.dataset.eventPhone || 'N/A';
         document.getElementById('allEventDetailDate').textContent = btn.dataset.eventDate || '-';
         document.getElementById('allEventDetailLocation').textContent = btn.dataset.eventLocation || '-';
         document.getElementById('allEventDetailRegistered').textContent = btn.dataset.eventRegistered || '0';
         document.getElementById('allEventDetailStatus').textContent = btn.dataset.eventStatus || '-';
         document.getElementById('allEventDetailDescription').textContent = btn.dataset.eventDescription || '-';
 
-        const modal = document.getElementById('allEventModal');
         modal.classList.add('show');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
+        activeTrigger = btn;
     }
 
     function closeAllEventModal() {
@@ -153,9 +170,10 @@
         modal.classList.remove('show');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        activeTrigger = null;
     }
 
-    document.querySelectorAll('.action-all-event').forEach(function (btn) {
+    document.querySelectorAll('.project-view-trigger').forEach(function (btn) {
         btn.addEventListener('click', function () { openAllEventModal(btn); });
     });
 

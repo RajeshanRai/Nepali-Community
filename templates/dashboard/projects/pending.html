@@ -121,8 +121,17 @@
                         <td><span class="status-badge status-pending">{{ request.get_status_display }}</span></td>
                         <td>
                             <div class="action-buttons enhanced-actions">
-                                    <button class="btn-icon btn-view" title="View Details"
-                                        onclick="viewDetails({{ request.id }}, '{{ request.title|escapejs }}', '{{ request.get_event_type_display|default:'Other'|escapejs }}', '{{ request.requester_name|default:'Guest'|escapejs }}', '{{ request.requester_email|default:'No email'|escapejs }}', '{{ request.requester_phone|default:'N/A'|escapejs }}', '{{ request.location|default:'No location'|escapejs }}', '{{ request.description|default:'No description'|escapejs }}', '{{ request.date|date:'M d, Y'|default:'Not specified'|escapejs }}', '{{ request.target_attendees|default:'N/A'|escapejs }}')">
+                                    <button class="btn-icon btn-view project-view-trigger" title="View Details"
+                                        data-project-title="{{ request.title|escapejs }}"
+                                        data-project-category="{{ request.get_event_type_display|default:'Other'|escapejs }}"
+                                        data-project-requester="{{ request.requester_name|default:'Guest'|escapejs }}"
+                                        data-project-email="{{ request.requester_email|default:'No email'|escapejs }}"
+                                        data-project-phone="{{ request.requester_phone|default:'N/A'|escapejs }}"
+                                        data-project-date="{{ request.date|date:'M d, Y'|default:'Not specified'|escapejs }}"
+                                        data-project-location="{{ request.location|default:'No location'|escapejs }}"
+                                        data-project-attendees="{{ request.target_attendees|default:'N/A'|escapejs }}"
+                                        data-project-status="{{ request.get_status_display|default:'Pending'|escapejs }}"
+                                        data-project-description="{{ request.description|default:'No description'|escapejs }}">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <button class="btn-icon btn-approve" title="Approve Request"
@@ -148,39 +157,42 @@
 </div>
 
 <div id="detailsModal" class="details-modal" aria-hidden="true">
-    <div class="details-modal-backdrop" onclick="closeDetailsModal()"></div>
+    <div class="details-modal-backdrop" id="detailsModalBackdrop"></div>
     <div class="details-modal-content">
         <div class="details-modal-header">
             <h3><i class="fas fa-file-alt"></i> Request Details</h3>
-            <button class="modal-close" onclick="closeDetailsModal()"><i class="fas fa-times"></i></button>
+            <button class="modal-close" type="button" id="detailsModalClose"><i class="fas fa-times"></i></button>
         </div>
         <div class="details-modal-body">
             <div class="details-grid">
-                <div><label>Title</label>
+                <div class="detail-item"><label>Title</label>
                     <p id="detailTitle"></p>
                 </div>
-                <div><label>Type</label>
+                <div class="detail-item"><label>Category</label>
                     <p id="detailType"></p>
                 </div>
-                <div><label>Requester</label>
+                <div class="detail-item"><label>Requester</label>
                     <p id="detailRequester"></p>
                 </div>
-                <div><label>Email</label>
+                <div class="detail-item"><label>Email</label>
                     <p id="detailEmail"></p>
                 </div>
-                <div><label>Phone</label>
+                <div class="detail-item"><label>Phone</label>
                     <p id="detailPhone"></p>
                 </div>
-                <div><label>Event Date</label>
+                <div class="detail-item"><label>Date</label>
                     <p id="detailDate"></p>
                 </div>
-                <div><label>Target Attendees</label>
-                    <p id="detailAttendees"></p>
-                </div>
-                <div class="details-full"><label>Location</label>
+                <div class="detail-item"><label>Location</label>
                     <p id="detailLocation"></p>
                 </div>
-                <div class="details-full"><label>Description</label>
+                <div class="detail-item"><label>Attendees</label>
+                    <p id="detailAttendees"></p>
+                </div>
+                <div class="detail-item"><label>Status</label>
+                    <p id="detailStatus"></p>
+                </div>
+                <div class="detail-item full"><label>Description</label>
                     <p id="detailDescription"></p>
                 </div>
             </div>
@@ -535,21 +547,30 @@
         showDecisionModal(id, 'reject');
     }
 
-    function viewDetails(id, title, type, requester, email, phone, location, description, date, attendees) {
-        document.getElementById('detailTitle').textContent = title;
-        document.getElementById('detailType').textContent = type;
-        document.getElementById('detailRequester').textContent = requester;
-        document.getElementById('detailEmail').textContent = email;
-        document.getElementById('detailPhone').textContent = phone;
-        document.getElementById('detailLocation').textContent = location;
-        document.getElementById('detailDescription').textContent = description;
-        document.getElementById('detailDate').textContent = date;
-        document.getElementById('detailAttendees').textContent = attendees;
+    let activeProjectTrigger = null;
 
+    function openProjectDetailsModal(btn) {
         const modal = document.getElementById('detailsModal');
+        if (modal.classList.contains('show') && activeProjectTrigger === btn) {
+            closeDetailsModal();
+            return;
+        }
+
+        document.getElementById('detailTitle').textContent = btn.dataset.projectTitle || '-';
+        document.getElementById('detailType').textContent = btn.dataset.projectCategory || '-';
+        document.getElementById('detailRequester').textContent = btn.dataset.projectRequester || '-';
+        document.getElementById('detailEmail').textContent = btn.dataset.projectEmail || '-';
+        document.getElementById('detailPhone').textContent = btn.dataset.projectPhone || '-';
+        document.getElementById('detailDate').textContent = btn.dataset.projectDate || '-';
+        document.getElementById('detailLocation').textContent = btn.dataset.projectLocation || '-';
+        document.getElementById('detailAttendees').textContent = btn.dataset.projectAttendees || '-';
+        document.getElementById('detailStatus').textContent = btn.dataset.projectStatus || 'Pending';
+        document.getElementById('detailDescription').textContent = btn.dataset.projectDescription || '-';
+
         modal.classList.add('show');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
+        activeProjectTrigger = btn;
     }
 
     function closeDetailsModal() {
@@ -557,9 +578,19 @@
         modal.classList.remove('show');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        activeProjectTrigger = null;
     }
 
     window.closeDetailsModal = closeDetailsModal;
+
+    document.querySelectorAll('.project-view-trigger').forEach(function (btn) {
+        btn.addEventListener('click', function () { openProjectDetailsModal(btn); });
+    });
+
+    const detailsClose = document.getElementById('detailsModalClose');
+    const detailsBackdrop = document.getElementById('detailsModalBackdrop');
+    if (detailsClose) detailsClose.addEventListener('click', closeDetailsModal);
+    if (detailsBackdrop) detailsBackdrop.addEventListener('click', closeDetailsModal);
 
     // Close modals on ESC key
     document.addEventListener('keydown', function (event) {

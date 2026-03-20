@@ -4,16 +4,20 @@
 {% block title %}{{ announcement.title }} - Announcement{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}">
+<link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20260319">
 {% endblock %}
 
 {% block content %}
 <div class="container announcement-detail-page">
+    <div class="detail-bg-orb detail-bg-orb-a" aria-hidden="true"></div>
+    <div class="detail-bg-orb detail-bg-orb-b" aria-hidden="true"></div>
+
     <a href="{% url 'announcement_list' %}" class="detail-back-link">
         <i class="fas fa-arrow-left"></i> Back to Announcements
     </a>
 
     <article class="announcement-detail-card priority-{{ announcement.priority }}">
+        <div class="detail-grid-overlay" aria-hidden="true"></div>
         <div class="detail-top-accent"></div>
 
         <div class="announcement-header">
@@ -33,8 +37,10 @@
             </div>
         </div>
 
-        <div class="announcement-content detail-content">
-            {{ announcement.content|linebreaks }}
+        <div class="detail-content-wrap">
+            <div class="announcement-content detail-content">
+                {{ announcement.content|linebreaks }}
+            </div>
         </div>
 
         {% if announcement.link_url %}

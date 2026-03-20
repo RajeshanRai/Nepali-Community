@@ -48,10 +48,27 @@
                         <td>{{ event.submitted_at|date:"M d, Y" }}</td>
                         <td><span class="status-badge status-rejected">Rejected</span></td>
                         <td>
-                            <button type="button" class="btn-icon btn-delete" title="Delete request"
-                                onclick="confirmDelete({url: '{% url 'dashboard:event_request_delete' event.id %}', itemName: '{{ event.title|escapejs }}'})">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <div class="action-buttons enhanced-actions">
+                                <button type="button" class="btn-icon btn-view project-view-trigger" title="View Details"
+                                    data-project-title="{{ event.title|escapejs }}"
+                                    data-project-category="Other"
+                                    data-project-requester="{% if event.requester %}{{ event.requester.get_full_name|default:event.requester_name|default:'—'|escapejs }}{% else %}{{ event.requester_name|default:'—'|escapejs }}{% endif %}"
+                                    data-project-email="{{ event.requester_email|default:'No email'|escapejs }}"
+                                    data-project-phone="{{ event.requester_phone|default:'-'|escapejs }}"
+                                    data-project-date="{{ event.submitted_at|date:'M d, Y'|escapejs }}"
+                                    data-project-location="N/A"
+                                    data-project-attendees="N/A"
+                                    data-project-status="Rejected"
+                                    data-project-description="{{ event.description|default:'No description available.'|striptags|escapejs }}">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="btn-icon btn-delete" title="Delete request"
+                                    data-dashboard-delete-url="{% url 'dashboard:event_request_delete' event.id %}"
+                                    data-item-name="{{ event.title|escape }}"
+                                    data-item-type="event request">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
@@ -64,4 +81,86 @@
         </div>
     </div>
 </div>
+
+<div id="rejectedProjectModal" class="details-modal" aria-hidden="true">
+    <div class="details-modal-backdrop" id="rejectedProjectModalBackdrop"></div>
+    <div class="details-modal-content">
+        <div class="details-modal-header">
+            <h3><i class="fas fa-eye"></i> Event Request Details</h3>
+            <button class="modal-close" type="button" id="rejectedProjectModalClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="details-modal-body">
+            <div class="details-grid">
+                <div class="detail-item"><label>Title</label><p id="rejectedDetailTitle"></p></div>
+                <div class="detail-item"><label>Category</label><p id="rejectedDetailCategory"></p></div>
+                <div class="detail-item"><label>Requester</label><p id="rejectedDetailRequester"></p></div>
+                <div class="detail-item"><label>Email</label><p id="rejectedDetailEmail"></p></div>
+                <div class="detail-item"><label>Phone</label><p id="rejectedDetailPhone"></p></div>
+                <div class="detail-item"><label>Date</label><p id="rejectedDetailDate"></p></div>
+                <div class="detail-item"><label>Location</label><p id="rejectedDetailLocation"></p></div>
+                <div class="detail-item"><label>Attendees</label><p id="rejectedDetailAttendees"></p></div>
+                <div class="detail-item"><label>Status</label><p id="rejectedDetailStatus"></p></div>
+                <div class="detail-item full"><label>Description</label><p id="rejectedDetailDescription"></p></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    let activeTrigger = null;
+
+    function openRejectedProjectModal(btn) {
+        const modal = document.getElementById('rejectedProjectModal');
+        if (modal.classList.contains('show') && activeTrigger === btn) {
+            closeRejectedProjectModal();
+            return;
+        }
+
+        document.getElementById('rejectedDetailTitle').textContent = btn.dataset.projectTitle || '-';
+        document.getElementById('rejectedDetailCategory').textContent = btn.dataset.projectCategory || '-';
+        document.getElementById('rejectedDetailRequester').textContent = btn.dataset.projectRequester || '-';
+        document.getElementById('rejectedDetailEmail').textContent = btn.dataset.projectEmail || '-';
+        document.getElementById('rejectedDetailPhone').textContent = btn.dataset.projectPhone || '-';
+        document.getElementById('rejectedDetailDate').textContent = btn.dataset.projectDate || '-';
+        document.getElementById('rejectedDetailLocation').textContent = btn.dataset.projectLocation || '-';
+        document.getElementById('rejectedDetailAttendees').textContent = btn.dataset.projectAttendees || '-';
+        document.getElementById('rejectedDetailStatus').textContent = btn.dataset.projectStatus || 'Rejected';
+        document.getElementById('rejectedDetailDescription').textContent = btn.dataset.projectDescription || '-';
+
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        activeTrigger = btn;
+    }
+
+    function closeRejectedProjectModal() {
+        const modal = document.getElementById('rejectedProjectModal');
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        activeTrigger = null;
+    }
+
+    document.querySelectorAll('.project-view-trigger').forEach(function (btn) {
+        btn.addEventListener('click', function () { openRejectedProjectModal(btn); });
+    });
+
+    const closeBtn = document.getElementById('rejectedProjectModalClose');
+    const backdrop = document.getElementById('rejectedProjectModalBackdrop');
+
+    if (closeBtn) closeBtn.addEventListener('click', closeRejectedProjectModal);
+    if (backdrop) backdrop.addEventListener('click', closeRejectedProjectModal);
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeRejectedProjectModal();
+        }
+    });
+}());
+</script>
 {% endblock %}

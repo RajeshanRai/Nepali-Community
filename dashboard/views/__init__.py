@@ -76,6 +76,12 @@ from dashboard.views_module import (
     partner_create,
     partner_edit,
     partner_delete,
+
+    # Team Member Management
+    team_members_list,
+    team_member_create,
+    team_member_edit,
+    team_member_delete,
     
     # Contact Management
     contact_messages_list,
@@ -179,6 +185,12 @@ __all__ = [
     'partner_create',
     'partner_edit',
     'partner_delete',
+
+    # Team Member Management
+    'team_members_list',
+    'team_member_create',
+    'team_member_edit',
+    'team_member_delete',
     
     # Contact Management
     'contact_messages_list',

@@ -1,7 +1,7 @@
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Count, Sum, Q, Avg, Case, When, IntegerField, Max
+from django.db.models import Count, Sum, Q, Avg, Case, When, IntegerField, Max, F, Prefetch
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
@@ -27,13 +27,14 @@ from donations.models import Donation
 from communities.models import Community
 from contacts.models import ContactMessage
 from partners.models import Partner
+from core.models import TeamMember
 from volunteers.models import VolunteerApplication, VolunteerOpportunity, VolunteerRequest
 from announcements.models import Announcement
 from dashboard.models import MemberModerationAction, AdminNotificationState
 from faqs.models import FAQ, FAQCategory
 from .forms import (
     ProgramForm, RequestEventForm, VolunteerOpportunityForm,
-    AnnouncementForm, FAQForm, DonationForm, ContactMessageForm, CommunityForm, PartnerForm,
+    AnnouncementForm, FAQForm, DonationForm, ContactMessageForm, CommunityForm, PartnerForm, TeamMemberForm,
     AdminProfileForm, AdminPasswordForm,
 )
 from .utils import (
@@ -774,7 +775,10 @@ def volunteer_applications_list(request):
     """List all volunteer applications"""
     applications = VolunteerApplication.objects.all().order_by('-applied_at')
     volunteer_requests = VolunteerRequest.objects.select_related('assigned_opportunity').all().order_by('-created_at')
-    available_opportunities = VolunteerOpportunity.objects.filter(status='open').order_by('title')
+    available_opportunities = VolunteerOpportunity.objects.filter(
+        status='open',
+        positions_needed__gt=F('positions_filled')
+    ).order_by('title')
     status_filter = request.GET.get('status', '')
     if status_filter:
         applications = applications.filter(status=status_filter)
@@ -950,11 +954,24 @@ def volunteer_request_assign(request, pk):
 
     opportunity = get_object_or_404(VolunteerOpportunity, pk=opportunity_id)
 
-    assigned_count = VolunteerApplication.objects.filter(
+    # Keep previous assignment state so we can release old slot if reassigned.
+    previous_opportunity = volunteer_request.assigned_opportunity
+
+    existing_target_application = VolunteerApplication.objects.filter(
+        opportunity=opportunity,
+        email__iexact=volunteer_request.email,
+    ).first()
+
+    assigned_count_qs = VolunteerApplication.objects.filter(
         opportunity=opportunity,
         status__in=['accepted', 'assigned']
-    ).count()
-    if opportunity.status != 'open' or assigned_count >= opportunity.positions_needed:
+    )
+    if existing_target_application:
+        assigned_count_qs = assigned_count_qs.exclude(pk=existing_target_application.pk)
+    assigned_count = assigned_count_qs.count()
+
+    target_is_current = bool(previous_opportunity and previous_opportunity.pk == opportunity.pk)
+    if not target_is_current and (opportunity.status != 'open' or assigned_count >= opportunity.positions_needed):
         return JsonResponse({'success': False, 'message': 'Selected opportunity is not available.'}, status=400)
 
     application, created = VolunteerApplication.objects.get_or_create(
@@ -966,7 +983,7 @@ def volunteer_request_assign(request, pk):
             'motivation': volunteer_request.purpose,
             'experience': volunteer_request.expertise or '',
             'availability': volunteer_request.schedule_availability,
-            'status': 'accepted',
+            'status': 'assigned',
             'reviewed_at': timezone.now(),
             'reviewed_by': request.user,
             'admin_notes': f'Assigned from volunteer request #{volunteer_request.id}',
@@ -979,11 +996,28 @@ def volunteer_request_assign(request, pk):
         application.motivation = volunteer_request.purpose
         application.experience = volunteer_request.expertise or ''
         application.availability = volunteer_request.schedule_availability
-        application.status = 'accepted'
+        application.status = 'assigned'
         application.reviewed_at = timezone.now()
         application.reviewed_by = request.user
         application.admin_notes = f'Assigned from volunteer request #{volunteer_request.id}'
         application.save()
+
+    # If reassigned to a different opportunity, release previous slot for this volunteer.
+    if previous_opportunity and previous_opportunity.pk != opportunity.pk:
+        previous_application = VolunteerApplication.objects.filter(
+            opportunity=previous_opportunity,
+            email__iexact=volunteer_request.email,
+            status__in=['accepted', 'assigned']
+        ).first()
+        if previous_application:
+            previous_application.status = 'withdrawn'
+            previous_application.reviewed_at = timezone.now()
+            previous_application.reviewed_by = request.user
+            previous_application.admin_notes = (
+                f'Reassigned from opportunity #{previous_opportunity.pk} to #{opportunity.pk} '
+                f'via volunteer request #{volunteer_request.id}'
+            )
+            previous_application.save(update_fields=['status', 'reviewed_at', 'reviewed_by', 'admin_notes'])
 
     volunteer_request.status = 'assigned'
     volunteer_request.assigned_opportunity = opportunity
@@ -992,6 +1026,17 @@ def volunteer_request_assign(request, pk):
         f'Assigned to opportunity "{opportunity.title}" (ID: {opportunity.id}) by {request.user.username}'
     )
     volunteer_request.save(update_fields=['status', 'assigned_opportunity', 'reviewed_at', 'admin_notes'])
+
+    # Recompute previous opportunity counters/status after reassignment.
+    if previous_opportunity and previous_opportunity.pk != opportunity.pk:
+        previous_opportunity.positions_filled = VolunteerApplication.objects.filter(
+            opportunity=previous_opportunity,
+            status__in=['accepted', 'assigned']
+        ).count()
+        previous_opportunity.status = (
+            'filled' if previous_opportunity.positions_filled >= previous_opportunity.positions_needed else 'open'
+        )
+        previous_opportunity.save(update_fields=['positions_filled', 'status'])
 
     opportunity.positions_filled = VolunteerApplication.objects.filter(
         opportunity=opportunity,
@@ -1516,6 +1561,102 @@ partners_list = PartnerListView.as_view()
 partner_create = PartnerCreateView.as_view()
 partner_edit = PartnerUpdateView.as_view()
 partner_delete = PartnerDeleteView.as_view()
+
+
+
+# ====== TEAM MEMBER MANAGEMENT ======
+
+class TeamMemberListView(StaffRequiredMixin, ListView):
+    model = TeamMember
+    template_name = 'dashboard/team_members/list.html'
+    context_object_name = 'team_members'
+    ordering = ['order', 'name']
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        search = self.request.GET.get('search', '').strip()
+        status = self.request.GET.get('status', '').strip().lower()
+
+        if search:
+            qs = qs.filter(
+                Q(name__icontains=search)
+                | Q(role__icontains=search)
+                | Q(focus__icontains=search)
+                | Q(email__icontains=search)
+            )
+
+        if status == 'active':
+            qs = qs.filter(is_active=True)
+        elif status == 'inactive':
+            qs = qs.filter(is_active=False)
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        all_members = TeamMember.objects.all()
+        context['search'] = self.request.GET.get('search', '').strip()
+        context['status'] = self.request.GET.get('status', '').strip().lower()
+        context['total_members'] = all_members.count()
+        context['active_members'] = all_members.filter(is_active=True).count()
+        context['inactive_members'] = all_members.filter(is_active=False).count()
+        context['with_photo_count'] = all_members.filter(photo__isnull=False).exclude(photo='').count()
+        return context
+
+
+class TeamMemberCreateView(StaffRequiredMixin, CreateView):
+    model = TeamMember
+    form_class = TeamMemberForm
+    template_name = 'dashboard/team_members/form.html'
+    success_url = reverse_lazy('dashboard:team_members_list')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f'Team member "{self.object.name}" created successfully.')
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Add Team Member'
+        return context
+
+
+class TeamMemberUpdateView(StaffRequiredMixin, UpdateView):
+    model = TeamMember
+    form_class = TeamMemberForm
+    template_name = 'dashboard/team_members/form.html'
+    success_url = reverse_lazy('dashboard:team_members_list')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f'Team member "{self.object.name}" updated successfully.')
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Edit Team Member'
+        return context
+
+
+class TeamMemberDeleteView(StaffRequiredMixin, DeleteView):
+    model = TeamMember
+    template_name = 'dashboard/team_members/confirm_delete.html'
+    success_url = reverse_lazy('dashboard:team_members_list')
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        member_name = self.object.name
+        if is_ajax_request(request):
+            self.object.delete()
+            return success_json_response(f'Team member "{member_name}" deleted successfully.')
+        messages.success(request, f'Team member "{member_name}" deleted successfully.')
+        return super().delete(request, *args, **kwargs)
+
+
+team_members_list = TeamMemberListView.as_view()
+team_member_create = TeamMemberCreateView.as_view()
+team_member_edit = TeamMemberUpdateView.as_view()
+team_member_delete = TeamMemberDeleteView.as_view()
 
 
 
@@ -2314,7 +2455,16 @@ def projects_rejected(request):
 @user_passes_test(staff_required, login_url='login')
 def volunteers_all(request):
     """All volunteer opportunities listing"""
-    opportunities = VolunteerOpportunity.objects.all().order_by('-created_at')
+    opportunities = (
+        VolunteerOpportunity.objects
+        .prefetch_related(
+            Prefetch(
+                'applications',
+                queryset=VolunteerApplication.objects.exclude(status='withdrawn').order_by('-applied_at'),
+            )
+        )
+        .order_by('-created_at')
+    )
     context = {
         'opportunities': opportunities,
         # sidebar counts are injected via context processor

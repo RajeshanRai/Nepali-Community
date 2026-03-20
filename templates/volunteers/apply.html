@@ -7,20 +7,51 @@
 <link rel="stylesheet" href="{% static 'volunteers/css/volunteers.css' %}">
 {% endblock %}
 
+{% block page_messages %}{% endblock %}
+
 {% block content %}
 <div class="container volunteer-apply-page">
-    <div class="breadcrumb">
-        <a href="{% url 'volunteer_detail' opportunity.pk %}"><i class="fas fa-arrow-left"></i> Back to Opportunity</a>
-    </div>
+    <div class="apply-page-shell">
+        <div class="apply-hero-card">
+            <div class="apply-hero-backdrop" aria-hidden="true"></div>
+            <div class="apply-hero-content">
+                <div class="breadcrumb apply-breadcrumb">
+                    <a href="{% url 'volunteer_detail' opportunity.pk %}"><i class="fas fa-arrow-left"></i> Back to Opportunity</a>
+                </div>
 
-    <div class="apply-container">
-        <div class="apply-header">
-            <h1><i class="fas fa-paper-plane"></i> Apply to Volunteer</h1>
-            <h2>{{ opportunity.title }}</h2>
+                <div class="apply-hero-grid">
+                    <div class="apply-hero-main">
+                        <p class="apply-kicker">Volunteer Application</p>
+                        <h1>Apply to Make an Impact</h1>
+                        <h2>{{ opportunity.title }}</h2>
+
+                        <div class="apply-hero-meta">
+                            <div class="hero-meta-item">
+                                <span class="hero-meta-label">Category</span>
+                                <strong><i class="fas fa-tag"></i> {{ opportunity.get_category_display }}</strong>
+                            </div>
+                            <div class="hero-meta-item">
+                                <span class="hero-meta-label">Location</span>
+                                <strong><i class="fas fa-map-marker-alt"></i> {{ opportunity.location|default:'Location flexible' }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <aside class="apply-hero-spotlight" aria-label="Opportunity Snapshot">
+                        <p class="spotlight-label">Open Spots</p>
+                        <div class="spotlight-number">{{ opportunity.positions_remaining }}</div>
+                        <p class="spotlight-subtext">spot{{ opportunity.positions_remaining|pluralize }} left</p>
+                        <div class="spotlight-pill">
+                            <i class="fas fa-sparkles"></i>
+                            Join this festival team
+                        </div>
+                    </aside>
+                </div>
+            </div>
         </div>
 
         {% if messages %}
-        <div class="messages">
+        <div class="messages apply-messages">
             {% for message in messages %}
             <div class="alert alert-{{ message.tags }}">
                 {{ message }}
@@ -29,103 +60,119 @@
         </div>
         {% endif %}
 
-        <form method="post" class="volunteer-application-form">
-            {% csrf_token %}
+        <div class="apply-layout">
+            <form method="post" class="volunteer-application-form">
+                {% csrf_token %}
 
-            <div class="form-section">
-                <h3><i class="fas fa-user"></i> Your Information</h3>
-                {% if user.is_authenticated %}
-                {{ form.name }}
-                {{ form.email }}
-                {% if not needs_phone %}
-                {{ form.phone }}
-                {% endif %}
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Your Information</h3>
+                    {% if user.is_authenticated %}
+                    {{ form.name }}
+                    {{ form.email }}
+                    {% if not needs_phone %}
+                    {{ form.phone }}
+                    {% endif %}
 
-                <div class="form-group">
-                    <p>
-                        Applying as <strong>{{ prefilled_name }}</strong>
-                        {% if prefilled_email %} ({{ prefilled_email }}){% endif %}
-                    </p>
-                </div>
-
-                {% if needs_phone %}
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }} <span class="required">*</span></label>
-                        {{ form.phone }}
-                        {% if form.phone.errors %}
-                        <span class="error">{{ form.phone.errors }}</span>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
-                {% else %}
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="{{ form.name.id_for_label }}">{{ form.name.label }} <span class="required">*</span></label>
-                        {{ form.name }}
-                        {% if form.name.errors %}
-                        <span class="error">{{ form.name.errors }}</span>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="form-row two-columns">
-                    <div class="form-group">
-                        <label for="{{ form.email.id_for_label }}">{{ form.email.label }} <span class="required">*</span></label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                        <span class="error">{{ form.email.errors }}</span>
-                        {% endif %}
+                    <div class="form-group form-group-highlight">
+                        <p>
+                            Applying as <strong>{{ prefilled_name }}</strong>
+                            {% if prefilled_email %} ({{ prefilled_email }}){% endif %}
+                        </p>
                     </div>
 
-                    <div class="form-group">
-                        <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
-                        {{ form.phone }}
-                        {% if form.phone.errors %}
-                        <span class="error">{{ form.phone.errors }}</span>
-                        {% endif %}
+                    {% if needs_phone %}
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }} <span class="required">*</span></label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                            <span class="error">{{ form.phone.errors }}</span>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
-                {% endif %}
-            </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.name.id_for_label }}">{{ form.name.label }} <span class="required">*</span></label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <span class="error">{{ form.name.errors }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
 
-            <div class="form-section">
-                <h3><i class="fas fa-heart"></i> Tell Us About Yourself</h3>
+                    <div class="form-row two-columns">
+                        <div class="form-group">
+                            <label for="{{ form.email.id_for_label }}">{{ form.email.label }} <span class="required">*</span></label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <span class="error">{{ form.email.errors }}</span>
+                            {% endif %}
+                        </div>
 
-                <div class="form-group">
-                    <label for="{{ form.motivation.id_for_label }}">{{ form.motivation.label }} <span
-                            class="required">*</span></label>
-                    {{ form.motivation }}
-                    {% if form.motivation.errors %}
-                    <span class="error">{{ form.motivation.errors }}</span>
+                        <div class="form-group">
+                            <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                            <span class="error">{{ form.phone.errors }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
                     {% endif %}
                 </div>
 
-                <div class="form-group">
-                    <label for="{{ form.experience.id_for_label }}">{{ form.experience.label }}</label>
-                    {{ form.experience }}
-                    {% if form.experience.errors %}
-                    <span class="error">{{ form.experience.errors }}</span>
-                    {% endif %}
+                <div class="form-section">
+                    <h3><i class="fas fa-heart"></i> Tell Us About Yourself</h3>
+
+                    <div class="form-group">
+                        <label for="{{ form.motivation.id_for_label }}">{{ form.motivation.label }} <span class="required">*</span></label>
+                        {{ form.motivation }}
+                        {% if form.motivation.errors %}
+                        <span class="error">{{ form.motivation.errors }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.experience.id_for_label }}">{{ form.experience.label }}</label>
+                        {{ form.experience }}
+                        {% if form.experience.errors %}
+                        <span class="error">{{ form.experience.errors }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.availability.id_for_label }}">{{ form.availability.label }}</label>
+                        {{ form.availability }}
+                        {% if form.availability.errors %}
+                        <span class="error">{{ form.availability.errors }}</span>
+                        {% endif %}
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="{{ form.availability.id_for_label }}">{{ form.availability.label }}</label>
-                    {{ form.availability }}
-                    {% if form.availability.errors %}
-                    <span class="error">{{ form.availability.errors }}</span>
-                    {% endif %}
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-large btn-submit-glow">
+                        <i class="fas fa-paper-plane"></i> Submit Application
+                    </button>
+                    <a href="{% url 'volunteer_detail' opportunity.pk %}" class="btn btn-secondary">Cancel</a>
                 </div>
-            </div>
+            </form>
 
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary btn-large">
-                    <i class="fas fa-paper-plane"></i> Submit Application
-                </button>
-                <a href="{% url 'volunteer_detail' opportunity.pk %}" class="btn btn-secondary">Cancel</a>
-            </div>
-        </form>
+            <aside class="apply-side-panel" aria-label="Application Tips">
+                <div class="side-card">
+                    <h3><i class="fas fa-lightbulb"></i> Application Tips</h3>
+                    <ul>
+                        <li>Share why this opportunity matters to you.</li>
+                        <li>Mention any relevant skills or experience.</li>
+                        <li>Be clear about your weekly availability.</li>
+                    </ul>
+                </div>
+                <div class="side-card side-card-alt">
+                    <h3><i class="fas fa-shield-alt"></i> What Happens Next</h3>
+                    <p>Our coordinators review applications and will contact you by email or phone with next steps.</p>
+                </div>
+            </aside>
+        </div>
     </div>
 </div>
 {% endblock %}

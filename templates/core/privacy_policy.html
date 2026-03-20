@@ -6,42 +6,36 @@
 {% block extra_head %}
 <style>
     .policy-page {
-        background: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
+        background: #ffffff;
         min-height: 100vh;
     }
 
     .policy-hero {
-        background: linear-gradient(135deg, var(--color-black) 0%, #2d2d2d 100%);
-        color: white;
-        padding: 4rem 1.5rem 3rem;
+        background: transparent;
+        color: #111827;
+        padding: 2.25rem 1.5rem 1.25rem;
         text-align: center;
         position: relative;
         overflow: hidden;
     }
 
     .policy-hero::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(255, 107, 53, 0.15) 0%, transparent 70%);
-        border-radius: 50%;
+        content: none;
     }
 
     .policy-hero h1 {
-        font-size: 2.8rem;
+        font-size: 2.1rem;
         font-weight: 800;
-        margin-bottom: 1rem;
+        margin-bottom: 0.6rem;
         position: relative;
         z-index: 1;
-        color: white;
+        color: #111827;
     }
 
     .policy-hero p {
-        font-size: 1.1rem;
-        opacity: 0.9;
+        font-size: 1rem;
+        opacity: 1;
+        color: #4b5563;
         max-width: 700px;
         margin: 0 auto;
         position: relative;
@@ -49,54 +43,42 @@
     }
 
     .policy-container {
-        max-width: 900px;
+        max-width: 820px;
         margin: 0 auto;
-        padding: 3rem 1.5rem;
+        padding: 2rem 1.25rem;
     }
 
     .policy-updated {
-        background: linear-gradient(135deg, #fff5f0 0%, #ffe8dc 100%);
-        border-left: 4px solid var(--color-accent);
-        padding: 1.2rem 1.5rem;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        padding: 0.9rem 1rem;
         border-radius: 8px;
-        margin-bottom: 2.5rem;
+        margin-bottom: 1.5rem;
         font-size: 0.95rem;
-        color: #333;
+        color: #374151;
     }
 
     .policy-section {
         background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
         border: 1px solid #e5e7eb;
-        transition: box-shadow 0.3s ease;
-    }
-
-    .policy-section:hover {
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     }
 
     .policy-section h2 {
-        color: white;
-        font-size: 1.5rem;
+        color: #111827;
+        font-size: 1.3rem;
         font-weight: 700;
-        margin: -2rem -2rem 1.5rem -2rem;
-        padding: 1.2rem 2rem;
-        background: linear-gradient(135deg, var(--color-black) 0%, #2d2d2d 100%);
-        border-radius: 12px 12px 0 0;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
+        margin: 0 0 0.8rem;
+        padding: 0;
+        background: transparent;
+        border-radius: 0;
+        display: block;
     }
 
     .policy-section h2::before {
-        content: '';
-        width: 4px;
-        height: 24px;
-        background: linear-gradient(135deg, var(--color-accent), var(--color-orange));
-        border-radius: 2px;
+        content: none;
     }
 
     .policy-section h3 {
@@ -108,14 +90,14 @@
 
     .policy-section p {
         color: #4b5563;
-        line-height: 1.8;
+        line-height: 1.65;
         margin-bottom: 1rem;
     }
 
     .policy-section ul,
     .policy-section ol {
         color: #4b5563;
-        line-height: 1.8;
+        line-height: 1.65;
         margin: 1rem 0 1rem 1.5rem;
     }
 
@@ -129,12 +111,13 @@
     }
 
     .contact-box {
-        background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-orange) 100%);
-        color: white;
-        padding: 2rem;
-        border-radius: 12px;
+        background: #ffffff;
+        color: #111827;
+        padding: 1.5rem;
+        border-radius: 8px;
         text-align: center;
-        margin-top: 3rem;
+        margin-top: 1.5rem;
+        border: 1px solid #e5e7eb;
     }
 
     .contact-box h3 {
@@ -145,11 +128,12 @@
 
     .contact-box p {
         margin-bottom: 1rem;
-        opacity: 0.95;
+        opacity: 1;
+        color: #374151;
     }
 
     .contact-box a {
-        color: white;
+        color: #111827;
         text-decoration: underline;
         font-weight: 600;
     }
@@ -157,7 +141,7 @@
     @media (max-width: 768px) {
         .policy-hero h1 {
             font-size: 2rem;
-            color: white;
+            color: #111827;
         }
 
         .policy-hero p {
@@ -184,218 +168,129 @@
 
     <div class="policy-container">
         <div class="policy-updated">
-            <strong>Last Updated:</strong> March 8, 2026
+            <strong>Last Updated:</strong> March 19, 2026
         </div>
 
         <div class="policy-section">
-            <h2>Introduction</h2>
-            <p>
-                Welcome to the Nepali Community of Vancouver ("we," "us," or "our"). We are committed to protecting your
-                privacy and ensuring the security of your personal information. This Privacy Policy explains how we
-                collect, use, disclose, and safeguard your information when you visit our website or participate in our
-                programs and events.
-            </p>
-            <p>
-                By using our services, you consent to the data practices described in this policy. If you do not agree
-                with this Privacy Policy, please do not use our website or services.
-            </p>
+            <h2>Scope and Commitment</h2>
+            <p>This Privacy Policy explains how Nepali Community of Vancouver ("NCV", "we", "us") collects, uses, shares, and protects personal information when you use our website, register for programs, volunteer, donate, or contact us.</p>
+            <p>We design our services with privacy and security in mind. We do not sell personal information. We limit collection to what we need to operate, improve, and protect our community services.</p>
         </div>
 
         <div class="policy-section">
             <h2>Information We Collect</h2>
 
-            <h3>Personal Information</h3>
-            <p>We may collect the following personal information when you interact with our services:</p>
+            <h3>Information You Provide</h3>
             <ul>
-                <li><strong>Contact Information:</strong> Name, email address, phone number, mailing address</li>
-                <li><strong>Account Information:</strong> Username, password (encrypted), profile information</li>
-                <li><strong>Event Registration Data:</strong> Program preferences, dietary restrictions, emergency
-                    contact information</li>
-                <li><strong>Donation Information:</strong> Payment details (processed securely through third-party
-                    payment processors)</li>
-                <li><strong>Volunteer Information:</strong> Skills, availability, interests, background check results
-                    (when applicable)</li>
-                <li><strong>Communication Data:</strong> Messages sent through our contact forms or email correspondence
-                </li>
+                <li><strong>Account and profile data:</strong> Name, email, username, phone number, and profile details.</li>
+                <li><strong>Program and event data:</strong> Registrations, attendance-related details, and participant preferences you choose to share.</li>
+                <li><strong>Volunteer data:</strong> Application details, skills, availability, and related coordination notes.</li>
+                <li><strong>Donation data:</strong> Donation amount, date, and related records. Card or bank payment details are processed by payment partners, not stored by NCV unless explicitly required for receipts or reconciliation.</li>
+                <li><strong>Messages and support data:</strong> Information you provide through contact forms, email, or support requests.</li>
             </ul>
 
-            <h3>Automatically Collected Information</h3>
-            <p>When you visit our website, we may automatically collect:</p>
+            <h3>Information Collected Automatically</h3>
             <ul>
-                <li><strong>Device Information:</strong> IP address, browser type, operating system</li>
-                <li><strong>Usage Data:</strong> Pages visited, time spent on pages, click patterns</li>
-                <li><strong>Cookies:</strong> Small data files stored on your device to enhance user experience</li>
+                <li><strong>Device and log data:</strong> IP address, browser type, operating system, date/time of access, and request metadata.</li>
+                <li><strong>Usage data:</strong> Pages viewed, features used, and interaction patterns that help us improve reliability and usability.</li>
+                <li><strong>Cookie and session data:</strong> Authentication, security, and preference cookies needed to run core site functions.</li>
             </ul>
         </div>
 
         <div class="policy-section">
             <h2>How We Use Your Information</h2>
-            <p>We use the collected information for the following purposes:</p>
             <ol>
-                <li><strong>Service Delivery:</strong> To provide, maintain, and improve our programs, events, and
-                    services</li>
-                <li><strong>Communication:</strong> To send you event updates, newsletters, announcements, and respond
-                    to your inquiries</li>
-                <li><strong>Registration Management:</strong> To process event registrations and manage participant
-                    information</li>
-                <li><strong>Donation Processing:</strong> To process and acknowledge charitable donations</li>
-                <li><strong>Community Building:</strong> To facilitate connections between community members and
-                    organize events</li>
-                <li><strong>Safety and Security:</strong> To protect the safety of our community members and prevent
-                    fraud</li>
-                <li><strong>Analytics:</strong> To understand how users interact with our website and improve user
-                    experience</li>
-                <li><strong>Legal Compliance:</strong> To comply with applicable laws, regulations, and legal processes
-                </li>
+                <li>Deliver and manage programs, events, volunteer opportunities, and community services.</li>
+                <li>Create and maintain accounts, verify identity where needed, and provide customer support.</li>
+                <li>Send service messages, program updates, receipts, and important administrative notices.</li>
+                <li>Process donations, maintain financial records, and meet accounting and legal obligations.</li>
+                <li>Monitor, secure, and improve our website, including fraud prevention and abuse detection.</li>
+                <li>Analyze trends and performance to improve product quality and user experience.</li>
             </ol>
         </div>
 
         <div class="policy-section">
-            <h2>Information Sharing and Disclosure</h2>
-            <p>We do not sell, trade, or rent your personal information to third parties. We may share your information
-                only in the following circumstances:</p>
+            <h2>Lawful Bases and Consent</h2>
+            <p>Depending on context, we process personal information based on one or more of the following:</p>
             <ul>
-                <li><strong>Service Providers:</strong> With trusted third-party service providers who assist us in
-                    operating our website and services (e.g., payment processors, email service providers)</li>
-                <li><strong>Event Partners:</strong> With partner organizations when you register for co-hosted events
-                    (only with your consent)</li>
-                <li><strong>Legal Requirements:</strong> When required by law, court order, or governmental authority
-                </li>
-                <li><strong>Safety and Protection:</strong> To protect the rights, property, or safety of our
-                    organization, community members, or others</li>
-                <li><strong>Business Transfers:</strong> In connection with any merger, sale of assets, or acquisition
-                    (you will be notified via email)</li>
+                <li><strong>Performance of services:</strong> To deliver what you request (for example, registrations or volunteer coordination).</li>
+                <li><strong>Legitimate interests:</strong> To run, secure, and improve our services responsibly.</li>
+                <li><strong>Legal obligations:</strong> To comply with applicable law, tax, accounting, and regulatory requirements.</li>
+                <li><strong>Consent:</strong> Where required or appropriate, including optional communications or specific data uses.</li>
             </ul>
         </div>
 
         <div class="policy-section">
-            <h2>Data Security</h2>
-            <p>
-                We implement appropriate technical and organizational security measures to protect your personal
-                information from unauthorized access, disclosure, alteration, or destruction. These measures include:
-            </p>
+            <h2>How We Share Information</h2>
+            <p>We do not sell personal information. We share information only as needed to operate our services and meet legal obligations.</p>
             <ul>
-                <li>Encryption of sensitive data during transmission (SSL/TLS)</li>
-                <li>Secure password storage using industry-standard hashing algorithms</li>
-                <li>Regular security audits and updates</li>
-                <li>Access controls limiting who can view personal information</li>
-                <li>Secure backup and recovery procedures</li>
+                <li><strong>Service providers:</strong> Hosting, email, payment processing, analytics, and operational support partners under contractual safeguards.</li>
+                <li><strong>Program partners:</strong> Limited details required for co-hosted activities, only where necessary and appropriate.</li>
+                <li><strong>Legal and safety disclosures:</strong> Where required by law or needed to protect rights, safety, and platform integrity.</li>
+                <li><strong>Organizational changes:</strong> If NCV undergoes reorganization, merger, or asset transfer, information may be transferred subject to applicable safeguards and notice requirements.</li>
             </ul>
-            <p>
-                However, no method of transmission over the Internet or electronic storage is 100% secure. While we
-                strive to protect your personal information, we cannot guarantee its absolute security.
-            </p>
         </div>
 
         <div class="policy-section">
-            <h2>Your Rights and Choices</h2>
-            <p>You have the following rights regarding your personal information:</p>
+            <h2>Cookies and Similar Technologies</h2>
+            <p>We use cookies and similar technologies to operate secure sessions, remember preferences, and understand service performance.</p>
             <ul>
-                <li><strong>Access:</strong> Request access to the personal information we hold about you</li>
-                <li><strong>Correction:</strong> Request correction of inaccurate or incomplete information</li>
-                <li><strong>Deletion:</strong> Request deletion of your personal information (subject to legal
-                    obligations)</li>
-                <li><strong>Opt-Out:</strong> Unsubscribe from marketing emails using the link in any email we send</li>
-                <li><strong>Data Portability:</strong> Request a copy of your data in a machine-readable format</li>
-                <li><strong>Withdraw Consent:</strong> Withdraw consent for data processing at any time</li>
+                <li><strong>Strictly necessary cookies:</strong> Required for authentication, security, and core features.</li>
+                <li><strong>Preference cookies:</strong> Store interface preferences to improve continuity of experience.</li>
+                <li><strong>Analytics cookies:</strong> Help us understand traffic and improve usability.</li>
             </ul>
-            <p>
-                To exercise these rights, please contact us using the information provided at the end of this policy.
-            </p>
+            <p>You can manage cookies in your browser settings. Disabling some cookies may affect service availability.</p>
         </div>
 
         <div class="policy-section">
-            <h2>Cookies and Tracking Technologies</h2>
-            <p>
-                We use cookies and similar tracking technologies to enhance your experience on our website. Cookies are
-                small text files stored on your device that help us remember your preferences and understand how you use
-                our site.
-            </p>
-            <h3>Types of Cookies We Use:</h3>
+            <h2>Security</h2>
+            <p>We apply administrative, technical, and physical safeguards designed to protect personal information, including transport encryption, access controls, and role-based data access.</p>
             <ul>
-                <li><strong>Essential Cookies:</strong> Required for the website to function properly</li>
-                <li><strong>Preference Cookies:</strong> Remember your settings and preferences</li>
-                <li><strong>Analytics Cookies:</strong> Help us understand how visitors interact with our website</li>
+                <li>Encryption in transit (HTTPS/TLS) for supported connections.</li>
+                <li>Credential protection and secure password hashing.</li>
+                <li>Operational monitoring, backup controls, and least-privilege access.</li>
             </ul>
-            <p>
-                You can control cookies through your browser settings. Note that disabling certain cookies may affect
-                website functionality.
-            </p>
-        </div>
-
-        <div class="policy-section">
-            <h2>Children's Privacy</h2>
-            <p>
-                Our services are not directed to individuals under the age of 13. We do not knowingly collect personal
-                information from children under 13. If you are a parent or guardian and believe your child has provided
-                us with personal information, please contact us immediately, and we will delete such information from
-                our systems.
-            </p>
-            <p>
-                For minors aged 13-18 participating in our programs, we require parental or guardian consent and
-                emergency contact information.
-            </p>
-        </div>
-
-        <div class="policy-section">
-            <h2>Third-Party Links</h2>
-            <p>
-                Our website may contain links to third-party websites, services, or applications. We are not responsible
-                for the privacy practices of these external sites. We encourage you to read the privacy policies of any
-                third-party sites you visit.
-            </p>
+            <p>No method of transmission or storage is fully secure. We continuously improve our controls to reduce risk.</p>
         </div>
 
         <div class="policy-section">
             <h2>Data Retention</h2>
-            <p>
-                We retain your personal information for as long as necessary to fulfill the purposes outlined in this
-                Privacy Policy, unless a longer retention period is required or permitted by law. When your information
-                is no longer needed, we will securely delete or anonymize it.
-            </p>
-            <p>
-                Typical retention periods include:
-            </p>
-            <ul>
-                <li>Account information: Retained while your account is active and for 3 years after account closure
-                </li>
-                <li>Event registration data: Retained for 5 years for historical records</li>
-                <li>Donation records: Retained for 7 years for tax and accounting purposes</li>
-                <li>Communication records: Retained for 2 years</li>
-            </ul>
+            <p>We retain personal information for as long as needed for the purposes described in this Policy, including legal, accounting, tax, dispute resolution, and records management requirements. When data is no longer needed, we delete or de-identify it using reasonable methods.</p>
         </div>
 
         <div class="policy-section">
-            <h2>Changes to This Privacy Policy</h2>
-            <p>
-                We may update this Privacy Policy from time to time to reflect changes in our practices, technology,
-                legal requirements, or other factors. We will notify you of any material changes by:
-            </p>
-            <ul>
-                <li>Posting the updated policy on our website with a new "Last Updated" date</li>
-                <li>Sending an email notification to registered users</li>
-                <li>Displaying a prominent notice on our homepage</li>
-            </ul>
-            <p>
-                Your continued use of our services after such modifications constitutes your acceptance of the updated
-                Privacy Policy.
-            </p>
+            <h2>Your Privacy Rights</h2>
+            <p>Subject to applicable law, you may request to access, correct, update, delete, or restrict use of your personal information, and may withdraw consent where processing is based on consent.</p>
+            <p>To make a request, contact us using the details below. We may verify your identity before processing requests, and some rights may be limited by law.</p>
+        </div>
+
+        <div class="policy-section">
+            <h2>International and Third-Party Services</h2>
+            <p>Some service providers may process data outside your province or country. Where this occurs, we use reasonable contractual and organizational safeguards appropriate to the sensitivity of the information and applicable legal requirements.</p>
+            <p>Our website may link to third-party sites. Their privacy practices are governed by their own policies, not this Policy.</p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Children and Youth</h2>
+            <p>Our public website is not directed to children under 13. If we learn that personal information from a child under 13 was collected without appropriate authorization, we will take steps to delete it.</p>
+            <p>For youth participation in programs, we may collect guardian contact details and consent information where required.</p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Policy Updates</h2>
+            <p>We may update this Privacy Policy to reflect legal, operational, or product changes. If we make material updates, we will post the revised Policy on this page and update the "Last Updated" date above.</p>
         </div>
 
         <div class="contact-box">
-            <h3>Questions or Concerns?</h3>
-            <p>
-                If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices,
-                please contact us:
-            </p>
+            <h3>Contact Us About Privacy</h3>
+            <p>If you have questions, concerns, or privacy requests, contact us:</p>
             <p>
                 <strong>Email:</strong> <a href="mailto:privacy@nepalivc.ca">privacy@nepalivc.ca</a><br>
                 <strong>Phone:</strong> +1 (604) 123-4567<br>
                 <strong>Address:</strong> Nepali Community of Vancouver, Vancouver, BC, Canada
             </p>
             <p style="margin-bottom: 0;">
-                You also have the right to lodge a complaint with the Office of the Privacy Commissioner of Canada if
-                you believe your privacy rights have been violated.
+                You may also contact the Office of the Privacy Commissioner of Canada if you believe your privacy rights have been infringed.
             </p>
         </div>
     </div>

@@ -791,7 +791,7 @@
     width: 100%;
     padding-bottom: 75%;
     overflow: hidden;
-    background: linear-gradient(135deg, var(--accent-color), var(--color-orange));
+    background: linear-gradient(140deg, #f8fafc 0%, #eef2f7 100%);
 }
 
 .member-image {
@@ -800,6 +800,7 @@
     left: 0;
     width: 100%;
     height: 100%;
+    background-color: rgba(255, 255, 255, 0.42);
     background-size: cover;
     background-position: center;
     transition: transform var(--transition-base);
@@ -915,8 +916,8 @@
 
 .member-socials .social-link--linkedin:hover,
 .member-socials .social-link--linkedin:focus-visible {
-    background: #0a66c2;
-    color: #ffffff;
+    background: rgba(10, 102, 194, 0.2);
+    color: #0a66c2;
     border-color: #0a66c2;
     box-shadow: 0 10px 22px rgba(10, 102, 194, 0.34);
     transform: translateY(-3px) scale(1.06);
@@ -935,8 +936,8 @@
 
 .member-socials .social-link--email:hover,
 .member-socials .social-link--email:focus-visible {
-    background: #ea4335;
-    color: #ffffff;
+    background: rgba(234, 67, 53, 0.2);
+    color: #ea4335;
     border-color: #ea4335;
     box-shadow: 0 10px 22px rgba(234, 67, 53, 0.34);
     transform: translateY(-3px) scale(1.06);
@@ -1726,5 +1727,341 @@
     .about-page.ultra-compact .team-grid,
     .about-page.ultra-compact .impact-grid {
         gap: 0.7rem;
+    }
+}
+
+/* =====================================================
+   PROFESSIONAL POLISH PASS
+   ===================================================== */
+
+.about-page {
+    color: #111827;
+}
+
+.about-page .hero-text {
+    color: #f8fafc;
+}
+
+.about-page .hero-kicker {
+    color: #f8fafc;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.08) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.about-page .hero-title {
+    font-size: clamp(2rem, 4.1vw, 3.05rem);
+    color: #ffffff;
+    text-shadow: 0 12px 28px rgba(0, 0, 0, 0.44);
+}
+
+.about-page .hero-subtitle {
+    color: rgba(248, 250, 252, 0.92);
+    max-width: 62ch;
+}
+
+.about-page .hero-cta .btn {
+    min-height: 44px;
+    border-radius: 14px;
+}
+
+.about-page .hero-cta .btn-primary {
+    background: linear-gradient(135deg, #ff9a3c 0%, #ff7a00 100%);
+    color: #0b0f19;
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.about-page .hero-cta .btn-secondary {
+    background: rgba(17, 24, 39, 0.74);
+    color: #f8fafc;
+    border-color: rgba(248, 250, 252, 0.34);
+}
+
+.about-page .section-title {
+    font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+    letter-spacing: -0.01em;
+}
+
+.about-page .section-description {
+    max-width: 64ch;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.about-page .section-header {
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.1);
+}
+
+.about-page .mission-card,
+.about-page .stat-card,
+.about-page .team-member-card,
+.about-page .impact-card {
+    border-radius: 20px;
+}
+
+.about-page .mission-card:hover,
+.about-page .stat-card:hover,
+.about-page .team-member-card:hover,
+.about-page .impact-card:hover {
+    transform: translateY(-6px);
+}
+
+.about-page .team-grid {
+    gap: 1rem;
+}
+
+.about-page .member-image-wrapper {
+    border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+.about-page .member-content {
+    gap: 0.2rem;
+}
+
+.about-page .member-name {
+    line-height: 1.25;
+}
+
+.about-page .member-role {
+    line-height: 1.35;
+}
+
+.about-page .impact-grid {
+    align-items: stretch;
+}
+
+.about-page .impact-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.about-page .impact-card p {
+    flex: 1;
+}
+
+@media (max-width: 992px) {
+    .about-page .hero-content {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .about-page .hero-text {
+        text-align: center;
+    }
+
+    .about-page .hero-subtitle {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .about-page .hero-cta {
+        justify-content: center;
+    }
+
+    .about-page .mission-highlights {
+        justify-content: center;
+    }
+
+    .about-page .team-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .about-page .hero-section,
+    .about-page .mission-section,
+    .about-page .stats-section,
+    .about-page .team-section,
+    .about-page .impact-section {
+        padding-left: 0.85rem;
+        padding-right: 0.85rem;
+    }
+
+    .about-page .hero-cta {
+        width: 100%;
+    }
+
+    .about-page .hero-cta .btn {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+
+    .about-page .mission-chip {
+        font-size: 0.72rem;
+    }
+
+    .about-page .section-header {
+        padding: 0.72rem 0.72rem;
+    }
+
+    .about-page .team-grid,
+    .about-page .stats-grid,
+    .about-page .impact-grid,
+    .about-page .mission-cards,
+    .about-page .values-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =====================================================
+   PREMIUM MOTION LAYER
+   ===================================================== */
+
+.about-page {
+    --motion-duration: 0.72s;
+    --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --motion-offset-y: 26px;
+    --motion-scale: 0.985;
+    --motion-blur: 2px;
+    --motion-hover-lift: -7px;
+    --motion-overlay-opacity: 0.2;
+    --motion-overlay-fade-duration: 0.9s;
+    --motion-card-duration: 0.44s;
+}
+
+.about-page[data-motion-intensity="subtle"] {
+    --motion-duration: 0.52s;
+    --motion-offset-y: 14px;
+    --motion-scale: 0.996;
+    --motion-blur: 0.8px;
+    --motion-hover-lift: -3px;
+    --motion-overlay-opacity: 0.12;
+    --motion-overlay-fade-duration: 0.7s;
+    --motion-card-duration: 0.3s;
+}
+
+.about-page[data-motion-intensity="balanced"] {
+    --motion-duration: 0.72s;
+    --motion-offset-y: 26px;
+    --motion-scale: 0.985;
+    --motion-blur: 2px;
+    --motion-hover-lift: -7px;
+    --motion-overlay-opacity: 0.2;
+    --motion-overlay-fade-duration: 0.9s;
+    --motion-card-duration: 0.44s;
+}
+
+.about-page[data-motion-intensity="cinematic"] {
+    --motion-duration: 0.96s;
+    --motion-offset-y: 40px;
+    --motion-scale: 0.965;
+    --motion-blur: 3.6px;
+    --motion-hover-lift: -10px;
+    --motion-overlay-opacity: 0.28;
+    --motion-overlay-fade-duration: 1.15s;
+    --motion-card-duration: 0.56s;
+}
+
+.about-page.motion-ready .hero-text,
+.about-page.motion-ready .hero-visual,
+.about-page.motion-ready .mission-grid,
+.about-page.motion-ready .stat-card,
+.about-page.motion-ready .team-member-card,
+.about-page.motion-ready .impact-card,
+.about-page.motion-ready .mission-card,
+.about-page.motion-ready .section-header {
+    animation: none !important;
+    opacity: 1;
+}
+
+.about-page.motion-ready .reveal-item {
+    opacity: 0;
+    transform: translate3d(0, var(--motion-offset-y), 0) scale(var(--motion-scale));
+    filter: blur(var(--motion-blur));
+    transition:
+        opacity var(--motion-duration) var(--motion-ease),
+        transform var(--motion-duration) var(--motion-ease),
+        filter 0.58s ease;
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: transform, opacity, filter;
+}
+
+.about-page.motion-ready .reveal-item.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+}
+
+.about-page.motion-ready .hero-text.reveal-item {
+    transform: translate3d(-18px, calc(var(--motion-offset-y) - 4px), 0) scale(calc(var(--motion-scale) + 0.005));
+}
+
+.about-page.motion-ready .hero-visual.reveal-item {
+    transform: translate3d(18px, calc(var(--motion-offset-y) - 4px), 0) scale(calc(var(--motion-scale) + 0.005));
+}
+
+.about-page.motion-ready .team-member-card.reveal-item,
+.about-page.motion-ready .impact-card.reveal-item {
+    transform: translate3d(0, calc(var(--motion-offset-y) - 2px), 0) scale(calc(var(--motion-scale) - 0.007));
+}
+
+.about-page.motion-ready .hero-section,
+.about-page.motion-ready .mission-section,
+.about-page.motion-ready .stats-section,
+.about-page.motion-ready .team-section,
+.about-page.motion-ready .impact-section {
+    position: relative;
+    isolation: isolate;
+}
+
+.about-page.motion-ready .hero-section::after,
+.about-page.motion-ready .mission-section::after,
+.about-page.motion-ready .stats-section::after,
+.about-page.motion-ready .team-section::after,
+.about-page.motion-ready .impact-section::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: var(--motion-overlay-opacity);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.04) 100%);
+    transition: opacity var(--motion-overlay-fade-duration) ease;
+}
+
+.about-page.motion-ready .hero-section.is-inview::after,
+.about-page.motion-ready .mission-section.is-inview::after,
+.about-page.motion-ready .stats-section.is-inview::after,
+.about-page.motion-ready .team-section.is-inview::after,
+.about-page.motion-ready .impact-section.is-inview::after {
+    opacity: 0;
+}
+
+.about-page.motion-ready .mission-card,
+.about-page.motion-ready .stat-card,
+.about-page.motion-ready .team-member-card,
+.about-page.motion-ready .impact-card,
+.about-page.motion-ready .section-header {
+    transition:
+    transform var(--motion-card-duration) var(--motion-ease),
+    box-shadow var(--motion-card-duration) var(--motion-ease),
+        border-color 0.34s ease,
+        background 0.34s ease;
+}
+
+.about-page.motion-ready .mission-card:hover,
+.about-page.motion-ready .stat-card:hover,
+.about-page.motion-ready .team-member-card:hover,
+.about-page.motion-ready .impact-card:hover {
+    transform: translateY(var(--motion-hover-lift));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .about-page.motion-ready .reveal-item,
+    .about-page.motion-ready .reveal-item.is-visible {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .about-page.motion-ready .hero-section::after,
+    .about-page.motion-ready .mission-section::after,
+    .about-page.motion-ready .stats-section::after,
+    .about-page.motion-ready .team-section::after,
+    .about-page.motion-ready .impact-section::after {
+        transition: none !important;
+        opacity: 0 !important;
     }
 }

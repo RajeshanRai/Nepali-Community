@@ -236,6 +236,10 @@ class RegisterView(CreateView):
         messages.info(self.request, 'We sent a verification email to your address. Please verify it to secure your account.')
         return response
 
+    def form_invalid(self, form):
+        messages.error(self.request, 'Please correct the registration form errors and try again.')
+        return super().form_invalid(form)
+
 
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'users/profile.html'

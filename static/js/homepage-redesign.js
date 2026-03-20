@@ -69,62 +69,52 @@
     }
 
     function showNotification(message, type = 'info', title = 'Notification', autoClose = true) {
-        const overlay = document.getElementById('notification-overlay');
-        const modal = document.getElementById('notification-modal');
-        const titleEl = document.getElementById('notification-title');
-        const messageEl = document.getElementById('notification-message');
-        const iconEl = document.getElementById('notification-icon-content');
+        const normalizedType = type === 'error' ? 'error' : (type === 'warning' ? 'warning' : (type === 'success' ? 'success' : 'info'));
+        const iconByType = {
+            success: 'circle-check',
+            error: 'triangle-exclamation',
+            warning: 'circle-exclamation',
+            info: 'circle-info'
+        };
 
-        if (!overlay || !modal || !titleEl || !messageEl || !iconEl) {
-            return;
+        const text = title && title !== 'Notification'
+            ? `${title}: ${message}`
+            : message;
+
+        let flashWrap = document.querySelector('.site-flash-wrap.dynamic-home-flash');
+        if (!flashWrap) {
+            flashWrap = document.createElement('div');
+            flashWrap.className = 'site-flash-wrap dynamic-home-flash';
+            flashWrap.setAttribute('aria-live', 'polite');
+            flashWrap.setAttribute('aria-label', 'Notifications');
+
+            const contentRoot = document.querySelector('.home-v2');
+            if (contentRoot && contentRoot.parentNode) {
+                contentRoot.parentNode.insertBefore(flashWrap, contentRoot);
+            } else {
+                document.body.prepend(flashWrap);
+            }
         }
 
-        modal.className = 'notification-modal';
-        modal.classList.add(type);
+        const flash = document.createElement('div');
+        flash.className = `site-flash site-flash-${normalizedType}`;
+        flash.setAttribute('role', 'alert');
+        flash.innerHTML = `
+            <i class="fas fa-${iconByType[normalizedType]}" aria-hidden="true"></i>
+            <div>${text}</div>
+        `;
 
-        titleEl.textContent = title;
-        messageEl.textContent = message;
-
-        if (type === 'success') {
-            iconEl.textContent = '✓';
-            if (!title || title === 'Notification') {
-                titleEl.textContent = 'Success';
-            }
-        } else if (type === 'error') {
-            iconEl.textContent = '✕';
-            if (!title || title === 'Notification') {
-                titleEl.textContent = 'Error';
-            }
-        } else {
-            iconEl.textContent = 'ℹ️';
-        }
-
-        overlay.classList.add('show');
-        modal.classList.remove('closing');
+        flashWrap.appendChild(flash);
 
         if (autoClose) {
-            setTimeout(closeNotification, 3000);
+            setTimeout(() => {
+                flash.remove();
+                if (!flashWrap.childElementCount) {
+                    flashWrap.remove();
+                }
+            }, 3200);
         }
     }
-
-    function closeNotification() {
-        const overlay = document.getElementById('notification-overlay');
-        const modal = document.getElementById('notification-modal');
-
-        if (!overlay || !modal) {
-            return;
-        }
-
-        modal.classList.add('closing');
-        overlay.classList.add('closing');
-
-        setTimeout(() => {
-            overlay.classList.remove('show', 'closing');
-            modal.classList.remove('closing');
-        }, 300);
-    }
-
-    window.closeNotification = closeNotification;
 
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
@@ -287,6 +277,55 @@
 
     document.querySelectorAll('.btn-register').forEach(btn => attachRegisterHandler(btn));
     document.querySelectorAll('.btn-unregister').forEach(btn => attachUnregisterHandler(btn));
+
+    function initTestimonialMotion() {
+        const strip = document.querySelector('.home-v2-testimonial-strip');
+        if (!strip) {
+            return;
+        }
+
+        const cards = Array.from(strip.querySelectorAll('.home-v2-testimonial-card'));
+        if (!cards.length) {
+            return;
+        }
+
+        cards.forEach((card, index) => {
+            card.style.setProperty('--testimonial-delay', `${index * 0.1}s`);
+        });
+
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion) {
+            return;
+        }
+
+        cards.forEach((card) => {
+            card.addEventListener('mousemove', (event) => {
+                const rect = card.getBoundingClientRect();
+                const x = ((event.clientX - rect.left) / rect.width) * 100;
+                const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+                card.style.setProperty('--spot-x', `${x}%`);
+                card.style.setProperty('--spot-y', `${y}%`);
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.removeProperty('--spot-x');
+                card.style.removeProperty('--spot-y');
+            });
+        });
+
+        let spotlightIndex = 0;
+        const rotateSpotlight = () => {
+            cards.forEach((card) => card.classList.remove('is-spotlight'));
+            cards[spotlightIndex].classList.add('is-spotlight');
+            spotlightIndex = (spotlightIndex + 1) % cards.length;
+        };
+
+        rotateSpotlight();
+        window.setInterval(rotateSpotlight, 2400);
+    }
+
+    initTestimonialMotion();
 
 
 })();

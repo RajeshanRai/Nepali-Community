@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="about-page ultra-compact">
+<div class="about-page ultra-compact" data-motion-intensity="balanced">
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="hero-background"></div>
@@ -142,7 +142,7 @@
                 <div class="team-member-card">
                     <div class="member-image-wrapper">
                         <div class="member-image"
-                            style="background-image: url('{% if member.photo %}{{ member.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ member.name|urlencode }}&size=400&background=c0392b&color=fff{% endif %}'); background-size: cover; background-position: center top;"></div>
+                            style="background-image: url('{% if member.photo %}{{ member.photo.url }}{% else %}https://ui-avatars.com/api/?name={{ member.name|urlencode }}&size=400&background=c0392b&color=fff{% endif %}'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
                         <div class="member-overlay"></div>
                         {% if member.badge %}<span class="member-badge">{{ member.badge }}</span>{% endif %}
                     </div>

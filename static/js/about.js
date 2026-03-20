@@ -6,6 +6,19 @@
 (function () {
     'use strict';
 
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function isReducedMotion() {
+        return reducedMotionQuery.matches;
+    }
+
+    function formatCompactNumber(num) {
+        if (num >= 1000) {
+            return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k+';
+        }
+        return num.toString();
+    }
+
     // =====================================================
     // SCROLL REVEAL ANIMATIONS
     // =====================================================
@@ -14,22 +27,33 @@
         constructor() {
             this.observerOptions = {
                 threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
+                rootMargin: '0px 0px -10% 0px'
             };
             this.init();
         }
 
         init() {
-            // Target all animatable elements
+            // Target all reveal elements and progressively show when entering viewport
             const elements = document.querySelectorAll(
-                '.hero-text, .hero-visual, .mission-grid, .stats-card, .team-member-card, ' +
-                '.timeline-item, .impact-card, .cta-content'
+                '.hero-text, .hero-visual, .mission-grid, .section-header, .mission-card, .mission-chip, ' +
+                '.values-list li, .stat-card, .team-member-card, .impact-card'
             );
+
+            if (isReducedMotion()) {
+                elements.forEach((el) => {
+                    el.classList.add('reveal-item', 'is-visible');
+                });
+                return;
+            }
+
+            elements.forEach((el) => {
+                el.classList.add('reveal-item');
+            });
 
             this.observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
+                        entry.target.classList.add('is-visible');
                         this.observer.unobserve(entry.target);
                     }
                 });
@@ -85,7 +109,7 @@
                 const easeProgress = 1 - Math.pow(1 - progress, 3);
                 const currentValue = Math.floor(startValue + (target - startValue) * easeProgress);
 
-                element.textContent = this.formatNumber(currentValue);
+                element.textContent = formatCompactNumber(currentValue);
 
                 if (progress < 1) {
                     requestAnimationFrame(updateCounter);
@@ -93,13 +117,6 @@
             };
 
             requestAnimationFrame(updateCounter);
-        }
-
-        formatNumber(num) {
-            if (num >= 1000) {
-                return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k+';
-            }
-            return num.toString();
         }
     }
 
@@ -268,16 +285,19 @@
         }
 
         init() {
-            this.staggerElements('.stats-grid .stat-card');
-            this.staggerElements('.team-grid .team-member-card');
-            this.staggerElements('.impact-grid .impact-card');
+            this.staggerElements('.mission-highlights .mission-chip', 55);
+            this.staggerElements('.mission-cards .mission-card', 90);
+            this.staggerElements('.values-list li', 70);
+            this.staggerElements('.stats-grid .stat-card', 95);
+            this.staggerElements('.team-grid .team-member-card', 95);
+            this.staggerElements('.impact-grid .impact-card', 105);
         }
 
-        staggerElements(selector) {
+        staggerElements(selector, step) {
             const elements = document.querySelectorAll(selector);
             elements.forEach((el, index) => {
-                const delay = index * 100;
-                el.style.setProperty('--animation-delay', delay + 'ms');
+                const delay = Math.min(index * step, 520);
+                el.style.setProperty('--reveal-delay', delay + 'ms');
             });
         }
     }
@@ -292,18 +312,35 @@
         }
 
         init() {
+            const sections = document.querySelectorAll('.hero-section, .mission-section, .stats-section, .team-section, .impact-section');
+
+            if (isReducedMotion()) {
+                sections.forEach((section) => section.classList.add('is-inview'));
+                return;
+            }
+
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
+                        entry.target.classList.add('is-inview');
                     }
                 });
-            }, { threshold: 0.1 });
+            }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
 
-            document.querySelectorAll('.section-header').forEach(header => {
-                observer.observe(header);
+            sections.forEach(section => {
+                observer.observe(section);
             });
         }
+    }
+
+    function setMotionModeClass() {
+        const aboutPage = document.querySelector('.about-page');
+        if (!aboutPage) {
+            return;
+        }
+
+        aboutPage.classList.remove('motion-ready', 'motion-reduced');
+        aboutPage.classList.add(isReducedMotion() ? 'motion-reduced' : 'motion-ready');
     }
 
     // =====================================================
@@ -328,7 +365,20 @@
     // =====================================================
 
     document.addEventListener('DOMContentLoaded', () => {
-        // Initialize all modules
+        setMotionModeClass();
+
+        // Always keep smooth anchor navigation
+        new SmoothScroll();
+
+        if (isReducedMotion()) {
+            document.querySelectorAll('[data-target]').forEach((counter) => {
+                const target = parseInt(counter.dataset.target || '0', 10);
+                counter.textContent = formatCompactNumber(target);
+            });
+            return;
+        }
+
+        // Initialize enhanced motion modules
         new ScrollReveal();
         new AnimatedCounter();
         new ParallaxEffect();
@@ -341,20 +391,30 @@
         // Smooth page entrance
         document.documentElement.style.scrollBehavior = 'smooth';
 
-        // Log initialization
-        console.log('About page animations initialized ✨');
+        // Keep native smooth behavior as a fallback for in-page links
+        document.documentElement.style.scrollBehavior = 'smooth';
     });
+
+    if (typeof reducedMotionQuery.addEventListener === 'function') {
+        reducedMotionQuery.addEventListener('change', () => {
+            setMotionModeClass();
+        });
+    }
 
     // Handle visibility change for animations
     document.addEventListener('visibilitychange', () => {
+        if (isReducedMotion()) {
+            return;
+        }
+
         if (document.hidden) {
-            document.querySelectorAll('*').forEach(el => {
+            document.querySelectorAll('.floating-shape, .reveal-item').forEach(el => {
                 if (el.style.animation) {
                     el.style.animationPlayState = 'paused';
                 }
             });
         } else {
-            document.querySelectorAll('*').forEach(el => {
+            document.querySelectorAll('.floating-shape, .reveal-item').forEach(el => {
                 if (el.style.animation) {
                     el.style.animationPlayState = 'running';
                 }

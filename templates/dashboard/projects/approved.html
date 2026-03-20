@@ -45,13 +45,17 @@
                         <td>{{ project.location }}</td>
                         <td>
                             <div class="action-buttons enhanced-actions">
-                                <button class="btn-icon btn-view" title="View Details"
+                                <button class="btn-icon btn-view project-view-trigger" title="View Details"
                                     data-project-title="{{ project.title|escapejs }}"
                                     data-project-category="{{ project.get_event_type_display|escapejs }}"
                                     data-project-date="{{ project.date|date:'M d, Y'|escapejs }}"
                                     data-project-location="{{ project.location|default:'N/A'|escapejs }}"
                                     data-project-description="{{ project.description|default:'No description available.'|striptags|escapejs }}"
-                                    onclick="openApprovedProjectModal(this)">
+                                    data-project-requester="N/A"
+                                    data-project-email="N/A"
+                                    data-project-phone="N/A"
+                                    data-project-attendees="{{ project.registrations.count }}"
+                                    data-project-status="Active">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <a class="btn-icon btn-edit" href="{% url 'dashboard:event_edit' project.id %}" title="Edit">
@@ -120,8 +124,13 @@
             <div class="details-grid">
                 <div class="detail-item"><label>Title</label><p id="approvedDetailTitle"></p></div>
                 <div class="detail-item"><label>Category</label><p id="approvedDetailCategory"></p></div>
+                <div class="detail-item"><label>Requester</label><p id="approvedDetailRequester"></p></div>
+                <div class="detail-item"><label>Email</label><p id="approvedDetailEmail"></p></div>
+                <div class="detail-item"><label>Phone</label><p id="approvedDetailPhone"></p></div>
                 <div class="detail-item"><label>Date</label><p id="approvedDetailDate"></p></div>
                 <div class="detail-item"><label>Location</label><p id="approvedDetailLocation"></p></div>
+                <div class="detail-item"><label>Attendees</label><p id="approvedDetailAttendees"></p></div>
+                <div class="detail-item"><label>Status</label><p id="approvedDetailStatus"></p></div>
                 <div class="detail-item full"><label>Description</label><p id="approvedDetailDescription"></p></div>
             </div>
         </div>
@@ -132,17 +141,30 @@
 {% block extra_js %}
 <script>
 (function () {
+    let activeTrigger = null;
+
     function openApprovedProjectModal(btn) {
+        const modal = document.getElementById('approvedProjectModal');
+        if (modal.classList.contains('show') && activeTrigger === btn) {
+            closeApprovedProjectModal();
+            return;
+        }
+
         document.getElementById('approvedDetailTitle').textContent = btn.dataset.projectTitle || '-';
         document.getElementById('approvedDetailCategory').textContent = btn.dataset.projectCategory || '-';
+        document.getElementById('approvedDetailRequester').textContent = btn.dataset.projectRequester || 'N/A';
+        document.getElementById('approvedDetailEmail').textContent = btn.dataset.projectEmail || 'N/A';
+        document.getElementById('approvedDetailPhone').textContent = btn.dataset.projectPhone || 'N/A';
         document.getElementById('approvedDetailDate').textContent = btn.dataset.projectDate || '-';
         document.getElementById('approvedDetailLocation').textContent = btn.dataset.projectLocation || '-';
+        document.getElementById('approvedDetailAttendees').textContent = btn.dataset.projectAttendees || '0';
+        document.getElementById('approvedDetailStatus').textContent = btn.dataset.projectStatus || 'Active';
         document.getElementById('approvedDetailDescription').textContent = btn.dataset.projectDescription || '-';
 
-        const modal = document.getElementById('approvedProjectModal');
         modal.classList.add('show');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
+        activeTrigger = btn;
     }
 
     function closeApprovedProjectModal() {
@@ -150,9 +172,12 @@
         modal.classList.remove('show');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        activeTrigger = null;
     }
 
-    window.openApprovedProjectModal = openApprovedProjectModal;
+    document.querySelectorAll('.project-view-trigger').forEach(function (btn) {
+        btn.addEventListener('click', function () { openApprovedProjectModal(btn); });
+    });
 
     document.getElementById('approvedProjectModalClose').addEventListener('click', closeApprovedProjectModal);
     document.getElementById('approvedProjectModalBackdrop').addEventListener('click', closeApprovedProjectModal);

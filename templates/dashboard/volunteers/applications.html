@@ -215,7 +215,7 @@
                         </td>
                         <td>
                             {% if request.status == 'accepted' or request.status == 'contacted' or request.status == 'assigned' %}
-                                <select class="assignment-select request-opportunity-select" data-request-id="{{ request.id }}">
+                                <select class="assignment-select request-opportunity-select" data-request-id="{{ request.id }}" {% if request.status == 'assigned' %}disabled{% endif %}>
                                     <option value="">Select</option>
 
                                     {% if request.assigned_opportunity %}

@@ -12,7 +12,7 @@ from announcements.models import Announcement
 from django.db.models.functions import TruncMonth
 from datetime import timedelta
 from communities.models import Community
-from volunteers.models import VolunteerApplication
+from volunteers.models import VolunteerApplication, VolunteerOpportunity, VolunteerRequest
 
 
 class HomeView(TemplateView):
@@ -28,7 +28,21 @@ class HomeView(TemplateView):
 
         # community and volunteer counts for metric cards
         context['total_communities'] = Community.objects.count()
-        context['total_volunteers'] = VolunteerApplication.objects.filter(status='approved').count()
+
+        # Active volunteers include accepted/assigned applications and approved request records.
+        active_application_emails = VolunteerApplication.objects.filter(
+            status__in=['accepted', 'assigned', 'approved']
+        ).values_list('email', flat=True)
+        active_request_emails = VolunteerRequest.objects.filter(
+            status__in=['accepted', 'assigned', 'contacted']
+        ).values_list('email', flat=True)
+
+        active_volunteer_emails = {
+            (email or '').strip().lower()
+            for email in list(active_application_emails) + list(active_request_emails)
+            if email
+        }
+        context['total_volunteers'] = len(active_volunteer_emails)
         context['total_members'] = CustomUser.objects.filter(is_active=True).count()
 
         # latest announcements for homepage
@@ -39,6 +53,11 @@ class HomeView(TemplateView):
         ).filter(
             Q(expire_date__isnull=True) | Q(expire_date__gt=now)
         )[:4]
+
+        # open volunteer opportunities preview for homepage CTA section
+        context['featured_volunteer_opportunities'] = VolunteerOpportunity.objects.filter(
+            status='open'
+        ).order_by('start_date', 'created_at')[:4]
 
         # include user's registrations to disable register buttons if already registered
         if self.request.user.is_authenticated:

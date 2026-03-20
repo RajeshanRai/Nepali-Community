@@ -107,6 +107,12 @@ urlpatterns = [
     path('partners/create/', views.partner_create, name='partner_create'),
     path('partners/<int:pk>/edit/', views.partner_edit, name='partner_edit'),
     path('partners/<int:pk>/delete/', views.partner_delete, name='partner_delete'),
+
+    # Team Members
+    path('team-members/', views.team_members_list, name='team_members_list'),
+    path('team-members/create/', views.team_member_create, name='team_member_create'),
+    path('team-members/<int:pk>/edit/', views.team_member_edit, name='team_member_edit'),
+    path('team-members/<int:pk>/delete/', views.team_member_delete, name='team_member_delete'),
     
     # API Endpoints
     path('api/available-opportunities/', dashboard_api.get_available_opportunities, name='api_available_opportunities'),

@@ -8,6 +8,7 @@ from users.models import CustomUser
 from donations.models import Donation
 from contacts.models import ContactMessage
 from partners.models import Partner
+from core.models import TeamMember
 
 
 class ProgramForm(forms.ModelForm):
@@ -168,6 +169,24 @@ class PartnerForm(forms.ModelForm):
                 'rows': 4,
                 'placeholder': '{"facebook":"https://...","twitter":"https://...","linkedin":"https://...","instagram":"https://..."}'
             }),
+        }
+
+
+class TeamMemberForm(forms.ModelForm):
+    class Meta:
+        model = TeamMember
+        fields = ['name', 'role', 'bio', 'focus', 'badge', 'photo', 'linkedin_url', 'email', 'order', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full name'}),
+            'role': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Role or title'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Short biography'}),
+            'focus': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Leadership or impact focus'}),
+            'badge': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Founder, Programs'}),
+            'photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'linkedin_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://linkedin.com/in/...'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'member@example.com'}),
+            'order': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 

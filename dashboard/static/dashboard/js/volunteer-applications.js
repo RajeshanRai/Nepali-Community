@@ -52,6 +52,13 @@
         alert(message);
     }
 
+    async function confirmAction(options) {
+        if (window.GlobalUI && typeof window.GlobalUI.confirm === 'function') {
+            return window.GlobalUI.confirm(options);
+        }
+        return Promise.resolve(window.confirm(options.message || 'Are you sure?'));
+    }
+
     function bindStatusFilters(containerId, tableId) {
         const container = document.getElementById(containerId);
         const table = document.getElementById(tableId);
@@ -241,11 +248,14 @@
             credentials: 'same-origin'
         });
 
-        if (!response.ok) {
-            throw new Error(`Request failed with status ${response.status}`);
+        const payload = await response.json().catch(() => ({}));
+
+        if (!response.ok || payload.success === false) {
+            const message = payload.message || payload.error || `Request failed with status ${response.status}`;
+            throw new Error(message);
         }
 
-        return response.json();
+        return payload;
     }
 
     function updateRowAfterAction(row, type, action) {
@@ -283,7 +293,7 @@
             const select = row.querySelector('.request-opportunity-select');
             if (select) {
                 const status = row.dataset.status;
-                select.disabled = status === 'closed';
+                select.disabled = status === 'closed' || status === 'assigned';
             }
         }
 
@@ -430,19 +440,21 @@
                 const opportunityId = select.value;
                 const requestId = select.dataset.requestId;
                 const row = select.closest('tr');
+                const previousValue = select.dataset.previousValue || '';
 
                 if (!opportunityId || !requestId) {
+                    select.dataset.previousValue = opportunityId || previousValue;
                     return;
                 }
 
                 const optionLabel = select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : 'selected program';
-                const confirmed = await window.GlobalUI.confirm({
+                const confirmed = await confirmAction({
                     title: 'Assign volunteer request',
                     message: `Assign this volunteer request to "${optionLabel}"?`,
                     okText: 'Assign'
                 });
                 if (!confirmed) {
-                    select.value = '';
+                    select.value = previousValue;
                     return;
                 }
 
@@ -452,14 +464,18 @@
                         opportunity_id: opportunityId
                     });
                     updateRowAfterAction(row, 'request', 'assign');
+                    select.dataset.previousValue = opportunityId;
                     notify(response.message || 'Volunteer assigned successfully.', 'success');
                 } catch (error) {
-                    select.value = '';
+                    select.value = previousValue;
                     notify(error.message || 'Assignment failed.', 'error');
                 } finally {
-                    select.disabled = false;
+                    const currentStatus = row?.dataset?.status;
+                    select.disabled = currentStatus === 'closed' || currentStatus === 'assigned';
                 }
             });
+
+            select.dataset.previousValue = select.value || '';
         });
     }
 

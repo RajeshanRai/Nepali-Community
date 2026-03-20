@@ -27,6 +27,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="announcements-page">
 <div class="content-card">
     <div class="content-card-header">
         <div class="search-filter-bar">
@@ -51,6 +52,15 @@
                 </a>
                 {% endif %}
             </form>
+        </div>
+        <div class="announcements-results-meta">
+            <span class="results-pill"><i class="fas fa-list"></i> {{ announcements|length }} result{{ announcements|length|pluralize }}</span>
+            {% if search %}
+            <span class="results-pill soft"><i class="fas fa-search"></i> "{{ search }}"</span>
+            {% endif %}
+            {% if selected_category %}
+            <span class="results-pill soft"><i class="fas fa-tag"></i> {{ selected_category|title }}</span>
+            {% endif %}
         </div>
     </div>
 
@@ -146,6 +156,7 @@
         </div>
         {% endif %}
     </div>
+</div>
 </div>
 {% endblock %}
 

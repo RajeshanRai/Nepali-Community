@@ -1,0 +1,399 @@
+{% extends 'dashboard/admin_base.html' %}
+
+{% block title %}Team Members{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tm-page-shell {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .tm-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0.85rem;
+    }
+
+    .tm-stat-card {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(155deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 0.9rem 1rem;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+        transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+    }
+
+    .tm-stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, #f97316, #fb923c);
+        opacity: 0.88;
+    }
+
+    .tm-stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 16px 30px rgba(15, 23, 42, 0.1);
+        border-color: #cbd5e1;
+    }
+
+    .tm-stat-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #64748b;
+        margin-bottom: 0.32rem;
+        display: block;
+        font-weight: 700;
+    }
+
+    .tm-stat-value {
+        font-size: 1.45rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+
+    .tm-main-card {
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+    }
+
+    .tm-main-card .content-card-header {
+        background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0.85rem 0.95rem;
+    }
+
+    .tm-filter-form {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) 170px auto auto;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .tm-search-group {
+        min-width: 0;
+    }
+
+    .tm-status-select {
+        max-width: 170px;
+    }
+
+    .tm-main-card .content-card-body {
+        padding: 0.95rem;
+    }
+
+    .tm-list-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 0.95rem;
+    }
+
+    .tm-card {
+        border: 1px solid #dbe4ee;
+        border-radius: 16px;
+        background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
+        padding: 0.95rem;
+        box-shadow: 0 10px 26px rgba(15, 23, 42, 0.07);
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tm-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 3px;
+        background: linear-gradient(90deg, rgba(251, 146, 60, 0.95), rgba(249, 115, 22, 0.7));
+    }
+
+    .tm-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 18px 32px rgba(15, 23, 42, 0.12);
+        border-color: #cbd5e1;
+    }
+
+    .tm-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.72rem;
+    }
+
+    .tm-avatar {
+        width: 54px;
+        height: 54px;
+        border-radius: 14px;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #fb923c, #ea580c 70%);
+        color: #fff;
+        font-weight: 800;
+        font-size: 1rem;
+        box-shadow: 0 8px 18px rgba(249, 115, 22, 0.28);
+    }
+
+    .tm-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .tm-name {
+        margin: 0;
+        font-size: 1.03rem;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.01em;
+    }
+
+    .tm-meta {
+        margin: 0.14rem 0 0;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    .tm-order-pill {
+        margin-top: 0.42rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.32rem;
+        padding: 0.18rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #334155;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+    }
+
+    .tm-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.42rem;
+    }
+
+    .tm-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.56rem;
+        border-radius: 999px;
+        border: 1px solid #dbe5ef;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 0.72rem;
+        line-height: 1;
+        font-weight: 600;
+    }
+
+    .tm-chip.active {
+        background: rgba(16, 185, 129, 0.08);
+        border-color: rgba(16, 185, 129, 0.35);
+        color: #047857;
+    }
+
+    .tm-chip.inactive {
+        background: rgba(239, 68, 68, 0.08);
+        border-color: rgba(239, 68, 68, 0.35);
+        color: #b91c1c;
+    }
+
+    .tm-actions {
+        display: flex;
+        gap: 0.45rem;
+        margin-top: auto;
+        padding-top: 0.35rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .tm-actions .btn {
+        flex: 1;
+        justify-content: center;
+        min-height: 36px;
+    }
+
+    .tm-empty {
+        margin: 0;
+        padding: 1.1rem;
+        text-align: center;
+        border: 1px dashed #cbd5e1;
+        border-radius: 12px;
+        background: #f8fafc;
+        color: #64748b;
+    }
+
+    @media (max-width: 980px) {
+        .tm-filter-form {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .tm-status-select {
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .tm-main-card .content-card-header,
+        .tm-main-card .content-card-body {
+            padding: 0.8rem;
+        }
+
+        .tm-filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .tm-actions {
+            flex-direction: column;
+        }
+
+        .tm-list-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">Team Members</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-user-tie"></i> Team Members</h1>
+        <p>Manage leadership team profiles shown on the About page.</p>
+    </div>
+    <div class="page-header-actions">
+        <a href="{% url 'dashboard:team_member_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Team Member
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="tm-page-shell">
+<div class="tm-stats-grid">
+    <div class="tm-stat-card">
+        <span class="tm-stat-label">Total Members</span>
+        <div class="tm-stat-value">{{ total_members }}</div>
+    </div>
+    <div class="tm-stat-card">
+        <span class="tm-stat-label">Active Profiles</span>
+        <div class="tm-stat-value">{{ active_members }}</div>
+    </div>
+    <div class="tm-stat-card">
+        <span class="tm-stat-label">Inactive Profiles</span>
+        <div class="tm-stat-value">{{ inactive_members }}</div>
+    </div>
+    <div class="tm-stat-card">
+        <span class="tm-stat-label">With Photos</span>
+        <div class="tm-stat-value">{{ with_photo_count }}</div>
+    </div>
+</div>
+
+<div class="content-card tm-main-card">
+    <div class="content-card-header">
+        <form method="GET" class="search-form tm-filter-form">
+            <div class="search-input-group tm-search-group">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" placeholder="Search name, role, focus, email..." value="{{ search }}">
+            </div>
+            <select name="status" class="form-control tm-status-select">
+                <option value="" {% if not status %}selected{% endif %}>All statuses</option>
+                <option value="active" {% if status == 'active' %}selected{% endif %}>Active only</option>
+                <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inactive only</option>
+            </select>
+            <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter"></i> Filter</button>
+            {% if search or status %}
+            <a href="{% url 'dashboard:team_members_list' %}" class="btn btn-sm btn-secondary">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="content-card-body">
+        {% if team_members %}
+        <div class="tm-list-grid">
+            {% for member in team_members %}
+            <article class="tm-card">
+                <div class="tm-head">
+                    <div class="tm-avatar">
+                        {% if member.photo %}
+                        <img src="{{ member.photo.url }}" alt="{{ member.name }}">
+                        {% else %}
+                        {{ member.name|slice:":1"|upper }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3 class="tm-name">{{ member.name }}</h3>
+                        <p class="tm-meta">{{ member.role }}</p>
+                        <span class="tm-order-pill"><i class="fas fa-sort-numeric-down"></i> Order {{ member.order }}</span>
+                    </div>
+                </div>
+
+                <div class="tm-chips">
+                    <span class="tm-chip {% if member.is_active %}active{% else %}inactive{% endif %}">
+                        <i class="fas {% if member.is_active %}fa-check-circle{% else %}fa-pause-circle{% endif %}"></i>
+                        {% if member.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                    {% if member.badge %}<span class="tm-chip"><i class="fas fa-award"></i> {{ member.badge }}</span>{% endif %}
+                    {% if member.focus %}<span class="tm-chip"><i class="fas fa-bullseye"></i> {{ member.focus|truncatechars:28 }}</span>{% endif %}
+                    {% if member.linkedin_url %}<span class="tm-chip"><i class="fab fa-linkedin-in"></i> LinkedIn</span>{% endif %}
+                    {% if member.email %}<span class="tm-chip"><i class="fas fa-envelope"></i> Email</span>{% endif %}
+                </div>
+
+                <div class="tm-actions">
+                    <a href="{% url 'dashboard:team_member_edit' member.pk %}" class="btn btn-secondary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <button
+                        type="button"
+                        class="btn btn-danger js-team-member-delete"
+                        data-delete-url="{% url 'dashboard:team_member_delete' member.pk %}"
+                        data-member-name="{{ member.name|escapejs }}"
+                    >
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="tm-empty">No team members found. Click <strong>Add Team Member</strong> to create the first profile.</p>
+        {% endif %}
+    </div>
+</div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.js-team-member-delete').forEach((button) => {
+        button.addEventListener('click', () => {
+            confirmDelete({
+                url: button.dataset.deleteUrl,
+                itemName: button.dataset.memberName,
+                itemType: 'team member'
+            });
+        });
+    });
+</script>
+{% endblock %}

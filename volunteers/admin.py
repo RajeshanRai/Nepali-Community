@@ -66,7 +66,7 @@ class VolunteerApplicationAdmin(admin.ModelAdmin):
         """Approve selected applications"""
         approved_count = 0
         for application in queryset.filter(status='pending'):
-            application.status = 'approved'
+            application.status = 'accepted'
             application.reviewed_by = request.user
             application.reviewed_at = timezone.now()
             application.save()

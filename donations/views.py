@@ -113,6 +113,10 @@ class DonationView(FormView):
         
         messages.success(self.request, f'Thank you! Your donation of ${donation.amount} is being processed.')
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Please correct the donation form errors and try again.')
+        return super().form_invalid(form)
     
     def send_confirmation_email(self, donation, cleaned_data):
         """Send confirmation email with payment details"""
