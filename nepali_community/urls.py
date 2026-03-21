@@ -19,9 +19,12 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
+from donations.views import stripe_webhook
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('webhook', stripe_webhook, name='stripe_webhook_root_no_slash'),
+    path('webhook/', stripe_webhook, name='stripe_webhook_root'),
     path('favicon.ico', RedirectView.as_view(url=f'{settings.STATIC_URL}favicon.svg', permanent=False)),
     path('accounts/login/', RedirectView.as_view(url='/users/login/', query_string=True, permanent=False)),
     path('', include('core.urls')),

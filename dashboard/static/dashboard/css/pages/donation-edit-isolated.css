@@ -1,0 +1,161 @@
+#donationEditPage.dfp-layout {
+    grid-template-columns: minmax(0, 1fr) 320px !important;
+    gap: 1.25rem !important;
+    max-width: 1320px;
+    margin: 0 auto;
+}
+
+#donationEditPage .dfp-main-card,
+#donationEditPage .dfp-side-card {
+    border: 1px solid #dbe5f1 !important;
+    border-radius: 18px !important;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08) !important;
+    background: #ffffff !important;
+}
+
+#donationEditPage .dfp-main-card .content-card-body,
+#donationEditPage .dfp-side-card .content-card-body {
+    padding: clamp(1.05rem, 2vw, 1.45rem) !important;
+}
+
+#donationEditPage .dfp-progress-wrap {
+    background: linear-gradient(135deg, #edf4ff, #f7fbff) !important;
+    border: 1px solid #cfe0ff !important;
+    border-radius: 13px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+#donationEditPage .dfp-section {
+    border-radius: 14px !important;
+    border: 1px solid #e2eaf4 !important;
+    background: linear-gradient(180deg, #f7fbff 0%, #ffffff 46%) !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04) !important;
+    padding: 1.05rem !important;
+}
+
+#donationEditPage .dfp-section-title {
+    font-size: 1rem !important;
+    margin-bottom: 0.85rem !important;
+    color: #0f172a !important;
+    letter-spacing: -0.01em;
+}
+
+#donationEditPage .dfp-label {
+    font-size: 0.74rem !important;
+    margin-bottom: 0.3rem !important;
+    color: #5b6a82 !important;
+}
+
+#donationEditPage .dfp-field input[type="text"],
+#donationEditPage .dfp-field input[type="number"],
+#donationEditPage .dfp-field input[type="email"],
+#donationEditPage .dfp-field input[type="date"],
+#donationEditPage .dfp-field input[type="datetime-local"],
+#donationEditPage .dfp-field input[type="url"],
+#donationEditPage .dfp-field select,
+#donationEditPage .dfp-field textarea,
+#donationEditPage .dfp-field .form-control {
+    background: #ffffff !important;
+    border: 1px solid #d2dceb !important;
+    border-radius: 10px !important;
+    padding: 0.6rem 0.7rem !important;
+    font-size: 0.88rem !important;
+    color: #0f172a !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+#donationEditPage .dfp-field .form-control:focus,
+#donationEditPage .dfp-field input:focus,
+#donationEditPage .dfp-field select:focus,
+#donationEditPage .dfp-field textarea:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14) !important;
+    background: #ffffff !important;
+}
+
+#donationEditPage .dfp-field-emphasis {
+    background: linear-gradient(145deg, #edf4ff, #f7faff) !important;
+    border: 1px solid #cfe0ff !important;
+    border-radius: 11px !important;
+    padding: 0.55rem !important;
+}
+
+#donationEditPage .dfp-side-card {
+    position: sticky;
+    top: 82px;
+}
+
+#donationEditPage .dfp-side-block {
+    border-radius: 10px !important;
+    background: #f9fbff !important;
+    border: 1px solid #e0e8f3 !important;
+}
+
+#donationEditPage .dfp-actions .btn {
+    min-width: 136px;
+    height: 38px;
+    border-radius: 10px;
+}
+
+#donationEditPage .dfp-actions .btn-primary {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    border-color: #1d4ed8 !important;
+    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.24);
+}
+
+#donationEditPage .dfp-actions .btn-secondary {
+    background: #f8fafc !important;
+    border-color: #d8e0eb !important;
+}
+
+/* Defend this page from broad dashboard css rules. */
+#donationEditPage .content-card,
+#donationEditPage .content-card-header,
+#donationEditPage .content-card-body,
+#donationEditPage .dfp-field .form-control {
+    box-sizing: border-box;
+}
+
+@media (max-width: 1240px) {
+    #donationEditPage.dfp-layout {
+        grid-template-columns: 1fr !important;
+    }
+
+    #donationEditPage .dfp-side-card {
+        position: static;
+    }
+}
+
+@media (max-width: 760px) {
+    #donationEditPage .dfp-main-card .content-card-body,
+    #donationEditPage .dfp-side-card .content-card-body {
+        padding: 0.84rem !important;
+    }
+
+    #donationEditPage .dfp-section {
+        padding: 0.8rem !important;
+        border-radius: 12px !important;
+    }
+
+    #donationEditPage .dfp-section-title {
+        font-size: 0.92rem !important;
+        margin-bottom: 0.62rem !important;
+    }
+
+    #donationEditPage .dfp-label {
+        font-size: 0.7rem !important;
+    }
+
+    #donationEditPage .dfp-field input[type="text"],
+    #donationEditPage .dfp-field input[type="number"],
+    #donationEditPage .dfp-field input[type="email"],
+    #donationEditPage .dfp-field input[type="date"],
+    #donationEditPage .dfp-field input[type="datetime-local"],
+    #donationEditPage .dfp-field input[type="url"],
+    #donationEditPage .dfp-field select,
+    #donationEditPage .dfp-field textarea,
+    #donationEditPage .dfp-field .form-control {
+        padding: 0.56rem 0.62rem !important;
+        font-size: 0.84rem !important;
+    }
+}

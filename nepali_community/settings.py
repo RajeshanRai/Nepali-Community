@@ -254,6 +254,12 @@ LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+# Stripe settings (test keys for development)
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', '').strip()
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '').strip()
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '').strip()
+RECEIPT_LOGO_PATH = os.getenv('RECEIPT_LOGO_PATH', '').strip()
+
 # to avoid default profile URL (404) for django.contrib.auth login view
 
 

@@ -1401,29 +1401,211 @@ class DonationListView(StaffRequiredMixin, ListView):
     model = Donation
     template_name = 'dashboard/donations/list.html'
     context_object_name = 'donations'
-    ordering = ['-created_at']
+    paginate_by = 25
 
-    def get_queryset(self):
-        qs = super().get_queryset().select_related('user')
-        search = self.request.GET.get('search', '')
+    def _safe_redirect_target(self):
+        redirect_target = self.request.POST.get('return_to', '').strip()
+        if redirect_target.startswith('/'):
+            return redirect_target
+        return reverse('dashboard:donations_list')
+
+    def _base_queryset(self):
+        qs = Donation.objects.select_related('user')
+
+        search = self.request.GET.get('search', '').strip()
         selected_status = self.request.GET.get('status', '').strip()
+        selected_method = self.request.GET.get('method', '').strip()
+        selected_recurring = self.request.GET.get('recurring', '').strip()
+        selected_anonymous = self.request.GET.get('anonymous', '').strip()
+        date_from = self.request.GET.get('date_from', '').strip()
+        date_to = self.request.GET.get('date_to', '').strip()
+
         if selected_status:
             qs = qs.filter(status=selected_status)
+        if selected_method:
+            qs = qs.filter(payment_method=selected_method)
+        if selected_recurring in {'true', 'false'}:
+            qs = qs.filter(is_recurring=(selected_recurring == 'true'))
+        if selected_anonymous in {'true', 'false'}:
+            qs = qs.filter(anonymous=(selected_anonymous == 'true'))
+        if date_from:
+            qs = qs.filter(created_at__date__gte=date_from)
+        if date_to:
+            qs = qs.filter(created_at__date__lte=date_to)
         if search:
             qs = qs.filter(
                 Q(donor_name__icontains=search)
                 | Q(donor_email__icontains=search)
+                | Q(donor_phone__icontains=search)
+                | Q(donor_address_line1__icontains=search)
+                | Q(donor_city__icontains=search)
+                | Q(donor_province__icontains=search)
+                | Q(donor_postal_code__icontains=search)
                 | Q(transaction_ref__icontains=search)
                 | Q(purpose__icontains=search)
+                | Q(stripe_session_id__icontains=search)
+                | Q(stripe_payment_intent_id__icontains=search)
             )
         return qs
 
+    def get_queryset(self):
+        qs = self._base_queryset()
+        sort_option = self.request.GET.get('sort', '-created_at').strip()
+        sort_map = {
+            '-created_at': '-created_at',
+            'created_at': 'created_at',
+            '-amount': '-amount',
+            'amount': 'amount',
+            'status': 'status',
+            'payment_method': 'payment_method',
+        }
+        return qs.order_by(sort_map.get(sort_option, '-created_at'))
+
+    def get(self, request, *args, **kwargs):
+        if request.GET.get('export') == 'csv':
+            return self._export_csv()
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action', '').strip()
+        if action == 'update_status':
+            donation_id = request.POST.get('donation_id')
+            new_status = request.POST.get('new_status', '').strip()
+            donation = get_object_or_404(Donation, pk=donation_id)
+            valid_statuses = {status for status, _ in Donation.DONATION_STATUS}
+            if new_status in valid_statuses:
+                donation.status = new_status
+                donation.save(update_fields=['status'])
+                messages.success(request, f'Donation #{donation.pk} status updated to {donation.get_status_display()}.')
+            else:
+                messages.error(request, 'Invalid status selected.')
+            return redirect(self._safe_redirect_target())
+
+        if action.startswith('bulk_'):
+            selected_ids = request.POST.getlist('selected_donations')
+            if not selected_ids:
+                messages.warning(request, 'Select at least one donation for bulk action.')
+                return redirect(self._safe_redirect_target())
+
+            selected_qs = Donation.objects.filter(pk__in=selected_ids)
+            selected_count = selected_qs.count()
+
+            if action == 'bulk_mark_completed':
+                selected_qs.update(status='completed')
+                messages.success(request, f'{selected_count} donation(s) marked as Completed.')
+            elif action == 'bulk_mark_pending':
+                selected_qs.update(status='pending')
+                messages.success(request, f'{selected_count} donation(s) marked as Pending.')
+            elif action == 'bulk_mark_failed':
+                selected_qs.update(status='failed')
+                messages.success(request, f'{selected_count} donation(s) marked as Failed.')
+            elif action == 'bulk_delete':
+                selected_qs.delete()
+                messages.success(request, f'{selected_count} donation(s) deleted successfully.')
+            else:
+                messages.error(request, 'Unsupported bulk action.')
+            return redirect(self._safe_redirect_target())
+
+        messages.error(request, 'Invalid action request.')
+        return redirect(self._safe_redirect_target())
+
+    def _export_csv(self):
+        qs = self._base_queryset().order_by('-created_at')
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="dashboard_donations.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow([
+            'ID',
+            'Date',
+            'Donor Name',
+            'Donor Email',
+            'Donor Phone',
+            'Donor Address',
+            'Donor City',
+            'Donor Province',
+            'Donor Postal Code',
+            'Amount',
+            'Purpose',
+            'Payment Method',
+            'Status',
+            'Recurring',
+            'Anonymous',
+            'Card Last 4',
+            'Transaction Ref',
+            'Stripe Session',
+            'Stripe Payment Intent',
+        ])
+
+        for donation in qs:
+            writer.writerow([
+                donation.pk,
+                donation.created_at.strftime('%Y-%m-%d %H:%M'),
+                donation.donor_name or (donation.user.username if donation.user else ''),
+                donation.donor_email,
+                donation.donor_phone,
+                donation.donor_address_line1,
+                donation.donor_city,
+                donation.donor_province,
+                donation.donor_postal_code,
+                donation.amount,
+                donation.purpose,
+                donation.get_payment_method_display(),
+                donation.get_status_display(),
+                'Yes' if donation.is_recurring else 'No',
+                'Yes' if donation.anonymous else 'No',
+                donation.card_last_four,
+                donation.transaction_ref,
+                donation.stripe_session_id,
+                donation.stripe_payment_intent_id,
+            ])
+        return response
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        filtered_qs = self._base_queryset()
+        filtered_totals = filtered_qs.aggregate(total_amount=Sum('amount'))
+        completed_totals = filtered_qs.filter(status='completed').aggregate(total_amount=Sum('amount'))
+        overall_totals = Donation.objects.aggregate(total_amount=Sum('amount'))
+
+        current_query = self.request.GET.copy()
+        if 'page' in current_query:
+            current_query.pop('page')
+
         context.update({
-            'search': self.request.GET.get('search', ''),
-            'selected_status': self.request.GET.get('status', ''),
+            'search': self.request.GET.get('search', '').strip(),
+            'selected_status': self.request.GET.get('status', '').strip(),
+            'selected_method': self.request.GET.get('method', '').strip(),
+            'selected_recurring': self.request.GET.get('recurring', '').strip(),
+            'selected_anonymous': self.request.GET.get('anonymous', '').strip(),
+            'date_from': self.request.GET.get('date_from', '').strip(),
+            'date_to': self.request.GET.get('date_to', '').strip(),
+            'selected_sort': self.request.GET.get('sort', '-created_at').strip(),
             'status_choices': Donation.DONATION_STATUS,
+            'method_choices': Donation.PAYMENT_METHOD_CHOICES,
+            'filtered_count': filtered_qs.count(),
+            'filtered_amount_total': filtered_totals['total_amount'] or 0,
+            'completed_amount_total': completed_totals['total_amount'] or 0,
+            'pending_count': filtered_qs.filter(status='pending').count(),
+            'failed_count': filtered_qs.filter(status='failed').count(),
+            'recurring_count': filtered_qs.filter(is_recurring=True).count(),
+            'card_count': filtered_qs.filter(payment_method='card').count(),
+            'overall_count': Donation.objects.count(),
+            'overall_amount_total': overall_totals['total_amount'] or 0,
+            'active_filters_count': sum(
+                1
+                for value in [
+                    self.request.GET.get('search', '').strip(),
+                    self.request.GET.get('status', '').strip(),
+                    self.request.GET.get('method', '').strip(),
+                    self.request.GET.get('recurring', '').strip(),
+                    self.request.GET.get('anonymous', '').strip(),
+                    self.request.GET.get('date_from', '').strip(),
+                    self.request.GET.get('date_to', '').strip(),
+                ]
+                if value
+            ),
+            'current_query': current_query.urlencode(),
         })
         return context
 

@@ -436,6 +436,9 @@ function initRouteHighlights() {
     ));
 
     dashboardTargets.forEach(item => {
+        if (item.hasAttribute('data-ignore-route-highlight')) {
+            return;
+        }
         item.classList.remove('dashboard-route-active');
         const itemPath = extractPathFromElement(item);
         const score = getMatchScore(itemPath, currentPath);

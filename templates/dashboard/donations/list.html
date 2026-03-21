@@ -2,6 +2,230 @@
 
 {% block title %}Donations{% endblock %}
 
+{% block extra_css %}
+<style>
+    .don-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+        gap: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
+    .don-kpi-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: linear-gradient(150deg, #ffffff, #f8fafc);
+        padding: 0.9rem;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+    }
+
+    .don-kpi-label {
+        display: block;
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #64748b;
+        margin-bottom: 0.28rem;
+        font-weight: 700;
+    }
+
+    .don-kpi-value {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.1;
+    }
+
+    .don-kpi-meta {
+        margin-top: 0.22rem;
+        color: #64748b;
+        font-size: 0.78rem;
+    }
+
+    .don-filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.6rem;
+        width: 100%;
+    }
+
+    .don-filter-grid .search-input-group {
+        grid-column: span 2;
+    }
+
+    .don-filter-actions {
+        display: flex;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+    }
+
+    .don-bulk-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .don-bulk-actions {
+        display: flex;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .don-col-donor {
+        min-width: 180px;
+    }
+
+    .don-col-ref {
+        min-width: 160px;
+    }
+
+    .don-inline-form {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 0.4rem;
+    }
+
+    .don-inline-form select {
+        min-width: 120px;
+        height: 34px;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        padding: 0 0.45rem;
+        font-size: 0.78rem;
+        background: #fff;
+    }
+
+    .don-inline-form .btn {
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        padding: 0 0.7rem;
+        font-weight: 700;
+    }
+
+    .don-status-cell {
+        min-width: 185px;
+    }
+
+    .don-status-cell .badge {
+        margin-bottom: 0.12rem;
+    }
+
+    .don-actions-cell .action-buttons {
+        justify-content: flex-start;
+    }
+
+    .don-table-wrap {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .data-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .data-table td {
+        vertical-align: top;
+    }
+
+    .don-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 999px;
+        padding: 0.22rem 0.6rem;
+        background: #f8fafc;
+        font-size: 0.75rem;
+        color: #334155;
+        margin-right: 0.3rem;
+    }
+
+    .don-text-muted {
+        color: #64748b;
+        font-size: 0.76rem;
+    }
+
+    .don-table-note {
+        margin-top: 0.7rem;
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+
+    .don-pagination {
+        margin-top: 0.8rem;
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    @media (max-width: 980px) {
+        .don-bulk-toolbar {
+            align-items: flex-start;
+        }
+
+        .don-bulk-actions {
+            width: 100%;
+        }
+
+        .don-bulk-actions strong {
+            width: 100%;
+            margin-bottom: 0.2rem;
+        }
+
+        .don-filter-actions {
+            width: 100%;
+        }
+
+        .don-filter-actions .btn {
+            flex: 1 1 auto;
+        }
+    }
+
+    @media (max-width: 780px) {
+        .don-filter-grid .search-input-group {
+            grid-column: span 1;
+        }
+
+        .data-table {
+            font-size: 0.82rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.55rem 0.5rem;
+        }
+
+        .don-inline-form {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.3rem;
+        }
+
+        .don-inline-form select,
+        .don-inline-form .btn {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .don-actions-cell .action-buttons {
+            gap: 0.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block breadcrumb_items %}
 <li class="breadcrumb-item active">Donations</li>
 {% endblock %}
@@ -9,10 +233,13 @@
 {% block page_header %}
 <div class="page-header">
     <div class="page-header-content">
-        <h1><i class="fas fa-hand-holding-heart"></i> Donations</h1>
-        <p>Manage donation records without leaving the dashboard.</p>
+        <h1><i class="fas fa-hand-holding-heart"></i> Donation Control Center</h1>
+        <p>Track incoming payments, monitor health, and apply status actions in one place.</p>
     </div>
     <div class="page-header-actions">
+        <a href="{% url 'dashboard:donations_list' %}?{{ current_query }}{% if current_query %}&{% endif %}export=csv" class="btn btn-secondary" data-ignore-route-highlight>
+            <i class="fas fa-download"></i> Export CSV
+        </a>
         <a href="{% url 'dashboard:donation_create' %}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Create Donation
         </a>
@@ -21,13 +248,40 @@
 {% endblock %}
 
 {% block content %}
+<div class="don-kpi-grid">
+    <div class="don-kpi-card">
+        <span class="don-kpi-label">Filtered Donations</span>
+        <div class="don-kpi-value">{{ filtered_count }}</div>
+        <div class="don-kpi-meta">{{ active_filters_count }} filter(s) active</div>
+    </div>
+    <div class="don-kpi-card">
+        <span class="don-kpi-label">Filtered Amount</span>
+        <div class="don-kpi-value">${{ filtered_amount_total|floatformat:2 }}</div>
+        <div class="don-kpi-meta">Completed: ${{ completed_amount_total|floatformat:2 }}</div>
+    </div>
+    <div class="don-kpi-card">
+        <span class="don-kpi-label">Pending / Failed</span>
+        <div class="don-kpi-value">{{ pending_count }} / {{ failed_count }}</div>
+        <div class="don-kpi-meta">Recurring: {{ recurring_count }}</div>
+    </div>
+    <div class="don-kpi-card">
+        <span class="don-kpi-label">Card Payments</span>
+        <div class="don-kpi-value">{{ card_count }}</div>
+        <div class="don-kpi-meta">In current filtered result</div>
+    </div>
+    <div class="don-kpi-card">
+        <span class="don-kpi-label">All-time Total</span>
+        <div class="don-kpi-value">${{ overall_amount_total|floatformat:2 }}</div>
+        <div class="don-kpi-meta">{{ overall_count }} total records</div>
+    </div>
+</div>
+
 <div class="content-card">
     <div class="content-card-header">
-        <form method="GET" class="search-form">
+        <form method="GET" class="search-form don-filter-grid">
             <div class="search-input-group">
                 <i class="fas fa-search"></i>
-                <input type="text" name="search" placeholder="Search donor, purpose, transaction..."
-                    value="{{ search }}">
+                <input type="text" name="search" placeholder="Search donor, email, phone, address, transaction, Stripe IDs..." value="{{ search }}">
             </div>
             <select name="status" class="form-control form-control-max-250">
                 <option value="">All Status</option>
@@ -35,23 +289,67 @@
                 <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
             </select>
-            <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter"></i> Filter</button>
-            {% if search or selected_status %}
-            <a href="{% url 'dashboard:donations_list' %}" class="btn btn-sm btn-secondary">Reset</a>
-            {% endif %}
+            <select name="method" class="form-control form-control-max-250">
+                <option value="">All Methods</option>
+                {% for value, label in method_choices %}
+                <option value="{{ value }}" {% if value == selected_method %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <select name="recurring" class="form-control form-control-max-250">
+                <option value="">Recurring: Any</option>
+                <option value="true" {% if selected_recurring == 'true' %}selected{% endif %}>Recurring</option>
+                <option value="false" {% if selected_recurring == 'false' %}selected{% endif %}>One-time</option>
+            </select>
+            <select name="anonymous" class="form-control form-control-max-250">
+                <option value="">Anonymous: Any</option>
+                <option value="true" {% if selected_anonymous == 'true' %}selected{% endif %}>Anonymous</option>
+                <option value="false" {% if selected_anonymous == 'false' %}selected{% endif %}>Named</option>
+            </select>
+            <input type="date" name="date_from" value="{{ date_from }}" class="form-control" title="From date">
+            <input type="date" name="date_to" value="{{ date_to }}" class="form-control" title="To date">
+            <select name="sort" class="form-control form-control-max-250">
+                <option value="-created_at" {% if selected_sort == '-created_at' %}selected{% endif %}>Newest First</option>
+                <option value="created_at" {% if selected_sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+                <option value="-amount" {% if selected_sort == '-amount' %}selected{% endif %}>Amount High-Low</option>
+                <option value="amount" {% if selected_sort == 'amount' %}selected{% endif %}>Amount Low-High</option>
+                <option value="status" {% if selected_sort == 'status' %}selected{% endif %}>Status</option>
+                <option value="payment_method" {% if selected_sort == 'payment_method' %}selected{% endif %}>Payment Method</option>
+            </select>
+            <div class="don-filter-actions">
+                <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-filter"></i> Apply</button>
+                {% if search or selected_status or selected_method or selected_recurring or selected_anonymous or date_from or date_to %}
+                <a href="{% url 'dashboard:donations_list' %}" class="btn btn-sm btn-secondary">Reset</a>
+                {% endif %}
+            </div>
         </form>
     </div>
 
     <div class="content-card-body">
-        <div class="table-responsive">
+        <form method="POST" id="bulkDonationForm">
+            {% csrf_token %}
+            <input type="hidden" name="return_to" value="{{ request.get_full_path }}">
+            <div class="don-bulk-toolbar">
+                <div class="don-bulk-actions">
+                    <strong>Bulk actions</strong>
+                    <button type="submit" class="btn btn-sm btn-secondary" name="action" value="bulk_mark_completed">Mark Completed</button>
+                    <button type="submit" class="btn btn-sm btn-secondary" name="action" value="bulk_mark_pending">Mark Pending</button>
+                    <button type="submit" class="btn btn-sm btn-warning" name="action" value="bulk_mark_failed">Mark Failed</button>
+                    <button type="submit" class="btn btn-sm btn-danger" name="action" value="bulk_delete">Delete Selected</button>
+                </div>
+                <span class="don-text-muted">Select rows using checkboxes and apply action.</span>
+            </div>
+
+        <div class="table-responsive don-table-wrap">
             <table class="data-table">
                 <thead>
                     <tr>
+                        <th><input type="checkbox" id="selectAllDonations" aria-label="Select all donations"></th>
                         <th>ID</th>
-                        <th>Donor</th>
+                        <th class="don-col-donor">Donor</th>
                         <th>Amount</th>
                         <th>Method</th>
                         <th>Status</th>
+                        <th class="don-col-ref">Refs</th>
                         <th>Date</th>
                         <th>Actions</th>
                     </tr>
@@ -59,34 +357,162 @@
                 <tbody>
                     {% for donation in donations %}
                     <tr>
+                        <td><input type="checkbox" name="selected_donations" value="{{ donation.pk }}" class="donation-checkbox" aria-label="Select donation {{ donation.pk }}"></td>
                         <td>#{{ donation.pk }}</td>
-                        <td>{{ donation.donor_name|default:donation.user.username|default:'Anonymous' }}</td>
+                        <td>
+                            <div>
+                                <strong>{{ donation.donor_name|default:donation.user.username|default:'Anonymous' }}</strong>
+                                <div class="don-text-muted">{{ donation.donor_email|default:'No email' }}</div>
+                                {% if donation.donor_phone %}<div class="don-text-muted">Phone: {{ donation.donor_phone }}</div>{% endif %}
+                                {% if donation.donor_address_line1 or donation.donor_city or donation.donor_province or donation.donor_postal_code %}
+                                <div class="don-text-muted">
+                                    {{ donation.donor_address_line1 }}{% if donation.donor_city %}, {{ donation.donor_city }}{% endif %}{% if donation.donor_province %}, {{ donation.donor_province }}{% endif %}{% if donation.donor_postal_code %} {{ donation.donor_postal_code }}{% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if donation.anonymous %}<span class="don-chip"><i class="fas fa-user-secret"></i> Anonymous</span>{% endif %}
+                                {% if donation.is_recurring %}<span class="don-chip"><i class="fas fa-sync-alt"></i> Recurring</span>{% endif %}
+                            </div>
+                        </td>
                         <td>${{ donation.amount }}</td>
                         <td>{{ donation.get_payment_method_display }}</td>
-                        <td>
-                            <span
-                                class="badge badge-{% if donation.status == 'completed' %}success{% elif donation.status == 'pending' %}warning{% else %}danger{% endif %}">
+                        <td class="don-status-cell">
+                            <span class="badge badge-{% if donation.status == 'completed' %}success{% elif donation.status == 'pending' %}warning{% else %}danger{% endif %}">
                                 {{ donation.get_status_display }}
                             </span>
+                            <form method="POST" class="don-inline-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="update_status">
+                                <input type="hidden" name="donation_id" value="{{ donation.pk }}">
+                                <input type="hidden" name="return_to" value="{{ request.get_full_path }}">
+                                <select name="new_status" aria-label="Change status">
+                                    {% for value, label in status_choices %}
+                                    <option value="{{ value }}" {% if donation.status == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                            </form>
+                        </td>
+                        <td>
+                            <div class="don-text-muted">Txn: {{ donation.transaction_ref|default:'-' }}</div>
+                            <div class="don-text-muted">Card: {% if donation.card_last_four %}•••• {{ donation.card_last_four }}{% else %}-{% endif %}</div>
+                            {% if donation.stripe_payment_intent_id %}<div class="don-text-muted">PI: {{ donation.stripe_payment_intent_id|truncatechars:22 }}</div>{% endif %}
                         </td>
                         <td>{{ donation.created_at|date:"M d, Y H:i" }}</td>
-                        <td>
+                        <td class="don-actions-cell">
                             <div class="action-buttons">
                                 <a href="{% url 'dashboard:donation_edit' donation.pk %}" class="btn-icon btn-edit"
                                     title="Edit"><i class="fas fa-edit"></i></a>
-                                <a href="{% url 'dashboard:donation_delete' donation.pk %}" class="btn-icon btn-delete"
-                                    title="Delete"><i class="fas fa-trash"></i></a>
+                                <button
+                                    type="button"
+                                    class="btn-icon btn-delete js-donation-delete"
+                                    data-delete-url="{% url 'dashboard:donation_delete' donation.pk %}"
+                                    data-donation-name="#{{ donation.pk }} - {{ donation.donor_name|default:donation.user.username|default:'Anonymous'|escapejs }}"
+                                    title="Delete"
+                                ><i class="fas fa-trash"></i></button>
                             </div>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center text-muted">No donations found.</td>
+                        <td colspan="9" class="text-center text-muted">No donations found for the selected filters.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        {% if is_paginated %}
+        <div class="don-pagination">
+            <span class="don-text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            <div class="don-filter-actions">
+                {% if page_obj.has_previous %}
+                <a class="btn btn-sm btn-secondary" href="?{% if current_query %}{{ current_query }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                <a class="btn btn-sm btn-secondary" href="?{% if current_query %}{{ current_query }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <p class="don-table-note">Tip: Use filters first, then Export CSV to download only the current filtered result.</p>
+        </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const selectAll = document.getElementById('selectAllDonations');
+    const checkboxes = document.querySelectorAll('.donation-checkbox');
+    const bulkDonationForm = document.getElementById('bulkDonationForm');
+
+    if (selectAll) {
+        selectAll.addEventListener('change', () => {
+            checkboxes.forEach((box) => {
+                box.checked = selectAll.checked;
+            });
+        });
+    }
+
+    checkboxes.forEach((box) => {
+        box.addEventListener('change', () => {
+            if (!selectAll) {
+                return;
+            }
+            const checked = document.querySelectorAll('.donation-checkbox:checked').length;
+            selectAll.checked = checked === checkboxes.length;
+            selectAll.indeterminate = checked > 0 && checked < checkboxes.length;
+        });
+    });
+
+    document.querySelectorAll('.js-donation-delete').forEach((button) => {
+        button.addEventListener('click', () => {
+            confirmDelete({
+                url: button.dataset.deleteUrl,
+                itemName: button.dataset.donationName,
+                itemType: 'donation'
+            });
+        });
+    });
+
+    if (bulkDonationForm) {
+        bulkDonationForm.addEventListener('submit', (event) => {
+            const submitter = event.submitter;
+            if (!submitter || submitter.value !== 'bulk_delete') {
+                return;
+            }
+
+            if (bulkDonationForm.dataset.bulkDeleteConfirmed === 'true') {
+                bulkDonationForm.dataset.bulkDeleteConfirmed = 'false';
+                return;
+            }
+
+            event.preventDefault();
+            const checkedCount = document.querySelectorAll('.donation-checkbox:checked').length;
+            if (!checkedCount) {
+                return;
+            }
+
+            const confirmPromise = window.GlobalUI
+                ? window.GlobalUI.confirm({
+                    title: 'Confirm deletion',
+                    message: `Delete ${checkedCount} selected donation(s)? This action cannot be undone.`,
+                    okText: 'Delete',
+                    variant: 'danger'
+                })
+                : Promise.resolve(window.confirm(`Delete ${checkedCount} selected donation(s)? This action cannot be undone.`));
+
+            confirmPromise.then((confirmed) => {
+                if (!confirmed) {
+                    return;
+                }
+                bulkDonationForm.dataset.bulkDeleteConfirmed = 'true';
+                bulkDonationForm.requestSubmit(submitter);
+            });
+        });
+    }
+</script>
 {% endblock %}

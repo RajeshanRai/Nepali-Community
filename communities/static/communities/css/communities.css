@@ -149,9 +149,9 @@
 .showcase-card {
     position: relative;
     z-index: 1;
-    width: min(205px, 100%);
+    width: min(170px, 100%);
     aspect-ratio: 1;
-    padding: 1rem;
+    padding: 0.7rem;
     border-radius: 50%;
     background:
         radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.02) 100%);
@@ -193,7 +193,7 @@
 .showcase-card::after {
     content: '';
     position: absolute;
-    inset: -9px;
+    inset: -7px;
     border-radius: 50%;
     border: 1px dashed rgba(255, 255, 255, 0.25);
     pointer-events: none;
@@ -204,7 +204,7 @@
 }
 
 .showcase-card::after {
-    inset: -18px;
+    inset: -13px;
     border-style: solid;
     border-color: rgba(255, 107, 53, 0.2);
     animation: spinCounterClockwise 16s linear infinite;
@@ -218,7 +218,7 @@
 .showcase-card strong {
     display: block;
     margin-top: 0;
-    font-size: clamp(1.8rem, 2.8vw, 2.1rem);
+    font-size: clamp(1.45rem, 2.3vw, 1.75rem);
     line-height: 1;
     color: #ffffff;
     text-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
@@ -226,13 +226,13 @@
 
 .showcase-card span {
     display: block;
-    margin-top: 0.45rem;
-    max-width: 100px;
+    margin-top: 0.35rem;
+    max-width: 86px;
     margin-left: auto;
     margin-right: auto;
     color: rgba(255, 255, 255, 0.88);
     font-weight: 600;
-    font-size: 0.82rem;
+    font-size: 0.74rem;
     letter-spacing: 0.03em;
     line-height: 1.3;
 }

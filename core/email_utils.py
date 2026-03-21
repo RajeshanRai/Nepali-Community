@@ -209,6 +209,7 @@ def send_notification_email(
     recipients: Iterable[str],
     html_message: str | None = None,
     send_individually: bool = True,
+    attachments: list[tuple[str, bytes, str]] | None = None,
 ) -> bool:
     """Send notification email safely without breaking caller flows on failure."""
     recipient_list = _clean_recipients(recipients)
@@ -240,6 +241,8 @@ def send_notification_email(
                     to=[recipient],
                 )
                 email.attach_alternative(personalized_html, 'text/html')
+                for attachment in attachments or []:
+                    email.attach(*attachment)
                 email.send(fail_silently=False)
         else:
             email = EmailMultiAlternatives(
@@ -249,6 +252,8 @@ def send_notification_email(
                 to=recipient_list,
             )
             email.attach_alternative(html_payload, 'text/html')
+            for attachment in attachments or []:
+                email.attach(*attachment)
             email.send(fail_silently=False)
         return True
     except Exception as exc:

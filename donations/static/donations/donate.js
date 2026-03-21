@@ -86,25 +86,12 @@ function togglePaymentMethod(method) {
     if (method === 'interact') {
         if (interactSection) interactSection.style.display = 'block';
         if (cardSection) cardSection.style.display = 'none';
-        // Clear card fields
-        clearCardFields();
     } else if (method === 'card') {
         if (interactSection) interactSection.style.display = 'none';
         if (cardSection) cardSection.style.display = 'block';
         // Clear interact email
         clearInteractFields();
     }
-}
-
-/**
- * Clear all card form fields
- */
-function clearCardFields() {
-    const fields = ['card_name', 'card_number', 'card_expiry', 'card_cvv'];
-    fields.forEach(fieldName => {
-        const field = document.querySelector(`input[name="${fieldName}"]`);
-        if (field) field.value = '';
-    });
 }
 
 /**
@@ -189,32 +176,6 @@ function validateInteractPayment() {
  * Validate card payment fields
  */
 function validateCardPayment() {
-    const cardName = document.querySelector('input[name="card_name"]');
-    const cardNumber = document.querySelector('input[name="card_number"]');
-    const cardExpiry = document.querySelector('input[name="card_expiry"]');
-    const cardCvv = document.querySelector('input[name="card_cvv"]');
-
-    const cardNameValue = cardName ? cardName.value.trim() : '';
-    const cardNumberValue = cardNumber ? cardNumber.value.trim() : '';
-    const cardExpiryValue = cardExpiry ? cardExpiry.value.trim() : '';
-    const cardCvvValue = cardCvv ? cardCvv.value.trim() : '';
-
-    if (!cardNameValue) {
-        alert('Please enter the name on your card.');
-        return false;
-    }
-    if (!cardNumberValue) {
-        alert('Please enter your card number.');
-        return false;
-    }
-    if (!cardExpiryValue) {
-        alert('Please enter the card expiry date (MM/YY).');
-        return false;
-    }
-    if (!cardCvvValue) {
-        alert('Please enter your card security code (CVV).');
-        return false;
-    }
-
+    // Card details are entered on Stripe Checkout.
     return true;
 }

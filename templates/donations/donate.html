@@ -38,8 +38,30 @@
         {% endfor %}
         {% endif %}
 
+        {% if stripe_test_mode_active %}
+        <div
+            style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); color: #065f46; padding: 0.75rem 1rem; border-radius: 10px; margin-bottom: 1rem; font-weight: 600;">
+            <i class="fas fa-flask"></i> Stripe test mode active - configuration loaded.
+        </div>
+        {% endif %}
+
         <form method="post" id="donationForm">
             {% csrf_token %}
+
+            <div class="donation-progress" aria-label="Fundraising progress">
+                <div class="donation-progress-head">
+                    <h3>Raised Till Date</h3>
+                    <span>{{ donation_stats.goal_percentage }}%</span>
+                </div>
+                <div class="donation-progress-values">
+                    <strong>${{ donation_stats.amount_raised_formatted }}</strong>
+                    <span>of ${{ donation_stats.annual_goal_formatted }} target value</span>
+                </div>
+                <div class="donation-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                    aria-valuenow="{{ donation_stats.goal_percentage }}" aria-label="Fundraising completion">
+                    <span class="donation-progress-fill" style="width: {{ donation_stats.goal_percentage }}%;"></span>
+                </div>
+            </div>
 
             <!-- Tier Selection -->
             <h2 class="form-section-title">Select Your Donation Level</h2>
@@ -106,7 +128,7 @@
             <!-- Donor Information -->
             <h2 class="form-section-title">Your Information</h2>
 
-            <div class="form-row">
+            <div class="form-row compact-info">
                 <div class="form-group">
                     <label for="{{ form.donor_name.id_for_label }}">Full Name</label>
                     {{ form.donor_name }}
@@ -123,13 +145,43 @@
                 </div>
             </div>
 
-            <!-- Interact Email -->
-            <div class="form-row">
+            <div class="form-row compact-info">
                 <div class="form-group">
-                    <label for="{{ form.interact_email.id_for_label }}">Interact e-Transfer Email</label>
-                    {{ form.interact_email }}
-                    {% if form.interact_email.errors %}
-                    <small style="color: var(--primary);">{{ form.interact_email.errors }}</small>
+                    <label for="{{ form.donor_phone.id_for_label }}">Phone Number</label>
+                    {{ form.donor_phone }}
+                    {% if form.donor_phone.errors %}
+                    <small style="color: var(--primary);">{{ form.donor_phone.errors }}</small>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.donor_address_line1.id_for_label }}">Street Address</label>
+                    {{ form.donor_address_line1 }}
+                    {% if form.donor_address_line1.errors %}
+                    <small style="color: var(--primary);">{{ form.donor_address_line1.errors }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row compact-info">
+                <div class="form-group">
+                    <label for="{{ form.donor_city.id_for_label }}">City</label>
+                    {{ form.donor_city }}
+                    {% if form.donor_city.errors %}
+                    <small style="color: var(--primary);">{{ form.donor_city.errors }}</small>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.donor_province.id_for_label }}">Province/State</label>
+                    {{ form.donor_province }}
+                    {% if form.donor_province.errors %}
+                    <small style="color: var(--primary);">{{ form.donor_province.errors }}</small>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.donor_postal_code.id_for_label }}">Postal Code</label>
+                    {{ form.donor_postal_code }}
+                    {% if form.donor_postal_code.errors %}
+                    <small style="color: var(--primary);">{{ form.donor_postal_code.errors }}</small>
                     {% endif %}
                 </div>
             </div>
@@ -232,21 +284,35 @@
                         <strong style="color: var(--dark); display: block; margin-bottom: 1rem;">
                             How to Complete Your Donation:
                         </strong>
-                        <ol>
-                            <li>Log into your <strong>bank's online or mobile app</strong></li>
-                            <li>Select the <strong>Interact e-Transfer</strong> option</li>
-                            <li>Enter the amount: <strong>$</strong><span id="transferAmount">20</span></li>
-                            <li>Send to: <span
-                                    style="color: var(--accent); font-weight: 700;">donations@nepalicommunityvancouver.ca</span>
-                            </li>
-                            <li>Add your <strong>reference number</strong> in the message (see confirmation email)</li>
-                            <li>Complete the transfer and we'll confirm within <strong>24 hours</strong></li>
-                        </ol>
+                        <div class="interact-qa-list">
+                            <div class="interact-qa-item">
+                                <p class="interact-qa-question">Q1. Where do I start?</p>
+                                <p class="interact-qa-answer">Log into your <strong>bank's online or mobile app</strong>.</p>
+                            </div>
+                            <div class="interact-qa-item">
+                                <p class="interact-qa-question">Q2. What payment option should I choose?</p>
+                                <p class="interact-qa-answer">Select the <strong>Interact e-Transfer</strong> option.</p>
+                            </div>
+                            <div class="interact-qa-item">
+                                <p class="interact-qa-question">Q3. What amount should I enter?</p>
+                                <p class="interact-qa-answer">Enter the amount: <strong>$</strong><span id="transferAmount">20</span>.</p>
+                            </div>
+                            <div class="interact-qa-item">
+                                <p class="interact-qa-question">Q4. Where should I send the transfer?</p>
+                                <p class="interact-qa-answer">Send to: <span
+                                        style="color: var(--accent); font-weight: 700;">donations@nepalicommunityvancouver.ca</span>.</p>
+                            </div>
+                            <div class="interact-qa-item">
+                                <p class="interact-qa-question">Q5. What should I write in the message?</p>
+                                <p class="interact-qa-answer">Add your <strong>reference number</strong> in the message (see confirmation email).</p>
+                            </div>
+                            <div class="interact-qa-item">
+                                <p class="interact-qa-question">Q6. When will my donation be confirmed?</p>
+                                <p class="interact-qa-answer">Complete the transfer and we will confirm within <strong>24 hours</strong>.</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div style="text-align: center; padding: 1rem 0;">
-                        <span class="transfer-email">donations@nepalicommunityvancouver.ca</span>
-                    </div>
                 </div>
             </div>
 
@@ -264,49 +330,21 @@
                     </div>
 
                     <p class="card-desc">
-                        Pay securely with your credit or debit card. Your payment will be processed immediately.
+                        Pay securely with your credit or debit card via Stripe Checkout. You will be redirected to
+                        Stripe to complete payment safely.
                     </p>
 
-                    <!-- Card Name -->
-                    <div class="form-group">
-                        <label for="{{ form.card_name.id_for_label }}">Name on Card</label>
-                        {{ form.card_name }}
-                        {% if form.card_name.errors %}
-                        <small style="color: var(--primary);">{{ form.card_name.errors }}</small>
-                        {% endif %}
-                    </div>
-
-                    <!-- Card Number -->
-                    <div class="form-group">
-                        <label for="{{ form.card_number.id_for_label }}">Card Number</label>
-                        {{ form.card_number }}
-                        {% if form.card_number.errors %}
-                        <small style="color: var(--primary);">{{ form.card_number.errors }}</small>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-row">
-                        <!-- Card Expiry -->
-                        <div class="form-group">
-                            <label for="{{ form.card_expiry.id_for_label }}">Expiry (MM/YY)</label>
-                            {{ form.card_expiry }}
-                            {% if form.card_expiry.errors %}
-                            <small style="color: var(--primary);">{{ form.card_expiry.errors }}</small>
-                            {% endif %}
-                        </div>
-
-                        <!-- Card CVV -->
-                        <div class="form-group">
-                            <label for="{{ form.card_cvv.id_for_label }}">CVV</label>
-                            {{ form.card_cvv }}
-                            {% if form.card_cvv.errors %}
-                            <small style="color: var(--primary);">{{ form.card_cvv.errors }}</small>
-                            {% endif %}
-                        </div>
+                    <div
+                        style="background: rgba(255, 107, 53, 0.08); border: 1px solid rgba(255, 107, 53, 0.2); border-radius: 10px; padding: 1rem; margin-top: 1rem;">
+                        <ul style="margin: 0; padding-left: 1.2rem; color: #334155;">
+                            <li>You will enter card details on Stripe's secure payment page.</li>
+                            <li>Use Stripe test cards during development.</li>
+                            <li>No full card details are stored on this website.</li>
+                        </ul>
                     </div>
 
                     <div class="security-badge">
-                        <i class="fas fa-shield-alt"></i> Your card information is encrypted and secure
+                        <i class="fas fa-shield-alt"></i> Stripe-hosted checkout keeps your card data encrypted and secure
                     </div>
                 </div>
             </div>
@@ -328,49 +366,68 @@
 
 <!-- FAQ Section -->
 <div class="faq-section">
-    <h2 class="faq-title"><i class="fas fa-question-circle"></i> Frequently Asked Questions</h2>
-
-    <div class="faq-grid">
-        <div class="faq-item">
-            <h4><i class="fas fa-lock"></i> Is my donation secure?</h4>
-            <p>Yes! Both Interact e-Transfer and card payments are encrypted and secure. Your personal information is
-                protected and never shared with third parties.</p>
+    <div class="faq-shell">
+        <div class="faq-head">
+            <h2 class="faq-title"><i class="fas fa-question-circle"></i> Frequently Asked Questions</h2>
+            <p class="faq-subtitle">Everything you may want to know before completing your donation.</p>
         </div>
 
-        <div class="faq-item">
-            <h4><i class="fas fa-credit-card"></i> What payment methods do you accept?</h4>
-            <p>We accept Interact e-Transfer and credit/debit cards (Visa, Mastercard). Choose the payment method that
-                works best for you.</p>
-        </div>
+        <div class="faq-grid">
+            <details class="faq-item" open>
+                <summary>
+                    <span><i class="fas fa-lock"></i> Is my donation secure?</span>
+                    <i class="fas fa-chevron-down faq-chevron" aria-hidden="true"></i>
+                </summary>
+                <p>Yes. Both Interac e-Transfer and card payments are encrypted and secure. Your personal information is protected and never shared with third parties.</p>
+            </details>
 
-        <div class="faq-item">
-            <h4><i class="fas fa-recycle"></i> Can I donate monthly?</h4>
-            <p>Yes! Check the "Make this a monthly recurring donation" option, and we'll send you a reminder each month
-                or charge your card automatically (for card payments).</p>
-        </div>
+            <details class="faq-item">
+                <summary>
+                    <span><i class="fas fa-credit-card"></i> What payment methods do you accept?</span>
+                    <i class="fas fa-chevron-down faq-chevron" aria-hidden="true"></i>
+                </summary>
+                <p>We accept Interac e-Transfer and credit/debit cards (Visa, Mastercard). Choose the payment method that works best for you.</p>
+            </details>
 
-        <div class="faq-item">
-            <h4><i class="fas fa-receipt"></i> Do I get a tax receipt?</h4>
-            <p>Yes! Once your donation is confirmed, we'll email you an official tax receipt. Ensure you're registered
-                with Canada Revenue Agency.</p>
-        </div>
+            <details class="faq-item">
+                <summary>
+                    <span><i class="fas fa-recycle"></i> Can I donate monthly?</span>
+                    <i class="fas fa-chevron-down faq-chevron" aria-hidden="true"></i>
+                </summary>
+                <p>Yes. Check "Make this a monthly recurring donation" and your contribution can continue monthly. For card donations, Stripe handles recurring billing securely.</p>
+            </details>
 
-        <div class="faq-item">
-            <h4><i class="fas fa-shield-alt"></i> Is my card information safe?</h4>
-            <p>Absolutely! We use industry-standard encryption for card payments. We never store your full card details
-                on our servers.</p>
-        </div>
+            <details class="faq-item">
+                <summary>
+                    <span><i class="fas fa-receipt"></i> Do I get a receipt?</span>
+                    <i class="fas fa-chevron-down faq-chevron" aria-hidden="true"></i>
+                </summary>
+                <p>Yes. Once your donation is confirmed, we send a detailed donation receipt by email, including your reference information.</p>
+            </details>
 
-        <div class="faq-item">
-            <h4><i class="fas fa-handshake"></i> How will my donation help?</h4>
-            <p>Your donation supports scholarships, cultural programs, community events, youth initiatives, and services
-                for Nepali families.</p>
-        </div>
+            <details class="faq-item">
+                <summary>
+                    <span><i class="fas fa-shield-alt"></i> Is my card information safe?</span>
+                    <i class="fas fa-chevron-down faq-chevron" aria-hidden="true"></i>
+                </summary>
+                <p>Absolutely. We use Stripe-hosted checkout for card payments, and full card details are not stored on our servers.</p>
+            </details>
 
-        <div class="faq-item">
-            <h4><i class="fas fa-user-secret"></i> Can my donation be anonymous?</h4>
-            <p>Yes! Check the anonymous option and your name won't appear in our public donor list while still
-                supporting the community.</p>
+            <details class="faq-item">
+                <summary>
+                    <span><i class="fas fa-handshake"></i> How will my donation help?</span>
+                    <i class="fas fa-chevron-down faq-chevron" aria-hidden="true"></i>
+                </summary>
+                <p>Your donation supports scholarships, cultural programs, community events, youth initiatives, and services for Nepali families in Vancouver.</p>
+            </details>
+
+            <details class="faq-item">
+                <summary>
+                    <span><i class="fas fa-user-secret"></i> Can my donation be anonymous?</span>
+                    <i class="fas fa-chevron-down faq-chevron" aria-hidden="true"></i>
+                </summary>
+                <p>Yes. Choose the anonymous option and your name will stay private in public donor mentions while still supporting the community.</p>
+            </details>
         </div>
     </div>
 </div>

@@ -4,7 +4,43 @@
 {% block title %}{% if object or form.instance.pk %}Edit Donation{% else %}Create Donation{% endif %}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'dashboard/css/pages/dynamic-form-pattern.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/dynamic-form-pattern.css' %}?v=20260321a">
+<style>
+    /* Final in-template override for donation edit page only. */
+    #donationEditPage {
+        max-width: 1320px;
+        margin: 0 auto;
+    }
+
+    #donationEditPage .dfp-main-card,
+    #donationEditPage .dfp-side-card {
+        border-radius: 18px !important;
+        border: 1px solid #dbe5f1 !important;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08) !important;
+        background: #ffffff !important;
+    }
+
+    #donationEditPage .dfp-section {
+        background: linear-gradient(180deg, #f7fbff 0%, #ffffff 46%) !important;
+        border: 1px solid #e2eaf4 !important;
+        border-radius: 14px !important;
+        padding: 1.05rem !important;
+    }
+
+    #donationEditPage .dfp-field .form-control,
+    #donationEditPage .dfp-field input,
+    #donationEditPage .dfp-field select,
+    #donationEditPage .dfp-field textarea {
+        border: 1px solid #d2dceb !important;
+        border-radius: 10px !important;
+        background: #ffffff !important;
+        padding: 0.6rem 0.7rem !important;
+    }
+</style>
+{% endblock %}
+
+{% block late_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/donation-edit-isolated.css' %}?v=20260321a">
 {% endblock %}
 
 {% block breadcrumb_items %}
@@ -22,7 +58,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="dfp-layout">
+<div class="dfp-layout" id="donationEditPage">
     <div class="content-card dfp-main-card">
         <div class="content-card-body">
             <form method="POST" class="dfp-form" id="donationForm">
@@ -48,7 +84,7 @@
                             {{ form.user }}
                             {% if form.user.errors %}<div class="dfp-error">{{ form.user.errors.0 }}</div>{% endif %}
                         </div>
-                        <div class="dfp-field">
+                        <div class="dfp-field dfp-field-emphasis">
                             <label for="{{ form.status.id_for_label }}" class="dfp-label required">Status</label>
                             {{ form.status }}
                             {% if form.status.errors %}<div class="dfp-error">{{ form.status.errors.0 }}</div>{% endif %}
@@ -64,6 +100,35 @@
                             <label for="{{ form.donor_email.id_for_label }}" class="dfp-label">Donor Email</label>
                             {{ form.donor_email }}
                             {% if form.donor_email.errors %}<div class="dfp-error">{{ form.donor_email.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="dfp-grid two">
+                        <div class="dfp-field">
+                            <label for="{{ form.donor_phone.id_for_label }}" class="dfp-label">Phone</label>
+                            {{ form.donor_phone }}
+                            {% if form.donor_phone.errors %}<div class="dfp-error">{{ form.donor_phone.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.donor_address_line1.id_for_label }}" class="dfp-label">Street Address</label>
+                            {{ form.donor_address_line1 }}
+                            {% if form.donor_address_line1.errors %}<div class="dfp-error">{{ form.donor_address_line1.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="dfp-grid three">
+                        <div class="dfp-field">
+                            <label for="{{ form.donor_city.id_for_label }}" class="dfp-label">City</label>
+                            {{ form.donor_city }}
+                            {% if form.donor_city.errors %}<div class="dfp-error">{{ form.donor_city.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.donor_province.id_for_label }}" class="dfp-label">Province/State</label>
+                            {{ form.donor_province }}
+                            {% if form.donor_province.errors %}<div class="dfp-error">{{ form.donor_province.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.donor_postal_code.id_for_label }}" class="dfp-label">Postal Code</label>
+                            {{ form.donor_postal_code }}
+                            {% if form.donor_postal_code.errors %}<div class="dfp-error">{{ form.donor_postal_code.errors.0 }}</div>{% endif %}
                         </div>
                     </div>
                 </section>

@@ -162,6 +162,67 @@ body {
     box-shadow: var(--shadow-xl);
 }
 
+.donation-progress {
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.08), rgba(255, 182, 217, 0.08));
+    border: 1px solid rgba(255, 107, 53, 0.22);
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+    margin-bottom: var(--space-lg);
+}
+
+.donation-progress-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.35rem;
+}
+
+.donation-progress-head h3 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 0.92rem;
+    color: var(--dark);
+}
+
+.donation-progress-head span {
+    color: var(--accent-dark);
+    font-weight: 700;
+    font-size: 0.86rem;
+}
+
+.donation-progress-values {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin-bottom: 0.55rem;
+}
+
+.donation-progress-values strong {
+    font-size: 1.05rem;
+    color: var(--dark);
+}
+
+.donation-progress-values span {
+    color: var(--gray);
+    font-size: 0.8rem;
+}
+
+.donation-progress-track {
+    width: 100%;
+    height: 9px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.12);
+    overflow: hidden;
+}
+
+.donation-progress-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent) 0%, #f97316 55%, #fb7185 100%);
+    transition: width 0.4s ease;
+}
+
 .form-section-title {
     font-family: var(--font-heading);
     font-size: 1.1rem;
@@ -311,6 +372,18 @@ body {
     border-color: var(--accent-dark);
 }
 
+/* Hide number input spinner arrows */
+.custom-amount-container input[type="number"]::-webkit-outer-spin-button,
+.custom-amount-container input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.custom-amount-container input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
 /* Form Groups */
 .form-row {
     display: grid;
@@ -347,6 +420,24 @@ body {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+}
+
+.form-row.compact-info {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 0.62rem;
+    margin-bottom: 0.72rem;
+}
+
+.form-row.compact-info .form-group label {
+    font-size: 0.84rem;
+    margin-bottom: 0.3rem;
+}
+
+.form-row.compact-info .form-group input[type="text"],
+.form-row.compact-info .form-group input[type="email"] {
+    padding: 0.52rem 0.68rem;
+    font-size: 0.84rem;
+    border-radius: 9px;
 }
 
 .form-group textarea {
@@ -446,16 +537,32 @@ body {
     margin: var(--space-sm) 0;
 }
 
-.interact-steps ol {
-    margin: 0;
-    padding-left: 1.8rem;
+.interact-qa-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
 }
 
-.interact-steps li {
-    margin-bottom: 0.5rem;
+.interact-qa-item {
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 10px;
+    background: rgba(248, 250, 252, 0.8);
+    padding: 0.6rem 0.72rem;
+}
+
+.interact-qa-question {
+    margin: 0 0 0.2rem 0;
     color: var(--dark);
-    line-height: 1.55;
-    font-size: 0.9rem;
+    font-weight: 700;
+    font-size: 0.86rem;
+    line-height: 1.4;
+}
+
+.interact-qa-answer {
+    margin: 0;
+    color: #334155;
+    line-height: 1.5;
+    font-size: 0.86rem;
 }
 
 .interact-steps strong {
@@ -633,22 +740,26 @@ body {
 /* Submit Button */
 .submit-container {
     margin-top: 1rem;
+    text-align: center;
 }
 
 .btn-submit {
-    width: 100%;
-    padding: 0.88rem 1rem;
+    width: auto;
+    min-width: 220px;
+    max-width: 100%;
+    padding: 0.72rem 0.9rem;
     background: linear-gradient(135deg, var(--accent), var(--accent-dark));
     color: white;
     border: none;
     border-radius: 999px;
-    font-size: 0.95rem;
+    font-size: 0.88rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 auto;
     gap: var(--space-sm);
     box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
 }
@@ -680,56 +791,117 @@ body {
    ============================================ */
 
 .faq-section {
-    max-width: var(--container-max-width);
+    max-width: calc(var(--container-max-width) * 0.85);
     margin: var(--section-margin) auto;
     padding: 0 var(--section-padding);
 }
 
+.faq-shell {
+    background:
+        radial-gradient(circle at 0% 0%, rgba(255, 107, 53, 0.12), transparent 42%),
+        radial-gradient(circle at 100% 100%, rgba(255, 182, 217, 0.18), transparent 46%),
+        #fff;
+    border: 1px solid rgba(255, 107, 53, 0.14);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    padding: clamp(1rem, 2.2vw, 1.4rem);
+}
+
+.faq-head {
+    text-align: center;
+    margin-bottom: 0.95rem;
+}
+
 .faq-title {
     font-family: var(--font-heading);
-    font-size: 1.45rem;
-    text-align: center;
+    font-size: clamp(1.2rem, 2.1vw, 1.45rem);
     color: var(--dark);
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.3rem;
+}
+
+.faq-title i {
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.35rem;
+    background: #ffffff;
+    color: #111111;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.08);
+}
+
+.faq-subtitle {
+    color: #64748b;
+    margin: 0;
+    font-size: 0.86rem;
 }
 
 .faq-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
 }
 
 .faq-item {
-    background: white;
-    padding: 1rem;
-    border-radius: 14px;
-    box-shadow: var(--shadow-md);
-    transition: all 0.3s ease;
-    border-left: 4px solid var(--accent);
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+    overflow: hidden;
 }
 
 .faq-item:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-xl);
+    border-color: rgba(255, 107, 53, 0.35);
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+    transform: translateY(-1px);
 }
 
-.faq-item h4 {
-    color: var(--dark);
-    margin-bottom: var(--space-sm);
-    font-size: 0.98rem;
+.faq-item summary {
+    list-style: none;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.8rem 0.92rem;
 }
 
-.faq-item h4 i {
+.faq-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-item summary span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--dark);
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.faq-item summary span i {
     color: var(--accent);
 }
 
+.faq-chevron {
+    color: #64748b;
+    font-size: 0.78rem;
+    transition: transform 0.22s ease;
+}
+
+.faq-item[open] .faq-chevron {
+    transform: rotate(180deg);
+}
+
 .faq-item p {
+    border-top: 1px solid rgba(148, 163, 184, 0.18);
+    padding: 0.74rem 0.92rem 0.82rem;
     color: var(--gray);
-    line-height: 1.55;
-    font-size: 0.88rem;
+    line-height: 1.6;
+    font-size: 0.84rem;
     margin: 0;
 }
 
@@ -767,6 +939,10 @@ body {
 
     .donate-hero-content {
         max-width: 100%;
+    }
+
+    .donation-progress-values {
+        flex-wrap: wrap;
     }
 
     .donate-hero-meta {
@@ -835,6 +1011,10 @@ body {
     .form-card {
         border-radius: 16px;
         padding: 0.9rem;
+    }
+
+    .donation-progress {
+        padding: 0.8rem 0.85rem;
     }
 
     .tier-grid,

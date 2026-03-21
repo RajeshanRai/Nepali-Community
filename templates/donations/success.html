@@ -46,7 +46,11 @@
                 <span class="detail-value">
                     <i class="fas fa-hourglass-half" style="color: var(--color-orange);"></i>
                     {% if payment_method == "card" %}
-                    Processing
+                    {% if payment_status == "completed" %}
+                    Completed
+                    {% else %}
+                    Pending Confirmation
+                    {% endif %}
                     {% else %}
                     Pending Confirmation
                     {% endif %}
@@ -110,12 +114,19 @@
         <!-- Card Payment Confirmation Section -->
         <div class="next-steps">
             <h3><i class="fas fa-credit-card"></i> Payment Processing</h3>
-            <p style="color: #333; margin-bottom: 1rem;">Your card payment is being processed securely.</p>
+            <p style="color: #333; margin-bottom: 1rem;">
+                {% if payment_status == "completed" %}
+                Your Stripe payment has been completed successfully.
+                {% else %}
+                Your Stripe payment is pending confirmation.
+                {% endif %}
+            </p>
             <div
                 style="background: rgba(255, 107, 53, 0.1); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--color-orange);">
                 <ul style="margin: 0; padding-left: 1.5rem;">
-                    <li><strong>Processing Status:</strong> Your payment is currently being processed</li>
-                    <li><strong>Confirmation:</strong> You will receive a confirmation email within 24 hours</li>
+                    <li><strong>Provider:</strong> Payment is processed by Stripe Checkout</li>
+                    <li><strong>Status:</strong> {% if payment_status == "completed" %}Completed{% else %}Pending{% endif %}</li>
+                    <li><strong>Confirmation:</strong> You will receive a receipt email when confirmed</li>
                     <li><strong>Tax Receipt:</strong> A tax receipt will be sent once payment is confirmed</li>
                     <li><strong>Recurring:</strong> If set up, monthly charges will appear on your statement</li>
                 </ul>
