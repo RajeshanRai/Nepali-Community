@@ -14,6 +14,7 @@ class Program(models.Model):
     title = models.CharField(max_length=300)
     description = models.TextField(blank=True)
     location = models.CharField(max_length=300, blank=True)
+    live_stream_url = models.URLField(blank=True)
     is_virtual = models.BooleanField(default=False)
     date = models.DateField()
     event_type = models.CharField(max_length=50, choices=EVENT_TYPES, default='other')

@@ -14,12 +14,13 @@ from core.models import TeamMember
 class ProgramForm(forms.ModelForm):
     class Meta:
         model = Program
-        fields = ['title', 'description', 'date', 'location', 'event_type', 'community', 'is_virtual']
+        fields = ['title', 'description', 'date', 'location', 'live_stream_url', 'event_type', 'community', 'is_virtual']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Event Title'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Event Description'}),
             'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Event Location'}),
+            'live_stream_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://www.youtube.com/watch?v=...'}),
             'event_type': forms.Select(attrs={'class': 'form-control'}),
             'is_virtual': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'community': forms.Select(attrs={'class': 'form-control'}),

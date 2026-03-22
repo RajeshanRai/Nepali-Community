@@ -579,7 +579,7 @@ def advanced_admin_panel(request):
 @user_passes_test(staff_required, login_url='login')
 def event_list(request):
     """List all events"""
-    events = Program.objects.all().order_by('-date')
+    events = Program.objects.all().order_by('date', 'id')
     search = request.GET.get('search', '')
     if search:
         events = events.filter(Q(title__icontains=search) | Q(description__icontains=search))

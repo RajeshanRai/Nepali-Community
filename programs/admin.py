@@ -5,8 +5,9 @@ from django.utils import timezone
 
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
-    list_display = ('title', 'community', 'date', 'event_type')
+    list_display = ('title', 'community', 'date', 'event_type', 'live_stream_url')
     list_filter = ('event_type', 'community')
+    search_fields = ('title', 'location', 'live_stream_url')
     # Optimized: select_related to prevent N+1 when displaying community names
     list_select_related = ('community',)
 

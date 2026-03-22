@@ -123,6 +123,13 @@
                         {% if form.location.errors %}<div class="field-error"><i class="fas fa-exclamation-circle"></i> {{ form.location.errors.0 }}</div>{% endif %}
                         <small class="form-help" id="evfLocationHint">Physical address or online meeting link.</small>
                     </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.live_stream_url.id_for_label }}" class="form-label">{{ form.live_stream_url.label }}</label>
+                        {{ form.live_stream_url }}
+                        {% if form.live_stream_url.errors %}<div class="field-error"><i class="fas fa-exclamation-circle"></i> {{ form.live_stream_url.errors.0 }}</div>{% endif %}
+                        <small class="form-help">Optional: YouTube live URL used by the homepage "See live" button.</small>
+                    </div>
                 </div>
 
                 {% if event %}

@@ -243,9 +243,65 @@ i {
     gap: 0.8rem;
 }
 
+.top-navbar .left .top-navbar-brand {
+    gap: 0;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
 .top-navbar .left i {
     font-size: var(--font-size-3xl);
     color: var(--color-orange);
+}
+
+.top-navbar .left .top-navbar-logo-wrap {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin: 0 0.05rem 0 0.64rem;
+}
+
+.top-navbar .left .top-navbar-logo-wrap::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.36) 0%, rgba(249, 115, 22, 0) 72%);
+    z-index: 0;
+}
+
+.top-navbar .left .top-navbar-logo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    flex-shrink: 0;
+    transform: scale(1.95);
+    transform-origin: center;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 2px 5px rgba(249, 115, 22, 0.35));
+}
+
+.top-navbar .left .top-navbar-brand-text {
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", serif;
+    font-size: clamp(1.03rem, 1.18vw, 1.16rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    font-style: normal;
+    color: #ffffff;
+    background: linear-gradient(90deg, #dc143c 0%, #1e3a8a 46%, #ffffff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 12px rgba(30, 58, 138, 0.28);
 }
 
 .top-navbar .center {

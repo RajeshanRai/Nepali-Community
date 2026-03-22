@@ -92,6 +92,11 @@
                     <i class="fas fa-sign-in-alt"></i> Login to Register
                 </button>
                 {% endif %}
+                {% if p.live_stream_url %}
+                <a href="{{ p.live_stream_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                    <i class="fas fa-circle-play"></i> See live
+                </a>
+                {% endif %}
                 <a href="{% url 'program_detail' p.id %}" class="btn btn-secondary">
                     <i class="fas fa-info-circle"></i> Details
                 </a>

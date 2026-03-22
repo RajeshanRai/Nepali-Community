@@ -106,6 +106,55 @@
         </article>
     </section>
 
+    <section class="home-v2-happening-now container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>Happening Now</h2>
+        </div>
+
+        {% if happening_now_programs or happening_now_opportunities %}
+        <div class="home-v2-happening-grid">
+            {% for program in happening_now_programs %}
+            <article class="home-v2-happening-card home-v2-happening-card--program">
+                <div class="home-v2-happening-topline">
+                    <span class="home-v2-live-status"><span class="home-v2-live-dot" aria-hidden="true"></span>Live program</span>
+                    <span class="home-v2-happening-side-chip home-v2-happening-side-chip--streaming"><i class="fas fa-broadcast-tower"></i> Streaming</span>
+                </div>
+                <h3>{{ program.title|fix_mojibake }}</h3>
+                <p>{{ program.description|fix_mojibake|truncatechars:110 }}</p>
+                <div class="home-v2-happening-meta">
+                    <span><i class="fas fa-calendar-day"></i> Today</span>
+                    <span><i class="fas fa-star"></i> Community spotlight</span>
+                </div>
+                {% if program.live_stream_url %}
+                <a class="home-v2-happening-cta home-v2-happening-cta--live" href="{{ program.live_stream_url }}" target="_blank" rel="noopener noreferrer">See live</a>
+                {% endif %}
+            </article>
+            {% endfor %}
+
+            {% for opportunity in happening_now_opportunities %}
+            <article class="home-v2-happening-card home-v2-happening-card--opportunity">
+                <div class="home-v2-happening-topline">
+                    <span class="home-v2-happening-badge home-v2-happening-badge--volunteer">Active opportunity</span>
+                    <span class="home-v2-happening-side-chip home-v2-happening-side-chip--seats"><i class="fas fa-user-plus"></i> Open seats</span>
+                </div>
+                <h3>{{ opportunity.title|fix_mojibake }}</h3>
+                <p>{{ opportunity.description|fix_mojibake|truncatechars:110 }}</p>
+                <div class="home-v2-happening-meta">
+                    <span><i class="fas fa-bolt"></i> Open now</span>
+                    <span><i class="fas fa-hands-helping"></i> Volunteer impact</span>
+                </div>
+                <a class="home-v2-happening-cta" href="{% url 'volunteer_detail' opportunity.pk %}">See opportunity <i class="fas fa-arrow-right"></i></a>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="home-v2-empty-state">
+            <i class="fas fa-clock"></i>
+            <p>No items are marked as happening now. Check upcoming sections below.</p>
+        </div>
+        {% endif %}
+    </section>
+
     <section class="home-v2-communities container reveal-up">
         <div class="home-v2-section-head">
             <h2>Communities That Keep Traditions Alive</h2>
@@ -133,7 +182,6 @@
     <section class="home-v2-programs container reveal-up">
         <div class="home-v2-section-head">
             <h2>Upcoming Programs</h2>
-            <a href="{% url 'program_list' %}">Browse all events <i class="fas fa-arrow-right"></i></a>
         </div>
 
         <div class="home-v2-program-list">
@@ -168,12 +216,17 @@
             </div>
             {% endfor %}
         </div>
+
+        {% if has_more_upcoming_programs %}
+        <div class="home-v2-visit-more-wrap">
+            <a class="home-v2-visit-more-link" href="{% url 'program_list' %}">Visit more <i class="fas fa-angle-double-down"></i></a>
+        </div>
+        {% endif %}
     </section>
 
     <section class="home-v2-announcements container reveal-up">
         <div class="home-v2-section-head">
             <h2>Latest Announcements</h2>
-            <a href="{% url 'announcement_list' %}">View all announcements <i class="fas fa-arrow-right"></i></a>
         </div>
 
         {% if latest_announcements %}
@@ -209,12 +262,17 @@
             <p>No announcements published yet.</p>
         </div>
         {% endif %}
+
+        {% if has_more_announcements %}
+        <div class="home-v2-visit-more-wrap">
+            <a class="home-v2-visit-more-link" href="{% url 'announcement_list' %}">Visit more <i class="fas fa-angle-double-down"></i></a>
+        </div>
+        {% endif %}
     </section>
 
     <section class="home-v2-volunteer-opportunities container reveal-up">
         <div class="home-v2-section-head">
             <h2>Volunteer Opportunities</h2>
-            <a href="{% url 'volunteer_list' %}">View all opportunities <i class="fas fa-arrow-right"></i></a>
         </div>
 
         {% if featured_volunteer_opportunities %}
@@ -252,6 +310,12 @@
         <div class="home-v2-empty-state">
             <i class="fas fa-hands-helping"></i>
             <p>No open volunteer opportunities right now. Please check back soon.</p>
+        </div>
+        {% endif %}
+
+        {% if has_more_volunteer_opportunities %}
+        <div class="home-v2-visit-more-wrap">
+            <a class="home-v2-visit-more-link" href="{% url 'volunteer_list' %}">Visit more <i class="fas fa-angle-double-down"></i></a>
         </div>
         {% endif %}
     </section>

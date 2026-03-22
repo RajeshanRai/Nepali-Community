@@ -81,6 +81,12 @@
                             <i class="fas fa-share-nodes" aria-hidden="true"></i>
                             <span>Share event</span>
                         </button>
+                        {% if object.live_stream_url %}
+                        <a href="{{ object.live_stream_url }}" target="_blank" rel="noopener noreferrer" class="program-action-btn program-action-btn--primary">
+                            <i class="fas fa-circle-play" aria-hidden="true"></i>
+                            <span>See live</span>
+                        </a>
+                        {% endif %}
                         <button type="button" class="program-action-btn" data-download-ics>
                             <i class="fas fa-calendar-plus" aria-hidden="true"></i>
                             <span>Add to calendar</span>

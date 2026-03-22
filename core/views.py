@@ -21,10 +21,12 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         now = timezone.now()
+        local_today = timezone.localdate()
 
-        # show next few upcoming programs on homepage
-        upcoming = Program.objects.filter(date__gte=now.date()).order_by('date')[:5]
-        context['upcoming_programs'] = upcoming
+        # show a compact preview list on homepage and reveal "Visit more" when additional items exist
+        upcoming_qs = Program.objects.filter(date__gte=local_today).order_by('date')
+        context['upcoming_programs'] = upcoming_qs[:3]
+        context['has_more_upcoming_programs'] = upcoming_qs.count() > 3
 
         # community and volunteer counts for metric cards
         context['total_communities'] = Community.objects.count()
@@ -45,25 +47,42 @@ class HomeView(TemplateView):
         context['total_volunteers'] = len(active_volunteer_emails)
         context['total_members'] = CustomUser.objects.filter(is_active=True).count()
 
-        # latest announcements for homepage
-        context['latest_announcements'] = Announcement.objects.filter(
+        # happening now snapshot for homepage
+        context['happening_now_programs'] = Program.objects.filter(
+            date=local_today
+        ).order_by('title')[:3]
+
+        context['happening_now_opportunities'] = VolunteerOpportunity.objects.filter(
+            status='open',
+        ).filter(
+            Q(start_date__isnull=True) | Q(start_date__lte=local_today)
+        ).filter(
+            Q(end_date__isnull=True) | Q(end_date__gte=local_today)
+        ).order_by('start_date', 'created_at')[:3]
+
+        # latest announcements preview with a conditional "Visit more" CTA
+        latest_announcements_qs = Announcement.objects.filter(
             show_on_homepage=True,
             is_active=True,
             publish_date__lte=now,
         ).filter(
             Q(expire_date__isnull=True) | Q(expire_date__gt=now)
-        )[:4]
+        )
+        context['latest_announcements'] = latest_announcements_qs[:3]
+        context['has_more_announcements'] = latest_announcements_qs.count() > 3
 
-        # open volunteer opportunities preview for homepage CTA section
-        context['featured_volunteer_opportunities'] = VolunteerOpportunity.objects.filter(
+        # volunteer opportunities preview with a conditional "Visit more" CTA
+        featured_opportunities_qs = VolunteerOpportunity.objects.filter(
             status='open'
-        ).order_by('start_date', 'created_at')[:4]
+        ).order_by('start_date', 'created_at')
+        context['featured_volunteer_opportunities'] = featured_opportunities_qs[:3]
+        context['has_more_volunteer_opportunities'] = featured_opportunities_qs.count() > 3
 
         # include user's registrations to disable register buttons if already registered
         if self.request.user.is_authenticated:
             registered_ids = EventRegistration.objects.filter(
                 user=self.request.user,
-                program__in=upcoming
+                program__in=context['upcoming_programs']
             ).values_list('program_id', flat=True)
             context['user_upcoming_registrations'] = set(registered_ids)
         else:

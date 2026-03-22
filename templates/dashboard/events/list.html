@@ -49,79 +49,78 @@
                 <a href="{% url 'dashboard:event_list' %}" class="btn btn-sm btn-secondary">Clear</a>
                 {% endif %}
             </form>
+            <div class="events-toolbar-meta">
+                <span><i class="fas fa-sort-amount-down-alt"></i> Sorted by date</span>
+                <span><i class="fas fa-calendar-check"></i> {{ events|length }} event{{ events|length|pluralize }}</span>
+            </div>
         </div>
     </div>
 
     <div class="content-card-body">
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Title</th>
-                        <th>Date</th>
-                        <th>Category</th>
-                        <th>Location</th>
-                        <th>Community</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for event in events %}
-                    <tr>
-                        <td>#{{ event.id }}</td>
-                        <td>
-                            <strong>{{ event.title }}</strong>
-                            {% if event.image %}
-                            <i class="fas fa-image text-success" title="Has image"></i>
-                            {% endif %}
-                        </td>
-                        <td>{{ event.date|date:"M d, Y" }}</td>
-                        <td>
-                            {% if event.category %}
-                            <span class="badge badge-secondary">{{ event.category }}</span>
-                            {% else %}
-                            <span class="text-muted">N/A</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ event.location|default:"N/A" }}</td>
-                        <td>
-                            {% if event.community %}
-                            <span class="badge badge-info">{{ event.community.name }}</span>
-                            {% else %}
-                            <span class="text-muted">All</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="badge badge-success">Active</span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="{% url 'dashboard:event_edit' event.pk %}" class="btn-icon btn-edit"
-                                    title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button class="btn-icon btn-delete"
-                                    onclick="deleteEvent({{ event.pk }}, '{{ event.title|escapejs }}')" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" class="text-center text-muted py-4">
-                            {% if search %}
-                            No events found matching "{{ search }}"
-                            {% else %}
-                            No events found. <a href="{% url 'dashboard:event_create' %}">Create your first event</a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="events-card-grid">
+            {% for event in events %}
+            <article class="event-card">
+                <div class="event-card-top">
+                    <span class="event-id">#{{ event.id }}</span>
+                    <span class="event-date-pill"><i class="far fa-calendar-alt"></i> {{ event.date|date:"M d, Y" }}</span>
+                </div>
+
+                <div class="event-card-title-row">
+                    <h3>{{ event.title }}</h3>
+                    {% if event.image %}
+                    <span class="event-media-chip" title="Has image"><i class="fas fa-image"></i> Media</span>
+                    {% endif %}
+                </div>
+
+                <div class="event-card-meta">
+                    <span class="event-meta-item">
+                        <i class="fas fa-tag" aria-hidden="true"></i>
+                        <strong>Category</strong>
+                        {% if event.event_type %}
+                        <span class="badge badge-secondary event-meta-value">{{ event.get_event_type_display }}</span>
+                        {% else %}
+                        <span class="text-muted event-meta-value">N/A</span>
+                        {% endif %}
+                    </span>
+                    <span class="event-meta-item">
+                        <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        <strong>Location</strong>
+                        <span class="event-meta-value">{{ event.location|default:"N/A" }}</span>
+                    </span>
+                    <span class="event-meta-item">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                        <strong>Community</strong>
+                        {% if event.community %}
+                        <span class="badge badge-info event-meta-value">{{ event.community.name }}</span>
+                        {% else %}
+                        <span class="text-muted event-meta-value">All</span>
+                        {% endif %}
+                    </span>
+                    <span class="event-meta-item">
+                        <i class="fas fa-circle-check" aria-hidden="true"></i>
+                        <strong>Status</strong>
+                        <span class="badge badge-success event-meta-value">Active</span>
+                    </span>
+                </div>
+
+                <div class="action-buttons action-buttons--row event-card-actions">
+                    <a href="{% url 'dashboard:event_edit' event.pk %}" class="btn-icon btn-edit" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="btn-icon btn-delete" onclick="deleteEvent({{ event.pk }}, '{{ event.title|escapejs }}')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </article>
+            {% empty %}
+            <div class="events-empty-state text-center text-muted py-4">
+                {% if search %}
+                No events found matching "{{ search }}"
+                {% else %}
+                No events found. <a href="{% url 'dashboard:event_create' %}">Create your first event</a>
+                {% endif %}
+            </div>
+            {% endfor %}
         </div>
     </div>
 </div>

@@ -64,6 +64,16 @@
             <form method="post" class="volunteer-application-form">
                 {% csrf_token %}
 
+                <div class="apply-form-intro" aria-label="Application process overview">
+                    <h3><i class="fas fa-route"></i> Quick Application Flow</h3>
+                    <div class="apply-form-steps">
+                        <span><i class="fas fa-user-edit"></i> Share your profile</span>
+                        <span><i class="fas fa-heart"></i> Tell your motivation</span>
+                        <span><i class="fas fa-paper-plane"></i> Submit for review</span>
+                    </div>
+                    <p class="apply-form-note">Most applications take about 3 to 5 minutes to complete.</p>
+                </div>
+
                 <div class="form-section">
                     <h3><i class="fas fa-user"></i> Your Information</h3>
                     {% if user.is_authenticated %}
@@ -159,6 +169,21 @@
             </form>
 
             <aside class="apply-side-panel" aria-label="Application Tips">
+                <div class="side-card side-card-opportunity">
+                    <h3><i class="fas fa-briefcase"></i> Opportunity Snapshot</h3>
+                    <ul class="opportunity-facts">
+                        <li><i class="fas fa-layer-group"></i> {{ opportunity.get_category_display }}</li>
+                        <li><i class="fas fa-map-marker-alt"></i> {{ opportunity.location|default:'Location flexible' }}</li>
+                        {% if opportunity.time_commitment %}
+                        <li><i class="fas fa-clock"></i> {{ opportunity.time_commitment }}</li>
+                        {% endif %}
+                        {% if opportunity.is_remote %}
+                        <li><i class="fas fa-wifi"></i> Remote friendly</li>
+                        {% endif %}
+                        <li><i class="fas fa-users"></i> {{ opportunity.positions_remaining }} spot{{ opportunity.positions_remaining|pluralize }} left</li>
+                    </ul>
+                </div>
+
                 <div class="side-card">
                     <h3><i class="fas fa-lightbulb"></i> Application Tips</h3>
                     <ul>
@@ -170,6 +195,10 @@
                 <div class="side-card side-card-alt">
                     <h3><i class="fas fa-shield-alt"></i> What Happens Next</h3>
                     <p>Our coordinators review applications and will contact you by email or phone with next steps.</p>
+                </div>
+                <div class="side-card side-card-privacy">
+                    <h3><i class="fas fa-lock"></i> Your Data</h3>
+                    <p>Your details are used only for volunteer coordination and are reviewed by authorized team members.</p>
                 </div>
             </aside>
         </div>
