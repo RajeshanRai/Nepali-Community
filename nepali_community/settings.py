@@ -240,6 +240,10 @@ DATA_UPLOAD_MAX_NUMBER_FILES = 100  # Allow up to 100 files per request (default
 # custom user model
 AUTH_USER_MODEL = 'users.CustomUser'
 
+# Community identity settings
+COMMUNITY_NAME = os.getenv('COMMUNITY_NAME', 'Nepali Community of Vancouver').strip()
+ANNUAL_DONATION_GOAL = int(os.getenv('ANNUAL_DONATION_GOAL', '60000'))
+
 # Email configuration (SMTP)
 EMAIL_BACKEND = _required_env('EMAIL_BACKEND')
 EMAIL_HOST = _required_env('EMAIL_HOST')
@@ -259,6 +263,36 @@ STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', '').strip()
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '').strip()
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '').strip()
 RECEIPT_LOGO_PATH = os.getenv('RECEIPT_LOGO_PATH', '').strip()
+DONATION_PENDING_SLA_HOURS = int(os.getenv('DONATION_PENDING_SLA_HOURS', '24'))
+
+
+def _stripe_key_mode(public_key: str, secret_key: str):
+    if public_key.startswith('pk_test_') and secret_key.startswith('sk_test_'):
+        return 'test'
+    if public_key.startswith('pk_live_') and secret_key.startswith('sk_live_'):
+        return 'live'
+    return None
+
+
+has_stripe_public = bool(STRIPE_PUBLIC_KEY)
+has_stripe_secret = bool(STRIPE_SECRET_KEY)
+
+if has_stripe_public != has_stripe_secret:
+    raise ImproperlyConfigured(
+        'Stripe configuration is incomplete. Set both STRIPE_PUBLIC_KEY and STRIPE_SECRET_KEY together.'
+    )
+
+if has_stripe_public and has_stripe_secret:
+    stripe_mode = _stripe_key_mode(STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY)
+    if stripe_mode is None:
+        raise ImproperlyConfigured(
+            'Stripe key mode mismatch. Use pk_test with sk_test or pk_live with sk_live.'
+        )
+
+if not DEBUG and not STRIPE_WEBHOOK_SECRET:
+    raise ImproperlyConfigured(
+        'Missing STRIPE_WEBHOOK_SECRET in non-debug mode.'
+    )
 
 # to avoid default profile URL (404) for django.contrib.auth login view
 

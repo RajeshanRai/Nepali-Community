@@ -15,7 +15,8 @@ class DonationForm(forms.ModelForm):
         required=True
     )
     custom_amount = forms.DecimalField(
-        min_value=0.01,
+        min_value=1,
+        max_value=100000,
         decimal_places=2,
         widget=forms.NumberInput(attrs={
             'placeholder': 'Enter custom amount',

@@ -58,7 +58,7 @@ class HomeView(TemplateView):
             Q(start_date__isnull=True) | Q(start_date__lte=local_today)
         ).filter(
             Q(end_date__isnull=True) | Q(end_date__gte=local_today)
-        ).order_by('start_date', 'created_at')[:3]
+        ).select_related('created_by').order_by('start_date', 'created_at')[:3]
 
         # latest announcements preview with a conditional "Visit more" CTA
         latest_announcements_qs = Announcement.objects.filter(
@@ -67,14 +67,14 @@ class HomeView(TemplateView):
             publish_date__lte=now,
         ).filter(
             Q(expire_date__isnull=True) | Q(expire_date__gt=now)
-        )
+        ).select_related('created_by')
         context['latest_announcements'] = latest_announcements_qs[:3]
         context['has_more_announcements'] = latest_announcements_qs.count() > 3
 
         # volunteer opportunities preview with a conditional "Visit more" CTA
         featured_opportunities_qs = VolunteerOpportunity.objects.filter(
             status='open'
-        ).order_by('start_date', 'created_at')
+        ).select_related('created_by').order_by('start_date', 'created_at')
         context['featured_volunteer_opportunities'] = featured_opportunities_qs[:3]
         context['has_more_volunteer_opportunities'] = featured_opportunities_qs.count() > 3
 

@@ -11,9 +11,13 @@ from django.views.decorators.cache import cache_page
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse, reverse_lazy
+from django.core.paginator import Paginator
+from django.conf import settings
 from datetime import timedelta, datetime, date, time
 import json
 import csv
+
+DASHBOARD_PAGE_SIZE = 30
 
 from core.email_utils import (
     send_notification_email,
@@ -583,7 +587,13 @@ def event_list(request):
     search = request.GET.get('search', '')
     if search:
         events = events.filter(Q(title__icontains=search) | Q(description__icontains=search))
-    return render(request, 'dashboard/events/list.html', {'events': events, 'search': search})
+    paginator = Paginator(events, DASHBOARD_PAGE_SIZE)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    return render(request, 'dashboard/events/list.html', {
+        'events': page_obj.object_list,
+        'page_obj': page_obj,
+        'search': search,
+    })
 
 
 @require_http_methods(['GET', 'POST'])
@@ -692,7 +702,7 @@ def event_delete(request, pk):
 @user_passes_test(staff_required, login_url='login')
 def volunteer_opportunities_list(request):
     """List all volunteer opportunities"""
-    opportunities = VolunteerOpportunity.objects.all().order_by('-created_at')
+    opportunities = VolunteerOpportunity.objects.select_related('created_by').all().order_by('-created_at')
     search = request.GET.get('search', '')
     selected_status = request.GET.get('status', '').strip()
 
@@ -711,8 +721,12 @@ def volunteer_opportunities_list(request):
         for value, label in VolunteerOpportunity.STATUS_CHOICES
     ]
 
+    paginator = Paginator(opportunities, DASHBOARD_PAGE_SIZE)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
     context = {
-        'opportunities': opportunities,
+        'opportunities': page_obj.object_list,
+        'page_obj': page_obj,
         'search': search,
         'selected_status': selected_status,
         'status_options': status_options,
@@ -773,7 +787,7 @@ def volunteer_opportunity_delete(request, pk):
 @user_passes_test(staff_required, login_url='login')
 def volunteer_applications_list(request):
     """List all volunteer applications"""
-    applications = VolunteerApplication.objects.all().order_by('-applied_at')
+    applications = VolunteerApplication.objects.select_related('opportunity').all().order_by('-applied_at')
     volunteer_requests = VolunteerRequest.objects.select_related('assigned_opportunity').all().order_by('-created_at')
     available_opportunities = VolunteerOpportunity.objects.filter(
         status='open',
@@ -783,12 +797,15 @@ def volunteer_applications_list(request):
     if status_filter:
         applications = applications.filter(status=status_filter)
 
+    paginator = Paginator(applications, DASHBOARD_PAGE_SIZE)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
     context = {
-        'applications': applications,
+        'applications': page_obj.object_list,
+        'page_obj': page_obj,
         'volunteer_requests': volunteer_requests,
         'available_opportunities': available_opportunities,
         'status_filter': status_filter,
-        # sidebar counts are provided by the global context processor
     }
     return render(request, 'dashboard/volunteers/applications.html', context)
 
@@ -1061,14 +1078,19 @@ def volunteer_request_assign(request, pk):
 @user_passes_test(staff_required, login_url='login')
 def event_requests_list(request):
     """List all event requests"""
-    requests = RequestEvent.objects.all().order_by('-submitted_at')
+    requests = RequestEvent.objects.select_related('community', 'approved_by').all().order_by('-submitted_at')
     status_filter = request.GET.get('status', '').strip()
 
-    # Allow case-insensitive filtering to avoid missing records if status values are not normalized
     if status_filter:
         requests = requests.filter(status__iexact=status_filter)
 
-    return render(request, 'dashboard/requests/list.html', {'requests': requests, 'status_filter': status_filter})
+    paginator = Paginator(requests, DASHBOARD_PAGE_SIZE)
+    page_obj = paginator.get_page(request.GET.get('page'))
+    return render(request, 'dashboard/requests/list.html', {
+        'requests': page_obj.object_list,
+        'page_obj': page_obj,
+        'status_filter': status_filter,
+    })
 
 
 @user_passes_test(staff_required, login_url='login')
@@ -1184,7 +1206,7 @@ def event_request_delete(request, pk):
 @user_passes_test(staff_required, login_url='login')
 def announcements_list(request):
     """List all announcements"""
-    announcements = Announcement.objects.all().order_by('-created_at')
+    announcements = Announcement.objects.select_related('created_by').all().order_by('-created_at')
     search = request.GET.get('search', '')
     selected_category = request.GET.get('category', '').strip()
 
@@ -1203,8 +1225,12 @@ def announcements_list(request):
         for value, label in Announcement.CATEGORY_CHOICES
     ]
 
+    paginator = Paginator(announcements, DASHBOARD_PAGE_SIZE)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
     context = {
-        'announcements': announcements,
+        'announcements': page_obj.object_list,
+        'page_obj': page_obj,
         'search': search,
         'selected_category': selected_category,
         'category_options': category_options,
@@ -1567,6 +1593,12 @@ class DonationListView(StaffRequiredMixin, ListView):
         filtered_totals = filtered_qs.aggregate(total_amount=Sum('amount'))
         completed_totals = filtered_qs.filter(status='completed').aggregate(total_amount=Sum('amount'))
         overall_totals = Donation.objects.aggregate(total_amount=Sum('amount'))
+        pending_sla_hours = int(getattr(settings, 'DONATION_PENDING_SLA_HOURS', 24) or 24)
+        pending_sla_cutoff = timezone.now() - timedelta(hours=pending_sla_hours)
+        overdue_pending_qs = Donation.objects.select_related('user').filter(
+            status='pending',
+            created_at__lt=pending_sla_cutoff,
+        ).order_by('created_at')
 
         current_query = self.request.GET.copy()
         if 'page' in current_query:
@@ -1592,6 +1624,9 @@ class DonationListView(StaffRequiredMixin, ListView):
             'card_count': filtered_qs.filter(payment_method='card').count(),
             'overall_count': Donation.objects.count(),
             'overall_amount_total': overall_totals['total_amount'] or 0,
+            'pending_sla_hours': pending_sla_hours,
+            'overdue_pending_count': overdue_pending_qs.count(),
+            'overdue_pending_donations': overdue_pending_qs[:10],
             'active_filters_count': sum(
                 1
                 for value in [
@@ -1846,7 +1881,7 @@ team_member_delete = TeamMemberDeleteView.as_view()
 @user_passes_test(staff_required, login_url='login')
 def contact_messages_list(request):
     """List all contact messages"""
-    messages_qs = ContactMessage.objects.all().order_by('-created_at')
+    messages_qs = ContactMessage.objects.select_related('user').all().order_by('-created_at')
     search = request.GET.get('search', '')
 
     if search:
@@ -1857,8 +1892,12 @@ def contact_messages_list(request):
             | Q(message__icontains=search)
         )
 
+    paginator = Paginator(messages_qs, DASHBOARD_PAGE_SIZE)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
     context = {
-        'contact_messages': messages_qs,
+        'contact_messages': page_obj.object_list,
+        'page_obj': page_obj,
         'search': search,
     }
     return render(request, 'dashboard/contacts/list.html', context)
@@ -2133,7 +2172,7 @@ def admin_overview(request):
             'status_label': app.status.title(),
         })
 
-    for post in Announcement.objects.order_by('-created_at')[:4]:
+    for post in Announcement.objects.select_related('created_by').order_by('-created_at')[:4]:
         activities.append({
             'actor': 'Announcements Team',
             'action': f'Announcement published: {post.title}',

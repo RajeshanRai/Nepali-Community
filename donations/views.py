@@ -1,9 +1,11 @@
+import logging
+
 from django.views.generic import FormView, TemplateView
 from django.contrib import messages
 from django.conf import settings
 from django.db.models import Sum
 from datetime import datetime
-from .models import Donation
+from .models import Donation, StripeWebhookEvent
 from .forms import DonationForm
 from django.urls import reverse_lazy
 from django.shortcuts import redirect
@@ -13,6 +15,22 @@ from core.email_utils import send_notification_email, build_donation_receipt_htm
 import uuid
 from io import BytesIO
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+
+def _get_stripe_key_mode(public_key, secret_key):
+    public = (public_key or '').strip()
+    secret = (secret_key or '').strip()
+    if not public or not secret:
+        return None, 'Stripe keys are missing.'
+
+    if public.startswith('pk_test_') and secret.startswith('sk_test_'):
+        return 'test', None
+    if public.startswith('pk_live_') and secret.startswith('sk_live_'):
+        return 'live', None
+
+    return None, 'Stripe key mode mismatch. Use either pk_test + sk_test or pk_live + sk_live.'
 
 
 def _resolve_receipt_logo_path():
@@ -377,6 +395,7 @@ def _build_receipt_attachment(donation, *, payment_method_text, payment_status_t
         buffer.close()
         return (f'{filename_base}.pdf', pdf_content, 'application/pdf')
     except Exception:
+        logger.exception('Failed to generate PDF receipt for donation; falling back to plain text')
         return (f'{filename_base}.txt', '\n'.join(fallback_lines).encode('utf-8'), 'text/plain')
 
 
@@ -398,6 +417,10 @@ def _get_stripe_client():
     ):
         return None, 'Stripe is not configured. Replace STRIPE_PUBLIC_KEY and STRIPE_SECRET_KEY in .env with real Stripe test keys.'
 
+    mode, mode_error = _get_stripe_key_mode(public_key, secret_key)
+    if mode_error:
+        return None, mode_error
+
     stripe.api_key = secret_key
     return stripe, None
 
@@ -406,12 +429,10 @@ def _is_stripe_test_mode_active():
     """True only when real Stripe test keys are loaded."""
     public_key = (getattr(settings, 'STRIPE_PUBLIC_KEY', '') or '').strip()
     secret_key = (getattr(settings, 'STRIPE_SECRET_KEY', '') or '').strip()
-    return (
-        public_key.startswith('pk_test_')
-        and secret_key.startswith('sk_test_')
-        and 'xxx' not in public_key.lower()
-        and 'xxx' not in secret_key.lower()
-    )
+    if 'xxx' in public_key.lower() or 'xxx' in secret_key.lower():
+        return False
+    mode, _ = _get_stripe_key_mode(public_key, secret_key)
+    return mode == 'test'
 
 
 def _extract_card_last4(stripe, payment_intent_id):
@@ -431,6 +452,7 @@ def _extract_card_last4(stripe, payment_intent_id):
             last4 = (card.get('last4') or '').strip()
             return last4[:4]
     except Exception:
+        logger.warning('Could not extract card last4 from payment intent %s', payment_intent_id)
         return ''
 
     return ''
@@ -470,8 +492,8 @@ class DonationView(FormView):
         monthly_average = float(total_raised) / months_with_donations if months_with_donations > 0 else 0
         
         # Annual goal
-        annual_goal = 60000
-        goal_percentage = min(100, round((float(total_raised) / annual_goal) * 100))
+        annual_goal = getattr(settings, 'ANNUAL_DONATION_GOAL', 60000)
+        goal_percentage = min(100, round((float(total_raised) / annual_goal) * 100)) if annual_goal else 0
         amount_remaining = max(0, annual_goal - float(total_raised))
         
         return {
@@ -495,16 +517,32 @@ class DonationView(FormView):
         donation_amount = form.cleaned_data.get('donation_amount')
         custom_amount = form.cleaned_data.get('custom_amount')
         payment_method = form.cleaned_data.get('payment_method')
-        
+
         # Determine final amount
         if donation_amount == 'custom':
             amount = custom_amount
         else:
-            amount = donation_amount
+            try:
+                amount = int(donation_amount)
+            except (TypeError, ValueError):
+                form.add_error(None, 'Invalid donation amount selected.')
+                return self.form_invalid(form)
+
+        # Server-side bounds check regardless of how the form was submitted
+        from decimal import Decimal as _D
+        try:
+            amount_decimal = _D(str(amount))
+        except Exception:
+            form.add_error(None, 'Invalid donation amount.')
+            return self.form_invalid(form)
+
+        if amount_decimal < _D('1') or amount_decimal > _D('100000'):
+            form.add_error(None, 'Donation amount must be between $1 and $100,000.')
+            return self.form_invalid(form)
         
         # Create donation instance
         donation = form.save(commit=False)
-        donation.amount = amount
+        donation.amount = amount_decimal
         donation.payment_method = payment_method
         donation.transaction_ref = str(uuid.uuid4())
         
@@ -696,10 +734,8 @@ Nepali Community of Vancouver Team
                     )
                 ],
             )
-        except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.error(f"Error sending donation confirmation email to {recipient_email}: {e}")
+        except Exception:
+            logger.exception('Failed to send donation confirmation email to %s', recipient_email)
 
 
 class PaymentSuccessView(TemplateView):
@@ -751,7 +787,7 @@ class PaymentSuccessView(TemplateView):
                         if donation.status == 'completed':
                             context['payment_status'] = 'completed'
                 except Exception:
-                    pass
+                    logger.exception('Error processing Stripe session %s on success page', stripe_session_id)
         return context
 
     def send_confirmation_email(self, donation):
@@ -809,7 +845,7 @@ Nepali Community of Vancouver Team
                 ],
             )
         except Exception:
-            pass
+            logger.exception('Failed to send Stripe payment confirmation email for donation %s', donation.pk)
 
 
 class PaymentCancelView(TemplateView):
@@ -837,7 +873,7 @@ def stripe_webhook(request):
         return HttpResponse(error_message, status=503)
 
     if not settings.STRIPE_WEBHOOK_SECRET:
-        return HttpResponseBadRequest('Missing STRIPE_WEBHOOK_SECRET')
+        return HttpResponse('Webhook secret not configured', status=401)
 
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE', '')
@@ -849,12 +885,51 @@ def stripe_webhook(request):
     except stripe.error.SignatureVerificationError:
         return HttpResponseBadRequest('Invalid signature')
 
+    event_id = (event.get('id') or '').strip()
     event_type = event.get('type')
+
+    if event_id:
+        webhook_event, created = StripeWebhookEvent.objects.get_or_create(
+            event_id=event_id,
+            defaults={'event_type': event_type or ''},
+        )
+        if not created:
+            logger.info('Duplicate Stripe webhook event ignored: %s', event_id)
+            return HttpResponse(status=200)
+        if event_type and webhook_event.event_type != event_type:
+            webhook_event.event_type = event_type
+            webhook_event.save(update_fields=['event_type'])
 
     if event_type == 'checkout.session.completed':
         session = event['data']['object']
+        metadata = session.get('metadata') or {}
+        metadata_donation_id = str(metadata.get('donation_id') or '').strip()
+        metadata_ref = str(metadata.get('transaction_ref') or '').strip()
+
         donation = Donation.objects.filter(stripe_session_id=session.get('id')).first()
+        if not donation and metadata_donation_id.isdigit():
+            donation = Donation.objects.filter(pk=int(metadata_donation_id)).first()
+
         if donation:
+            if metadata_donation_id and metadata_donation_id != str(donation.pk):
+                logger.warning(
+                    'Stripe webhook metadata donation_id mismatch: event=%s donation=%s metadata=%s',
+                    event_id,
+                    donation.pk,
+                    metadata_donation_id,
+                )
+                return HttpResponse(status=200)
+
+            if metadata_ref and donation.transaction_ref and metadata_ref != donation.transaction_ref:
+                logger.warning(
+                    'Stripe webhook transaction_ref mismatch: event=%s donation=%s metadata_ref=%s donation_ref=%s',
+                    event_id,
+                    donation.pk,
+                    metadata_ref,
+                    donation.transaction_ref,
+                )
+                return HttpResponse(status=200)
+
             update_fields = []
             payment_intent_id = session.get('payment_intent', '') or donation.stripe_payment_intent_id
 
@@ -879,10 +954,47 @@ def stripe_webhook(request):
 
     if event_type == 'payment_intent.payment_failed':
         payment_intent = event['data']['object']
-        donation = Donation.objects.filter(stripe_payment_intent_id=payment_intent.get('id')).first()
+        payment_intent_id = str(payment_intent.get('id') or '').strip()
+        metadata = payment_intent.get('metadata') or {}
+        metadata_donation_id = str(metadata.get('donation_id') or '').strip()
+        metadata_ref = str(metadata.get('transaction_ref') or '').strip()
+
+        donation = Donation.objects.filter(stripe_payment_intent_id=payment_intent_id).first()
+        if not donation and metadata_donation_id.isdigit():
+            donation = Donation.objects.filter(pk=int(metadata_donation_id)).first()
+
         if donation:
+            if metadata_donation_id and metadata_donation_id != str(donation.pk):
+                logger.warning(
+                    'Stripe payment_failed donation_id mismatch: event=%s donation=%s metadata=%s',
+                    event_id,
+                    donation.pk,
+                    metadata_donation_id,
+                )
+                return HttpResponse(status=200)
+
+            if metadata_ref and donation.transaction_ref and metadata_ref != donation.transaction_ref:
+                logger.warning(
+                    'Stripe payment_failed transaction_ref mismatch: event=%s donation=%s metadata_ref=%s donation_ref=%s',
+                    event_id,
+                    donation.pk,
+                    metadata_ref,
+                    donation.transaction_ref,
+                )
+                return HttpResponse(status=200)
+
+            update_fields = []
+            if payment_intent_id and donation.stripe_payment_intent_id != payment_intent_id:
+                donation.stripe_payment_intent_id = payment_intent_id
+                update_fields.append('stripe_payment_intent_id')
+
             donation.status = 'failed'
-            donation.save(update_fields=['status'])
+            update_fields.append('status')
+            donation.save(update_fields=sorted(set(update_fields)))
+
+    known_event_types = {'checkout.session.completed', 'payment_intent.payment_failed'}
+    if event_type not in known_event_types:
+        logger.info('Ignoring Stripe webhook event type: %s', event_type)
 
     return HttpResponse(status=200)
 

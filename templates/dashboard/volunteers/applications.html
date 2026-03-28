@@ -340,6 +340,9 @@
 
 {% csrf_token %}
 <input type="hidden" id="csrfTokenValue" value="{{ csrf_token }}">
+
+{% include 'dashboard/includes/pagination.html' %}
+
 {% endblock %}
 
 {% block extra_js %}

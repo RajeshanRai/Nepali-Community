@@ -1,4 +1,6 @@
 from django.contrib.auth.views import LoginView as AuthLoginView, LogoutView as AuthLogoutView
+import logging
+
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 from django.contrib.auth import update_session_auth_hash, logout, login
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -18,6 +20,8 @@ import base64
 import io
 import pyotp
 import qrcode  # pyright: ignore[reportMissingImports]
+
+logger = logging.getLogger(__name__)
 from .models import CustomUser, LoginActivity, TwoFactorEmailCode
 from .forms import (
     CustomAuthForm,
@@ -142,7 +146,7 @@ def _get_authenticated_profile_url(request):
         try:
             return reverse('dashboard:profiles')
         except NoReverseMatch:
-            pass
+            logger.warning("dashboard:profiles URL not found; falling back to profile URL")
     return reverse('profile')
 
 

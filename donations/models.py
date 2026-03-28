@@ -37,3 +37,15 @@ class Donation(models.Model):
     def __str__(self):
         return f"{'Anonymous' if self.anonymous else (self.donor_name or self.user)} - ${self.amount}"
 
+
+class StripeWebhookEvent(models.Model):
+    event_id = models.CharField(max_length=255, unique=True)
+    event_type = models.CharField(max_length=120, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.event_type or 'unknown'} ({self.event_id})"
+

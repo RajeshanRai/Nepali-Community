@@ -1,19 +1,25 @@
 from decimal import Decimal
 
+from django.conf import settings
 from django.db.models import Q, Sum
 from django.utils import timezone
+from django.core.cache import cache
 
 from announcements.models import Announcement
 from donations.models import Donation
 from programs.models import Program
 
 
-ANNUAL_DONATION_GOAL = Decimal('60000.00')
-
-
 def site_chrome(request):
     now = timezone.now()
     today = timezone.localdate()
+
+    ANNUAL_DONATION_GOAL = Decimal(str(getattr(settings, 'ANNUAL_DONATION_GOAL', 60000)))
+
+    CACHE_KEY = f'site_chrome_{today.isoformat()}'
+    cached = cache.get(CACHE_KEY)
+    if cached is not None:
+        return cached
 
     upcoming_count = Program.objects.filter(date__gte=today).count()
 
@@ -59,8 +65,10 @@ def site_chrome(request):
         },
     ]
 
-    return {
+    result = {
         'top_bar_rotator_items': rotator_items,
         'top_bar_event_pill': f'{upcoming_count} upcoming' if upcoming_count else 'Calendar warming up',
         'top_bar_donation_pill': f'{donation_progress}% funded' if donation_progress else 'Donations open',
     }
+    cache.set(CACHE_KEY, result, timeout=300)
+    return result

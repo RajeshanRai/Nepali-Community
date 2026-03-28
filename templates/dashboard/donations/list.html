@@ -170,6 +170,30 @@
         justify-content: space-between;
     }
 
+    .don-overdue-card {
+        border: 1px solid #f9c4a8;
+        background: linear-gradient(120deg, #fffaf5, #fff7ed);
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .don-overdue-title {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-weight: 800;
+        color: #9a3412;
+        margin-bottom: 0.35rem;
+    }
+
+    .don-overdue-list {
+        margin: 0.45rem 0 0;
+        padding-left: 1rem;
+        color: #7c2d12;
+        font-size: 0.82rem;
+    }
+
     @media (max-width: 980px) {
         .don-bulk-toolbar {
             align-items: flex-start;
@@ -276,6 +300,22 @@
     </div>
 </div>
 
+{% if overdue_pending_count %}
+<div class="don-overdue-card" role="status" aria-live="polite">
+    <div class="don-overdue-title"><i class="fas fa-triangle-exclamation"></i> Pending Donations Breaching SLA</div>
+    <div class="don-text-muted">
+        {{ overdue_pending_count }} donation(s) have remained pending for more than {{ pending_sla_hours }} hour{{ pending_sla_hours|pluralize }}.
+    </div>
+    <ul class="don-overdue-list">
+        {% for overdue in overdue_pending_donations %}
+        <li>
+            #{{ overdue.pk }} • ${{ overdue.amount }} • {{ overdue.donor_email|default:overdue.donor_name|default:'Unknown donor' }} • {{ overdue.created_at|timesince }} ago
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
 <div class="content-card">
     <div class="content-card-header">
         <form method="GET" class="search-form don-filter-grid">
@@ -361,7 +401,15 @@
                         <td>#{{ donation.pk }}</td>
                         <td>
                             <div>
-                                <strong>{{ donation.donor_name|default:donation.user.username|default:'Anonymous' }}</strong>
+                                <strong>
+                                    {% if donation.donor_name %}
+                                    {{ donation.donor_name }}
+                                    {% elif donation.user %}
+                                    {{ donation.user.username }}
+                                    {% else %}
+                                    Anonymous
+                                    {% endif %}
+                                </strong>
                                 <div class="don-text-muted">{{ donation.donor_email|default:'No email' }}</div>
                                 {% if donation.donor_phone %}<div class="don-text-muted">Phone: {{ donation.donor_phone }}</div>{% endif %}
                                 {% if donation.donor_address_line1 or donation.donor_city or donation.donor_province or donation.donor_postal_code %}
@@ -408,7 +456,7 @@
                                     type="button"
                                     class="btn-icon btn-delete js-donation-delete"
                                     data-delete-url="{% url 'dashboard:donation_delete' donation.pk %}"
-                                    data-donation-name="#{{ donation.pk }} - {{ donation.donor_name|default:donation.user.username|default:'Anonymous'|escapejs }}"
+                                    data-donation-name="#{{ donation.pk }} - {% if donation.donor_name %}{{ donation.donor_name|escapejs }}{% elif donation.user %}{{ donation.user.username|escapejs }}{% else %}Anonymous{% endif %}"
                                     title="Delete"
                                 ><i class="fas fa-trash"></i></button>
                             </div>
