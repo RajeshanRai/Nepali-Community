@@ -1,0 +1,167 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}FAQs Management{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/faqs-list.css' %}">
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">FAQs</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-question-circle"></i> FAQs Management</h1>
+        <p>Create and manage frequently asked questions</p>
+    </div>
+    <div class="page-header-actions">
+        <a href="{% url 'dashboard:faq_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create FAQ
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="content-card-header">
+        <div class="search-filter-bar">
+            <form method="GET" class="search-form">
+                <div class="search-input-group">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" placeholder="Search FAQs..." value="{{ search }}">
+                </div>
+                <select name="category" class="form-control form-control-max-250">
+                    <option value="">All Categories</option>
+                    {% for option in category_options %}
+                    <option value="{{ option.slug }}" {% if option.selected %}selected{% endif %}>
+                        {{ option.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                {% if search or selected_category %}
+                <a href="{% url 'dashboard:faqs_list' %}" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-redo"></i> Reset
+                </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <div class="content-card-body">
+        {% if faqs %}
+        <div class="faqs-container">
+            {% regroup faqs by category as faqs_by_category %}
+            {% for category, items in faqs_by_category %}
+            <div class="faq-category-section">
+                <div class="category-header">
+                    <h2 class="category-title">
+                        <i class="fas fa-{% if category.icon %}{{ category.icon }}{% else %}list{% endif %}"></i>
+                        {{ category.name }}
+                    </h2>
+                    <small class="category-count">{{ items|length }} question{{ items|length|pluralize }}</small>
+                </div>
+
+                <div class="faqs-list">
+                    {% for faq in items %}
+                    <div class="faq-item">
+                        <div class="faq-header" onclick="toggleFAQ(this)">
+                            <div class="faq-question">
+                                <i class="fas fa-chevron-right toggle-icon"></i>
+                                <h3>{{ faq.question }}</h3>
+                            </div>
+                            <div class="faq-status">
+                                {% if faq.is_featured %}
+                                <span class="badge badge-success">
+                                    <i class="fas fa-star"></i> Featured
+                                </span>
+                                {% endif %}
+                                {% if not faq.is_published %}
+                                <span class="badge badge-warning">
+                                    <i class="fas fa-eye-slash"></i> Draft
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="faq-content">
+                            <div class="faq-answer">
+                                {{ faq.answer }}
+                            </div>
+
+                            <div class="faq-feedback">
+                                <small class="text-muted">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    {{ faq.helpful_count }} helpful
+                                    <span class="separator">•</span>
+                                    <i class="fas fa-thumbs-down"></i>
+                                    {{ faq.not_helpful_count }} not helpful
+                                </small>
+                            </div>
+
+                            <div class="faq-actions">
+                                <a href="{% url 'dashboard:faq_edit' faq.pk %}" class="btn-icon btn-edit" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button onclick="deleteFAQ({{ faq.pk }}, '{{ faq.question|escapejs }}')"
+                                    class="btn-icon btn-delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-question-circle"></i>
+            <h3>No FAQs Yet</h3>
+            <p>
+                {% if search or request.GET.category %}
+                No FAQs match your search criteria.
+                {% else %}
+                Start by creating your first FAQ to help the community!
+                {% endif %}
+            </p>
+            <a href="{% url 'dashboard:faq_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create FAQ
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function toggleFAQ(element) {
+        const faqItem = element.closest('.faq-item');
+        faqItem.classList.toggle('open');
+    }
+
+    function deleteFAQ(id, question) {
+        confirmDelete({
+            url: `/dashboard/faqs/${id}/delete/`,
+            itemName: question,
+            itemType: 'FAQ'
+        });
+    }
+
+    // Expand first 5 FAQs by default
+    document.addEventListener('DOMContentLoaded', function () {
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach((item, index) => {
+            if (index < 5) {
+                item.classList.add('open');
+            }
+        });
+    });
+</script>
+{% endblock %}

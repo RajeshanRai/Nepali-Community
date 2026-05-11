@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ opportunity.title }} - Volunteer{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'volunteers/css/volunteers.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container volunteer-detail-page">
+    <div class="breadcrumb">
+        <a href="{% url 'volunteer_list' %}"><i class="fas fa-arrow-left"></i> Back to Opportunities</a>
+    </div>
+
+    <div class="detail-container">
+        <div class="main-content">
+            <div class="opportunity-header">
+                <div class="badges">
+                    <span class="category-badge category-{{ opportunity.category }}">
+                        {{ opportunity.get_category_display }}
+                    </span>
+                    {% if opportunity.is_remote %}
+                    <span class="remote-badge"><i class="fas fa-laptop-house"></i> Remote</span>
+                    {% endif %}
+                    <span class="status-badge status-{{ opportunity.status }}">
+                        {{ opportunity.get_status_display }}
+                    </span>
+                </div>
+
+                <h1>{{ opportunity.title }}</h1>
+
+                <div class="meta-info">
+                    <div class="meta-item">
+                        <i class="fas fa-users"></i>
+                        <strong>{{ opportunity.positions_remaining }}</strong> of {{ opportunity.positions_needed }}
+                        positions available
+                    </div>
+                    {% if opportunity.start_date %}
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-start"></i>
+                        Starts: {{ opportunity.start_date|date:"F d, Y" }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="content-section">
+                <h2><i class="fas fa-info-circle"></i> Description</h2>
+                <p class="description-text">{{ opportunity.description|linebreaks }}</p>
+            </div>
+
+            {% if opportunity.requirements %}
+            <div class="content-section">
+                <h2><i class="fas fa-check-circle"></i> Requirements</h2>
+                <p>{{ opportunity.requirements|linebreaks }}</p>
+            </div>
+            {% endif %}
+
+            {% if opportunity.benefits %}
+            <div class="content-section">
+                <h2><i class="fas fa-gift"></i> What You'll Gain</h2>
+                <p>{{ opportunity.benefits|linebreaks }}</p>
+            </div>
+            {% endif %}
+
+            <div class="content-section">
+                <h2><i class="fas fa-clipboard-list"></i> Details</h2>
+                <table class="details-table">
+                    {% if not opportunity.is_remote and opportunity.location %}
+                    <tr>
+                        <td><i class="fas fa-map-marker-alt"></i> Location</td>
+                        <td>{{ opportunity.location }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if opportunity.time_commitment %}
+                    <tr>
+                        <td><i class="fas fa-clock"></i> Time Commitment</td>
+                        <td>{{ opportunity.time_commitment }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if opportunity.end_date %}
+                    <tr>
+                        <td><i class="fas fa-calendar-check"></i> End Date</td>
+                        <td>{{ opportunity.end_date|date:"F d, Y" }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            {% if opportunity.is_active %}
+            <div class="apply-card">
+                <h3><i class="fas fa-hand-paper"></i> Ready to Volunteer?</h3>
+                <p>{{ opportunity.positions_remaining }} position{{ opportunity.positions_remaining|pluralize }} still
+                    available!</p>
+                <a href="{% url 'volunteer_apply' opportunity.pk %}" class="btn btn-primary btn-large">
+                    <i class="fas fa-paper-plane"></i> Apply Now
+                </a>
+            </div>
+            {% else %}
+            <div class="apply-card inactive">
+                <h3>
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% if opportunity.status == 'filled' %}
+                    Positions Filled
+                    {% else %}
+                    Application Closed
+                    {% endif %}
+                </h3>
+                <p>
+                    {% if opportunity.status == 'filled' %}
+                    All {{ opportunity.positions_needed }} volunteer position{{ opportunity.positions_needed|pluralize
+                    }} have been filled. Thank you for your interest!
+                    {% else %}
+                    This opportunity is no longer accepting applications.
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+
+            {% if opportunity.contact_email or opportunity.contact_phone %}
+            <div class="contact-card">
+                <h3><i class="fas fa-envelope"></i> Questions?</h3>
+                {% if opportunity.contact_email %}
+                <p><i class="fas fa-envelope"></i> {{ opportunity.contact_email }}</p>
+                {% endif %}
+                {% if opportunity.contact_phone %}
+                <p><i class="fas fa-phone"></i> {{ opportunity.contact_phone }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

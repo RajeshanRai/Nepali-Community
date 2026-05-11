@@ -1,0 +1,425 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load text_filters %}
+
+{% block title %}Home - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/homepage-redesign.css' %}">
+{% endblock %}
+
+{% block content %}
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+<div class="home-v2">
+    <section class="home-v2-hero">
+        <div class="home-v2-hero-slideshow" aria-hidden="true">
+            <div class="hero-slide active" style="background-image: url('https://images.pexels.com/photos/33440904/pexels-photo-33440904.jpeg?auto=compress&cs=tinysrgb&w=1920')"></div>
+            <div class="hero-slide" style="background-image: url('https://images.pexels.com/photos/28867843/pexels-photo-28867843.jpeg?auto=compress&cs=tinysrgb&w=1920')"></div>
+            <div class="hero-slide" style="background-image: url('https://images.pexels.com/photos/1661460/pexels-photo-1661460.jpeg?auto=compress&cs=tinysrgb&w=1920')"></div>
+            <div class="hero-slide" style="background-image: url('https://images.pexels.com/photos/33440909/pexels-photo-33440909.jpeg?auto=compress&cs=tinysrgb&w=1920')"></div>
+            <div class="hero-slide" style="background-image: url('https://images.pexels.com/photos/32135288/pexels-photo-32135288.jpeg?auto=compress&cs=tinysrgb&w=1920')"></div>
+            <div class="home-v2-hero-overlay"></div>
+        </div>
+        <div class="home-v2-hero-content container">
+            <div class="home-v2-hero-left">
+                <span class="home-v2-kicker">Nepali Community in Vancouver</span>
+                <h1>Where Culture Feels Like Home</h1>
+                <p>
+                    Celebrate festivals, join meaningful programs, and build lifelong connections across Nepali
+                    communities in Vancouver.
+                </p>
+                <div class="home-v2-hero-actions">
+                    <a href="{% url 'program_list' %}" class="btn btn-primary">Explore Programs</a>
+                    <a href="{% url 'community_list' %}" class="btn btn-secondary">Discover Communities</a>
+                </div>
+                <div class="home-v2-hero-tags">
+                    <span><i class="fas fa-calendar-alt"></i> Events</span>
+                    <span><i class="fas fa-users"></i> Community</span>
+                    <span><i class="fas fa-hands-helping"></i> Volunteering</span>
+                </div>
+            </div>
+            <div class="home-v2-hero-side">
+                <article class="hero-side-card hero-side-card--week">
+                    <div class="hero-side-card-icon">
+                        <i class="fas fa-calendar-week"></i>
+                    </div>
+                    <div class="hero-side-card-body">
+                        <h3>This Week</h3>
+                        <p>{{ upcoming_programs|length }} upcoming program{{ upcoming_programs|length|pluralize }} scheduled for the community.</p>
+                        <a href="{% url 'program_list' %}" class="hero-side-card-cta">View Calendar <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </article>
+                <article class="hero-side-card hero-side-card--involved">
+                    <div class="hero-side-card-icon">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <div class="hero-side-card-body">
+                        <h3>Get Involved</h3>
+                        <p>Volunteer, donate, or partner to grow our community's impact together.</p>
+                        <a href="{% url 'volunteer_list' %}" class="hero-side-card-cta">Join as Volunteer <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="home-v2-metrics container" aria-label="Community Highlights">
+        <article class="home-v2-metric-card reveal-up">
+            <div class="home-v2-metric-meta">
+                <div class="home-v2-metric-icon" style="--metric-color: #FF6B35;">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <span class="home-v2-metric-kicker">Live</span>
+            </div>
+            <h4 class="home-v2-metric-value" data-countup>{{ upcoming_programs|length }}</h4>
+            <p class="home-v2-metric-label">Upcoming Programs</p>
+        </article>
+        <article class="home-v2-metric-card reveal-up">
+            <div class="home-v2-metric-meta">
+                <div class="home-v2-metric-icon" style="--metric-color: #8B5CF6;">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <span class="home-v2-metric-kicker">Heritage</span>
+            </div>
+            <h4 class="home-v2-metric-value" data-countup>{{ total_communities }}</h4>
+            <p class="home-v2-metric-label">Ethnic Communities</p>
+        </article>
+        <article class="home-v2-metric-card reveal-up">
+            <div class="home-v2-metric-meta">
+                <div class="home-v2-metric-icon" style="--metric-color: #10b981;">
+                    <i class="fas fa-hands-helping"></i>
+                </div>
+                <span class="home-v2-metric-kicker">Support</span>
+            </div>
+            <h4 class="home-v2-metric-value" data-countup>{{ total_volunteers }}</h4>
+            <p class="home-v2-metric-label">Active Volunteers</p>
+        </article>
+        <article class="home-v2-metric-card reveal-up">
+            <div class="home-v2-metric-meta">
+                <div class="home-v2-metric-icon" style="--metric-color: #3B82F6;">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <span class="home-v2-metric-kicker">Growth</span>
+            </div>
+            <h4 class="home-v2-metric-value" data-countup>{{ total_members }}</h4>
+            <p class="home-v2-metric-label">Active Members</p>
+        </article>
+    </section>
+
+    <section class="home-v2-happening-now container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>Happening Now</h2>
+        </div>
+
+        {% if happening_now_programs or happening_now_opportunities %}
+        <div class="home-v2-happening-grid">
+            {% for program in happening_now_programs %}
+            <article class="home-v2-happening-card home-v2-happening-card--program">
+                <div class="home-v2-happening-topline">
+                    <span class="home-v2-live-status"><span class="home-v2-live-dot" aria-hidden="true"></span>Live program</span>
+                    <span class="home-v2-happening-side-chip home-v2-happening-side-chip--streaming"><i class="fas fa-broadcast-tower"></i> Streaming</span>
+                </div>
+                <h3>{{ program.title|fix_mojibake }}</h3>
+                <p>{{ program.description|fix_mojibake|truncatechars:110 }}</p>
+                <div class="home-v2-happening-meta">
+                    <span><i class="fas fa-calendar-day"></i> Today</span>
+                    <span><i class="fas fa-star"></i> Community spotlight</span>
+                </div>
+                {% if program.live_stream_url %}
+                <a class="home-v2-happening-cta home-v2-happening-cta--live" href="{{ program.live_stream_url }}" target="_blank" rel="noopener noreferrer">See live</a>
+                {% endif %}
+            </article>
+            {% endfor %}
+
+            {% for opportunity in happening_now_opportunities %}
+            <article class="home-v2-happening-card home-v2-happening-card--opportunity">
+                <div class="home-v2-happening-topline">
+                    <span class="home-v2-happening-badge home-v2-happening-badge--volunteer">Active opportunity</span>
+                    <span class="home-v2-happening-side-chip home-v2-happening-side-chip--seats"><i class="fas fa-user-plus"></i> Open seats</span>
+                </div>
+                <h3>{{ opportunity.title|fix_mojibake }}</h3>
+                <p>{{ opportunity.description|fix_mojibake|truncatechars:110 }}</p>
+                <div class="home-v2-happening-meta">
+                    <span><i class="fas fa-bolt"></i> Open now</span>
+                    <span><i class="fas fa-hands-helping"></i> Volunteer impact</span>
+                </div>
+                <a class="home-v2-happening-cta" href="{% url 'volunteer_detail' opportunity.pk %}">See opportunity <i class="fas fa-arrow-right"></i></a>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="home-v2-empty-state">
+            <i class="fas fa-clock"></i>
+            <p>No items are marked as happening now. Check upcoming sections below.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="home-v2-communities container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>Communities That Keep Traditions Alive</h2>
+            <a href="{% url 'community_list' %}">See all communities <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="home-v2-community-grid">
+            <article class="home-v2-community-card">
+                <div class="icon"><i class="fas fa-users"></i></div>
+                <h3>Rai Community</h3>
+                <p>Preserving Sakela rhythms, stories, and Kirati heritage through shared celebration.</p>
+            </article>
+            <article class="home-v2-community-card">
+                <div class="icon"><i class="fas fa-user-friends"></i></div>
+                <h3>Magar Community</h3>
+                <p>Bringing vibrant western Nepal traditions to Vancouver through festivals and gatherings.</p>
+            </article>
+            <article class="home-v2-community-card">
+                <div class="icon"><i class="fas fa-music"></i></div>
+                <h3>Tamang Community</h3>
+                <p>Celebrating Lhosar, language, and music while strengthening intergenerational identity.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="home-v2-programs container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>Upcoming Programs</h2>
+        </div>
+
+        <div class="home-v2-program-list">
+            {% for program in upcoming_programs %}
+            <article class="home-v2-program-card">
+                <div class="home-v2-date-chip">
+                    <span>{{ program.date|date:"M" }}</span>
+                    <strong>{{ program.date|date:"d" }}</strong>
+                </div>
+                <div class="home-v2-program-info">
+                    <h3>{{ program.title|fix_mojibake }}</h3>
+                    <p>{{ program.description|fix_mojibake|truncatechars:120 }}</p>
+                    <div class="home-v2-meta">
+                        <span><i class="fas fa-tag"></i> {{ program.get_event_type_display }}</span>
+                        <span><i class="fas fa-map-marker-alt"></i> {{ program.location|fix_mojibake|default:"Location TBA" }}</span>
+                        <span><i class="fas fa-user-check"></i> {{ program.registered_count }} attending</span>
+                    </div>
+                </div>
+                <div class="home-v2-program-action">
+                    {% if user.is_authenticated and program.id in user_upcoming_registrations %}
+                    <button class="btn-unregister btn btn-secondary"
+                        data-program-id="{{ program.id }}">Unregister</button>
+                    {% else %}
+                    <button class="btn-register btn btn-primary" data-program-id="{{ program.id }}">Register</button>
+                    {% endif %}
+                </div>
+            </article>
+            {% empty %}
+            <div class="home-v2-empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <p>No upcoming programs right now. Check back soon!</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if has_more_upcoming_programs %}
+        <div class="home-v2-visit-more-wrap">
+            <a class="home-v2-visit-more-link" href="{% url 'program_list' %}">Visit more <i class="fas fa-angle-double-down"></i></a>
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="home-v2-announcements container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>Latest Announcements</h2>
+        </div>
+
+        {% if latest_announcements %}
+        <div class="home-v2-program-list home-v2-announcement-list">
+            {% for item in latest_announcements %}
+            <article class="home-v2-program-card home-v2-announcement-row priority-{{ item.priority }}">
+                <div class="home-v2-date-chip home-v2-announcement-chip">
+                    <span>{{ item.publish_date|date:"M" }}</span>
+                    <strong>{{ item.publish_date|date:"d" }}</strong>
+                </div>
+
+                <div class="home-v2-program-info home-v2-announcement-info">
+                    <h3>{{ item.title|fix_mojibake }}</h3>
+                    <p>{{ item.content|fix_mojibake|truncatechars:120 }}</p>
+                    <div class="home-v2-meta">
+                        <span class="announcement-meta-chip announcement-category-{{ item.category }}"><i class="fas fa-tag"></i> {{ item.get_category_display }}</span>
+                        <span class="announcement-meta-chip announcement-priority-{{ item.priority }}"><i class="fas fa-flag"></i> {{ item.get_priority_display }} priority</span>
+                        <span><i class="fas fa-calendar-alt"></i> {{ item.publish_date|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+
+                <div class="home-v2-program-action home-v2-announcement-action">
+                    <a class="btn btn-primary" href="{% url 'announcement_detail' item.pk %}">
+                        Read Details
+                    </a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="home-v2-empty-state">
+            <i class="fas fa-bullhorn"></i>
+            <p>No announcements published yet.</p>
+        </div>
+        {% endif %}
+
+        {% if has_more_announcements %}
+        <div class="home-v2-visit-more-wrap">
+            <a class="home-v2-visit-more-link" href="{% url 'announcement_list' %}">Visit more <i class="fas fa-angle-double-down"></i></a>
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="home-v2-volunteer-opportunities container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>Volunteer Opportunities</h2>
+        </div>
+
+        {% if featured_volunteer_opportunities %}
+        <div class="home-v2-program-list">
+            {% for opportunity in featured_volunteer_opportunities %}
+            <article class="home-v2-program-card">
+                <div class="home-v2-date-chip">
+                    {% if opportunity.start_date %}
+                    <span>{{ opportunity.start_date|date:"M" }}</span>
+                    <strong>{{ opportunity.start_date|date:"d" }}</strong>
+                    {% else %}
+                    <span>Open</span>
+                    <strong>Now</strong>
+                    {% endif %}
+                </div>
+
+                <div class="home-v2-program-info">
+                    <h3>{{ opportunity.title|fix_mojibake }}</h3>
+                    <p>{{ opportunity.description|fix_mojibake|truncatechars:120 }}</p>
+                    <div class="home-v2-meta">
+                        <span><i class="fas fa-tag"></i> {{ opportunity.get_category_display }}</span>
+                        <span><i class="fas fa-map-marker-alt"></i> {{ opportunity.location|fix_mojibake|default:"Location flexible" }}</span>
+                        <span><i class="fas fa-user-check"></i> {{ opportunity.positions_remaining }} spot{{ opportunity.positions_remaining|pluralize }} left</span>
+                    </div>
+                </div>
+
+                <div class="home-v2-program-action">
+                    <a class="btn btn-primary" href="{% url 'volunteer_detail' opportunity.pk %}">View Opportunity</a>
+                    <a class="btn btn-secondary" href="{% url 'volunteer_apply' opportunity.pk %}">Apply Now</a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="home-v2-empty-state">
+            <i class="fas fa-hands-helping"></i>
+            <p>No open volunteer opportunities right now. Please check back soon.</p>
+        </div>
+        {% endif %}
+
+        {% if has_more_volunteer_opportunities %}
+        <div class="home-v2-visit-more-wrap">
+            <a class="home-v2-visit-more-link" href="{% url 'volunteer_list' %}">Visit more <i class="fas fa-angle-double-down"></i></a>
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="home-v2-testimonials container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>Voices from Our Community</h2>
+            <a href="{% url 'contact' %}">Share your story <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="home-v2-smile-field" aria-hidden="true">
+            <span><i class="far fa-smile"></i></span>
+            <span><i class="far fa-smile"></i></span>
+            <span><i class="far fa-smile"></i></span>
+            <span><i class="far fa-smile"></i></span>
+            <span><i class="far fa-smile"></i></span>
+            <span><i class="far fa-smile"></i></span>
+        </div>
+        <div class="home-v2-testimonial-strip">
+            <article class="home-v2-testimonial-card">
+                <p>"Our family felt welcomed from day one. The events helped our kids reconnect with their roots."</p>
+                <div class="author">
+                    <strong>Pratima R.</strong>
+                    <span>Community Member</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"Volunteering here gave me purpose and friendships. It truly feels like one big extended family."</p>
+                <div class="author">
+                    <strong>Bikash T.</strong>
+                    <span>Volunteer Lead</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"The cultural classes are beautifully organized. My children now proudly speak and sing in Nepali."
+                </p>
+                <div class="author">
+                    <strong>Mina G.</strong>
+                    <span>Parent</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"The volunteer team made my first community event easy and joyful. I felt supported throughout."</p>
+                <div class="author">
+                    <strong>Ritesh K.</strong>
+                    <span>Volunteer</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"From music sessions to youth workshops, this community gives our teens confidence and belonging."</p>
+                <div class="author">
+                    <strong>Sarika L.</strong>
+                    <span>Youth Mentor</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"Every festival is organized with heart. It is the closest feeling to home we have in Vancouver."</p>
+                <div class="author">
+                    <strong>Dawa T.</strong>
+                    <span>Community Member</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"I came here as a newcomer and left with friends, mentors, and real opportunities to contribute."</p>
+                <div class="author">
+                    <strong>Kripa B.</strong>
+                    <span>Newcomer</span>
+                </div>
+            </article>
+            <article class="home-v2-testimonial-card">
+                <p>"The language and dance programs keep our traditions alive while helping children stay connected."</p>
+                <div class="author">
+                    <strong>Prabin S.</strong>
+                    <span>Program Parent</span>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="home-v2-pathways container reveal-up">
+        <div class="home-v2-section-head">
+            <h2>How You Can Participate</h2>
+        </div>
+        <article class="home-v2-path-card">
+            <div class="icon"><i class="fas fa-language"></i></div>
+            <h3>Language & Heritage Classes</h3>
+            <p>Learn and preserve Nepali languages through family-friendly sessions.</p>
+            <a href="{% url 'program_list' %}">Join classes</a>
+        </article>
+        <article class="home-v2-path-card">
+            <div class="icon"><i class="fas fa-handshake"></i></div>
+            <h3>Community Support Network</h3>
+            <p>Get help with settlement, networking, and local guidance for newcomers.</p>
+            <a href="{% url 'contact' %}">Get support</a>
+        </article>
+        <article class="home-v2-path-card">
+            <div class="icon"><i class="fas fa-donate"></i></div>
+            <h3>Support Community Projects</h3>
+            <p>Contribute to cultural and social initiatives that impact local families.</p>
+            <a href="{% url 'donation' %}">Donate now</a>
+        </article>
+    </section>
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/homepage-redesign.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,1 @@
+[programs-registration.js content from old location]

@@ -1,0 +1,562 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Advanced Admin Panel - Nepali Community{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'dashboard/css/admin-advanced.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <!-- Header -->
+    <div class="admin-header">
+        <div class="header-left">
+            <h1><i class="fas fa-shield-alt"></i> Admin Control Panel</h1>
+            <p>Manage all aspects of your community</p>
+        </div>
+        <div class="header-right">
+            <div class="admin-user">
+                <img src="https://ui-avatars.com/api/?name={{ user.get_full_name }}&background=FF6B35&color=fff"
+                    alt="Admin">
+                <span>{{ user.get_full_name }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+        <div class="stat-card stat-purple">
+            <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_events }}</h3>
+                <p>Events</p>
+            </div>
+        </div>
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-hands-helping"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_volunteers }}</h3>
+                <p>Volunteers</p>
+            </div>
+        </div>
+        <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+            <div class="stat-info">
+                <h3>{{ pending_requests }}</h3>
+                <p>Pending Requests</p>
+            </div>
+        </div>
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-bell"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_announcements }}</h3>
+                <p>Announcements</p>
+            </div>
+        </div>
+        <div class="stat-card stat-red">
+            <div class="stat-icon"><i class="fas fa-question-circle"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_faqs }}</h3>
+                <p>FAQs</p>
+            </div>
+        </div>
+        <div class="stat-card stat-teal">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+                <h3>{{ total_users }}</h3>
+                <p>Users</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="admin-tabs">
+        <button class="tab-btn active" data-tab="events">
+            <i class="fas fa-calendar-alt"></i> Events
+        </button>
+        <button class="tab-btn" data-tab="volunteers">
+            <i class="fas fa-hands-helping"></i> Volunteers
+        </button>
+        <button class="tab-btn" data-tab="requests">
+            <i class="fas fa-hourglass-half"></i> Requests
+        </button>
+        <button class="tab-btn" data-tab="announcements">
+            <i class="fas fa-megaphone"></i> Announcements
+        </button>
+        <button class="tab-btn" data-tab="faqs">
+            <i class="fas fa-question-circle"></i> FAQs
+        </button>
+        <button class="tab-btn" data-tab="users">
+            <i class="fas fa-users"></i> Users
+        </button>
+    </div>
+
+    <!-- Tab Contents -->
+    <div class="tab-contents">
+        <!-- EVENTS TAB -->
+        <div class="tab-content active" id="events-tab">
+            <div class="tab-header">
+                <h2><i class="fas fa-calendar-alt"></i> Event Management</h2>
+                <a href="{% url 'dashboard:event_create' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> New Event
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Date</th>
+                            <th>Location</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                        <tr>
+                            <td class="font-bold">{{ event.title }}</td>
+                            <td>{{ event.date|date:"M d, Y" }}</td>
+                            <td>{{ event.location }}</td>
+                            <td><span class="badge badge-{{ event.category }}">{{ event.get_category_display }}</span>
+                            </td>
+                            <td><span class="badge badge-success">Active</span></td>
+                            <td class="actions">
+                                <a href="{% url 'dashboard:event_edit' event.pk %}" class="btn-icon" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'dashboard:event_delete' event.pk %}" class="btn-icon btn-danger"
+                                    title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No events found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VOLUNTEERS TAB -->
+        <div class="tab-content" id="volunteers-tab">
+            <div class="volunteer-tabs">
+                <button class="sub-tab-btn active" data-subtab="opportunities">
+                    <i class="fas fa-briefcase"></i> Opportunities
+                </button>
+                <button class="sub-tab-btn" data-subtab="applications">
+                    <i class="fas fa-file-alt"></i> Applications
+                </button>
+            </div>
+
+            <!-- Opportunities Sub-tab -->
+            <div class="sub-tab-content active" id="opportunities-subtab">
+                <div class="tab-header">
+                    <h2><i class="fas fa-briefcase"></i> Volunteer Opportunities</h2>
+                    <a href="{% url 'dashboard:volunteer_opportunity_create' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> New Opportunity
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Positions</th>
+                                <th>Status</th>
+                                <th>Remote</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for opp in volunteer_opportunities %}
+                            <tr>
+                                <td class="font-bold">{{ opp.title }}</td>
+                                <td>{{ opp.get_category_display }}</td>
+                                <td>
+                                    <span class="badge badge-info">
+                                        {{ opp.positions_filled }}/{{ opp.positions_needed }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if opp.status == 'open' %}
+                                    <span class="badge badge-success">Open</span>
+                                    {% elif opp.status == 'filled' %}
+                                    <span class="badge badge-warning">Filled</span>
+                                    {% else %}
+                                    <span class="badge badge-secondary">{{ opp.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if opp.is_remote %}
+                                    <i class="fas fa-check text-success"></i>
+                                    {% else %}
+                                    <i class="fas fa-times text-danger"></i>
+                                    {% endif %}
+                                </td>
+                                <td class="actions">
+                                    <a href="{% url 'dashboard:volunteer_opportunity_edit' opp.pk %}" class="btn-icon">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No opportunities found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Applications Sub-tab -->
+            <div class="sub-tab-content" id="applications-subtab">
+                <div class="tab-header">
+                    <h2><i class="fas fa-file-alt"></i> Volunteer Applications</h2>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="pending">Pending</button>
+                        <button class="filter-btn" data-filter="approved">Approved</button>
+                        <button class="filter-btn" data-filter="rejected">Rejected</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Volunteer Name</th>
+                                <th>Opportunity</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Applied</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in volunteer_applications %}
+                            <tr data-status="{{ app.status }}">
+                                <td class="font-bold">{{ app.name }}</td>
+                                <td>{{ app.opportunity.title }}</td>
+                                <td>{{ app.email }}</td>
+                                <td>
+                                    {% if app.status == 'pending' %}
+                                    <span class="badge badge-warning">Pending</span>
+                                    {% elif app.status == 'approved' %}
+                                    <span class="badge badge-success">Approved</span>
+                                    {% else %}
+                                    <span class="badge badge-danger">Rejected</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ app.applied_at|date:"M d, Y" }}</td>
+                                <td class="actions">
+                                    {% if app.status == 'pending' %}
+                                    <button class="btn-icon btn-approve" data-id="{{ app.pk }}" data-action="approve"
+                                        title="Approve">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn-icon btn-reject" data-id="{{ app.pk }}" data-action="reject"
+                                        title="Reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No applications found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tab-header tab-header-spaced">
+                    <h2><i class="fas fa-paper-plane"></i> Volunteer Requests</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Type</th>
+                                <th>Schedule</th>
+                                <th>Status</th>
+                                <th>Submitted</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in volunteer_requests %}
+                            <tr data-status="{{ req.status }}">
+                                <td class="font-bold">{{ req.name }}</td>
+                                <td>{{ req.phone }}</td>
+                                <td>{{ req.email }}</td>
+                                <td>{{ req.get_volunteer_type_display }}</td>
+                                <td>{{ req.schedule_availability|truncatechars:35 }}</td>
+                                <td>
+                                    {% if req.status == 'new' %}
+                                    <span class="badge badge-warning">New</span>
+                                    {% elif req.status == 'contacted' %}
+                                    <span class="badge badge-success">Contacted</span>
+                                    {% elif req.status == 'closed' %}
+                                    <span class="badge badge-danger">Closed</span>
+                                    {% else %}
+                                    <span class="badge badge-secondary">{{ req.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ req.created_at|date:"M d, Y" }}</td>
+                                <td class="actions">
+                                    {% if req.status == 'new' or req.status == 'reviewed' %}
+                                    <button class="btn-icon btn-approve" data-id="{{ req.pk }}" data-action="approve"
+                                        data-kind="request" title="Approve">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn-icon btn-reject" data-id="{{ req.pk }}" data-action="reject"
+                                        data-kind="request" title="Reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    {% else %}
+                                    <span class="badge badge-secondary">Processed</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center">No volunteer requests found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- REQUESTS TAB -->
+        <div class="tab-content" id="requests-tab">
+            <div class="tab-header">
+                <h2><i class="fas fa-hourglass-half"></i> Event Requests</h2>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="pending">Pending</button>
+                    <button class="filter-btn" data-filter="approved">Approved</button>
+                    <button class="filter-btn" data-filter="rejected">Rejected</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Organizer</th>
+                            <th>Requested Date</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in event_requests %}
+                        <tr data-status="{{ req.status }}">
+                            <td class="font-bold">{{ req.event_name }}</td>
+                            <td>{{ req.organizer_name }}</td>
+                            <td>{{ req.requested_date|date:"M d, Y" }}</td>
+                            <td>{{ req.location }}</td>
+                            <td>
+                                {% if req.status == 'pending' %}
+                                <span class="badge badge-warning">Pending</span>
+                                {% elif req.status == 'approved' %}
+                                <span class="badge badge-success">Approved</span>
+                                {% else %}
+                                <span class="badge badge-danger">Rejected</span>
+                                {% endif %}
+                            </td>
+                            <td class="actions">
+                                {% if req.status == 'pending' %}
+                                <button class="btn-icon btn-approve" data-id="{{ req.pk }}" data-action="approve"
+                                    title="Approve">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn-icon btn-reject" data-id="{{ req.pk }}" data-action="reject"
+                                    title="Reject">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No requests found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ANNOUNCEMENTS TAB -->
+        <div class="tab-content" id="announcements-tab">
+            <div class="tab-header">
+                <h2><i class="fas fa-megaphone"></i> Announcements</h2>
+                <a href="{% url 'dashboard:announcement_create' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> New Announcement
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Author</th>
+                            <th>Featured</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ann in announcements %}
+                        <tr>
+                            <td class="font-bold">{{ ann.title }}</td>
+                            <td><span class="badge badge-info">{{ ann.get_category_display }}</span></td>
+                            <td>{{ ann.author.get_full_name }}</td>
+                            <td>
+                                {% if ann.is_featured %}
+                                <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                <i class="fas fa-star text-muted"></i>
+                                {% endif %}
+                            </td>
+                            <td>{{ ann.created_at|date:"M d, Y" }}</td>
+                            <td class="actions">
+                                <a href="{% url 'dashboard:announcement_edit' ann.pk %}" class="btn-icon">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'dashboard:announcement_delete' ann.pk %}" class="btn-icon btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No announcements found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FAQs TAB -->
+        <div class="tab-content" id="faqs-tab">
+            <div class="tab-header">
+                <h2><i class="fas fa-question-circle"></i> FAQs</h2>
+                <a href="{% url 'dashboard:faq_create' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> New FAQ
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th>Category</th>
+                            <th>Featured</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for faq in faqs %}
+                        <tr>
+                            <td class="font-bold">{{ faq.question }}</td>
+                            <td><span class="badge badge-secondary">{{ faq.category }}</span></td>
+                            <td>
+                                {% if faq.is_featured %}
+                                <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                <i class="fas fa-star text-muted"></i>
+                                {% endif %}
+                            </td>
+                            <td>{{ faq.created_at|date:"M d, Y" }}</td>
+                            <td class="actions">
+                                <a href="{% url 'dashboard:faq_edit' faq.pk %}" class="btn-icon">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'dashboard:faq_delete' faq.pk %}" class="btn-icon btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No FAQs found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- USERS TAB -->
+        <div class="tab-content" id="users-tab">
+            <div class="tab-header">
+                <h2><i class="fas fa-users"></i> Users</h2>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td class="font-bold">{{ user.get_full_name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                {% if user.is_active %}
+                                <span class="badge badge-success">Active</span>
+                                {% else %}
+                                <span class="badge badge-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                            <td>
+                                {% if user.is_superuser %}
+                                <span class="badge badge-danger">Superuser</span>
+                                {% elif user.is_staff %}
+                                <span class="badge badge-warning">Staff</span>
+                                {% else %}
+                                <span class="badge badge-secondary">Member</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No users found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'dashboard/js/admin-panel.js' %}"></script>
+{% endblock %}

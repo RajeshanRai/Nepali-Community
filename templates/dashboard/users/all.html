@@ -1,0 +1,408 @@
+{% extends 'dashboard/admin_base.html' %}
+
+{% block title %}All Users{% endblock %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/users-all.css' %}">
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">Users</li>
+<li class="breadcrumb-item active">All Users</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-user-friends"></i> Member Directory</h1>
+        <p>Discover members, moderate accounts, and monitor engagement trends.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="directory-kpi-grid">
+    <article class="kpi-card">
+        <h3>Total Members</h3>
+        <p>{{ total_members }}</p>
+    </article>
+    <article class="kpi-card">
+        <h3>Active Users</h3>
+        <p>{{ active_users }}</p>
+    </article>
+    <article class="kpi-card">
+        <h3>Engagement Rate</h3>
+        <p>{{ engagement_rate }}%</p>
+    </article>
+    <article class="kpi-card">
+        <h3>Monthly Growth</h3>
+        <p>{{ recent_growth }}</p>
+        <small class="growth-delta {% if growth_delta_pct < 0 %}negative{% endif %}">
+            {% if growth_delta_pct > 0 %}+{% endif %}{{ growth_delta_pct }}% vs last month
+        </small>
+    </article>
+</div>
+
+<div class="analytics-grid">
+    <section class="content-card">
+        <div class="content-card-header compact">
+            <h3><i class="fas fa-fire"></i> Popular Posts</h3>
+        </div>
+        <div class="content-card-body">
+            {% if popular_posts %}
+            <ul class="popular-posts-list">
+                {% for post in popular_posts %}
+                <li>
+                    <div>
+                        <strong>{{ post.title }}</strong>
+                        <span>{{ post.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <span class="post-views">{{ post.views_count }} views</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="empty-note">No posts available.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="content-card">
+        <div class="content-card-header compact">
+            <h3><i class="fas fa-chart-line"></i> Growth Statistics</h3>
+        </div>
+        <div class="content-card-body">
+            {% if growth_points %}
+            <ul class="growth-list">
+                {% for point in growth_points %}
+                <li>
+                    <span>{{ point.month }}</span>
+                    <strong>{{ point.count }}</strong>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="empty-note">No growth data found.</p>
+            {% endif %}
+            <div class="engagement-mini">
+                <span>Avg registrations per active user</span>
+                <strong>{{ avg_registrations_per_active_user }}</strong>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="content-card">
+    <div class="content-card-header">
+        <h3><i class="fas fa-address-book"></i> Member List</h3>
+        <form method="get" class="members-search-form">
+            <input type="search" name="q" value="{{ search_query }}" placeholder="Search members by name, username, email or phone">
+            <button type="submit" class="btn btn-primary btn-sm">Search Members</button>
+        </form>
+    </div>
+    <div class="content-card-body">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Joined</th>
+                        <th>Activity</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>#{{ user.id }}</td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar-table">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <div class="user-info-table">
+                                    <strong>{{ user.get_full_name|default:user.username }}</strong>
+                                    <span>@{{ user.username }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.is_superuser %}
+                            <span class="badge badge-danger">Superuser</span>
+                            {% elif user.is_staff %}
+                            <span class="badge badge-warning">Staff</span>
+                            {% else %}
+                            <span class="badge badge-info">Member</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                        <td>{{ user.registration_count }} events</td>
+                        <td>
+                            {% if user.is_active %}
+                            <span class="status-badge status-approved">Active</span>
+                            {% else %}
+                            <span class="status-badge status-rejected">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button type="button" class="btn-icon btn-view" onclick="viewUser(event, {{ user.id }})" title="View profile">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="btn-icon btn-edit" onclick="openWarnModal(event, {{ user.id }}, '{{ user.get_full_name|default:user.username|escapejs }}')" title="Warn member">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </button>
+                                {% if not user.is_superuser %}
+                                <button type="button" class="btn-icon btn-delete"
+                                    onclick="toggleUserStatus({{ user.id }}, {{ user.is_active|lower }})"
+                                    title="{{ user.is_active|yesno:'Ban member,Unban member' }}">
+                                    <i class="fas fa-{% if user.is_active %}ban{% else %}check{% endif %}"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">No users found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="content-card">
+    <div class="content-card-header compact">
+        <h3><i class="fas fa-shield-alt"></i> Recent Moderation Actions</h3>
+    </div>
+    <div class="content-card-body">
+        {% if recent_moderation_actions %}
+        <ul class="moderation-list">
+            {% for action in recent_moderation_actions %}
+            <li>
+                <span class="action-pill action-{{ action.action }}">{{ action.get_action_display }}</span>
+                <div>
+                    <strong>{{ action.user.get_full_name|default:action.user.username }}</strong>
+                    <small>{{ action.created_at|date:"M d, Y H:i" }} by {{ action.created_by.username|default:'System' }}</small>
+                    {% if action.reason %}<p>{{ action.reason }}</p>{% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="empty-note">No moderation actions yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="member-modal" id="memberProfileModal" aria-hidden="true">
+    <div class="member-modal__content">
+        <button type="button" class="close" onclick="closeMemberModal()">&times;</button>
+        <h3 id="memberProfileTitle">Member Profile</h3>
+        <div id="memberProfileBody" class="member-profile-body"></div>
+    </div>
+</div>
+
+<div class="member-modal" id="warnMemberModal" aria-hidden="true">
+    <div class="member-modal__content warn-modal-content">
+        <button type="button" class="close" onclick="closeWarnModal()">&times;</button>
+        <h3 id="warnModalTitle">Warn Member</h3>
+        <p class="warn-modal-note">Add a warning message for this member. This action will be saved in moderation history.</p>
+        <label for="warnReasonInput" class="warn-modal-label">Warning reason</label>
+        <textarea id="warnReasonInput" class="warn-modal-textarea" rows="4" placeholder="Enter warning reason (optional)"></textarea>
+        <div class="warn-modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeWarnModal()">Cancel</button>
+            <button type="button" class="btn btn-warning" onclick="submitWarnModal()">Send Warning</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let warnTargetUserId = null;
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return '';
+    }
+
+    function csrfToken() {
+        const metaToken = document.querySelector('meta[name="csrf-token"]');
+        if (metaToken && metaToken.content && metaToken.content !== 'NOTPROVIDED') {
+            return metaToken.content;
+        }
+        return getCookie('csrftoken');
+    }
+
+    function closeMemberModal() {
+        const modal = document.getElementById('memberProfileModal');
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    function openWarnModal(event, id, displayName) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        warnTargetUserId = id;
+        document.getElementById('warnModalTitle').textContent = `Warn ${displayName}`;
+        const input = document.getElementById('warnReasonInput');
+        input.value = '';
+        const modal = document.getElementById('warnMemberModal');
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        setTimeout(() => input.focus(), 0);
+    }
+
+    function closeWarnModal() {
+        warnTargetUserId = null;
+        const modal = document.getElementById('warnMemberModal');
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    async function viewUser(event, id) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        try {
+            const response = await fetch(`/dashboard/admin/users/${id}/profile/`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Unable to load profile.');
+            }
+
+            const user = data.user;
+            const body = document.getElementById('memberProfileBody');
+            document.getElementById('memberProfileTitle').textContent = `${user.full_name} (@${user.username})`;
+            body.innerHTML = `
+                <div class="profile-grid">
+                    <div><strong>Email</strong><span>${user.email || 'N/A'}</span></div>
+                    <div><strong>Phone</strong><span>${user.phone_number}</span></div>
+                    <div><strong>Joined</strong><span>${user.date_joined}</span></div>
+                    <div><strong>Last Login</strong><span>${user.last_login}</span></div>
+                    <div><strong>Primary Community</strong><span>${user.primary_community}</span></div>
+                    <div><strong>Secondary Community</strong><span>${user.secondary_community}</span></div>
+                    <div><strong>Event Registrations</strong><span>${user.registration_count}</span></div>
+                    <div><strong>Posts</strong><span>${user.posts_count}</span></div>
+                    <div><strong>Verified Member</strong><span>${user.is_verified_member ? 'Yes' : 'No'}</span></div>
+                    <div><strong>Community Rep</strong><span>${user.is_community_rep ? 'Yes' : 'No'}</span></div>
+                </div>
+            `;
+            const modal = document.getElementById('memberProfileModal');
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+        } catch (error) {
+            showToast(error.message || 'Failed to load member profile.', 'error');
+        }
+    }
+
+    async function submitWarnModal() {
+        if (!warnTargetUserId) {
+            closeWarnModal();
+            return;
+        }
+
+        const reason = document.getElementById('warnReasonInput').value.trim();
+
+        const response = await fetch(`/dashboard/admin/users/${warnTargetUserId}/warn/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken(),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: new URLSearchParams({ reason })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success) {
+            showToast('Warning recorded successfully.', 'success');
+            closeWarnModal();
+            window.location.reload();
+            return;
+        }
+
+        showToast(data.message || 'Failed to warn member.', 'error');
+    }
+
+    async function toggleUserStatus(id, isActive) {
+        const action = isActive ? 'ban' : 'unban';
+        const confirmed = await window.GlobalUI.confirm({
+            title: `${action.charAt(0).toUpperCase()}${action.slice(1)} member`,
+            message: `Are you sure you want to ${action} this member?`,
+            okText: action.charAt(0).toUpperCase() + action.slice(1),
+            variant: action === 'ban' ? 'danger' : 'primary'
+        });
+
+        if (!confirmed) {
+            return;
+        }
+
+        const response = await fetch(`/dashboard/admin/users/${id}/toggle-ban/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken(),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: new URLSearchParams({ reason: `${action.toUpperCase()} action from directory` })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success) {
+            showToast(data.message, 'success');
+            window.location.reload();
+            return;
+        }
+
+        showToast(data.message || 'Failed to update member status.', 'error');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const profileModal = document.getElementById('memberProfileModal');
+        const warnModal = document.getElementById('warnMemberModal');
+
+        if (profileModal) {
+            profileModal.addEventListener('click', function (event) {
+                if (event.target === profileModal) {
+                    closeMemberModal();
+                }
+            });
+        }
+
+        if (warnModal) {
+            warnModal.addEventListener('click', function (event) {
+                if (event.target === warnModal) {
+                    closeWarnModal();
+                }
+            });
+        }
+    });
+
+    window.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeMemberModal();
+            closeWarnModal();
+        }
+    });
+</script>
+
+{% endblock %}

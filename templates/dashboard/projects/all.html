@@ -1,0 +1,187 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}All Events{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/projects-all.css' %}">
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">Events</li>
+<li class="breadcrumb-item active">All Events</li>
+{% endblock %}
+
+{% block page_header %}
+{% url 'dashboard:event_create' as create_event_url %}
+{% include 'dashboard/includes/page_header.html' with title='All Events' subtitle='Manage and overview all events' icon_class='fas fa-calendar' action_url=create_event_url action_label='Create Event' action_icon='fas fa-plus' %}
+{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="content-card-header">
+        <div class="search-filter-section">
+            <div class="search-box-inline">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchEvents" placeholder="Search events...">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="cultural">Cultural</button>
+                <button class="filter-btn" data-filter="workshop">Workshop</button>
+                <button class="filter-btn" data-filter="meeting">Meeting</button>
+            </div>
+        </div>
+    </div>
+    <div class="content-card-body">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="bulkSelectAll"></th>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Registered</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in projects %}
+                    <tr data-category="{{ event.event_type }}">
+                        <td><input type="checkbox" class="bulk-checkbox" value="{{ event.id }}"></td>
+                        <td>#{{ event.id }}</td>
+                        <td>
+                            <strong>{{ event.title }}</strong>
+                            <br><small class="text-muted">{{ event.description|truncatewords:10 }}</small>
+                        </td>
+                        <td><span class="badge badge-info">{{ event.get_event_type_display }}</span></td>
+                        <td>{{ event.date|date:"M d, Y" }}</td>
+                        <td>{{ event.location|truncatewords:5 }}</td>
+                        <td>{{ event.registrations.count }}</td>
+                        <td>
+                            {% if event.date < today %} <span class="status-badge status-completed">Completed</span>
+                                {% else %}
+                                <span class="status-badge status-approved">Active</span>
+                                {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button type="button" class="btn-icon btn-view project-view-trigger" title="View"
+                                    data-event-title="{{ event.title|escapejs }}"
+                                    data-event-category="{{ event.get_event_type_display|escapejs }}"
+                                    data-event-date="{{ event.date|date:'M d, Y'|escapejs }}"
+                                    data-event-location="{{ event.location|truncatewords:5|escapejs }}"
+                                    data-event-description="{{ event.description|truncatewords:40|striptags|escapejs }}"
+                                    data-event-registered="{{ event.registrations.count }}"
+                                    data-event-status="{% if event.date < today %}Completed{% else %}Active{% endif %}"
+                                    data-event-requester="N/A"
+                                    data-event-email="N/A"
+                                    data-event-phone="N/A">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <a class="btn-icon btn-edit" title="Edit" href="{% url 'dashboard:event_edit' event.id %}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn-icon btn-delete" title="Delete"
+                                    data-dashboard-delete-url="{% url 'dashboard:event_delete' event.id %}"
+                                    data-item-name="{{ event.title|escape }}"
+                                    data-item-type="event">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">No events found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Event Details Modal -->
+<div id="allEventModal" class="details-modal" aria-hidden="true">
+    <div class="details-modal-backdrop" id="allEventModalBackdrop"></div>
+    <div class="details-modal-content">
+        <div class="details-modal-header">
+            <h3><i class="fas fa-eye"></i> Event Details</h3>
+            <button class="modal-close" type="button" id="allEventModalClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="details-modal-body">
+            <div class="details-grid">
+                <div class="detail-item"><label>Title</label><p id="allEventDetailTitle"></p></div>
+                <div class="detail-item"><label>Category</label><p id="allEventDetailCategory"></p></div>
+                <div class="detail-item"><label>Requester</label><p id="allEventDetailRequester"></p></div>
+                <div class="detail-item"><label>Email</label><p id="allEventDetailEmail"></p></div>
+                <div class="detail-item"><label>Phone</label><p id="allEventDetailPhone"></p></div>
+                <div class="detail-item"><label>Date</label><p id="allEventDetailDate"></p></div>
+                <div class="detail-item"><label>Location</label><p id="allEventDetailLocation"></p></div>
+                <div class="detail-item"><label>Attendees</label><p id="allEventDetailRegistered"></p></div>
+                <div class="detail-item"><label>Status</label><p id="allEventDetailStatus"></p></div>
+                <div class="detail-item full"><label>Description</label><p id="allEventDetailDescription"></p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'dashboard/js/pages/projects-all.js' %}"></script>
+<script>
+(function () {
+    let activeTrigger = null;
+
+    function openAllEventModal(btn) {
+        const modal = document.getElementById('allEventModal');
+        if (modal.classList.contains('show') && activeTrigger === btn) {
+            closeAllEventModal();
+            return;
+        }
+
+        document.getElementById('allEventDetailTitle').textContent = btn.dataset.eventTitle || '-';
+        document.getElementById('allEventDetailCategory').textContent = btn.dataset.eventCategory || '-';
+        document.getElementById('allEventDetailRequester').textContent = btn.dataset.eventRequester || 'N/A';
+        document.getElementById('allEventDetailEmail').textContent = btn.dataset.eventEmail || 'N/A';
+        document.getElementById('allEventDetailPhone').textContent = btn.dataset.eventPhone || 'N/A';
+        document.getElementById('allEventDetailDate').textContent = btn.dataset.eventDate || '-';
+        document.getElementById('allEventDetailLocation').textContent = btn.dataset.eventLocation || '-';
+        document.getElementById('allEventDetailRegistered').textContent = btn.dataset.eventRegistered || '0';
+        document.getElementById('allEventDetailStatus').textContent = btn.dataset.eventStatus || '-';
+        document.getElementById('allEventDetailDescription').textContent = btn.dataset.eventDescription || '-';
+
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        activeTrigger = btn;
+    }
+
+    function closeAllEventModal() {
+        const modal = document.getElementById('allEventModal');
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        activeTrigger = null;
+    }
+
+    document.querySelectorAll('.project-view-trigger').forEach(function (btn) {
+        btn.addEventListener('click', function () { openAllEventModal(btn); });
+    });
+
+    document.getElementById('allEventModalClose').addEventListener('click', closeAllEventModal);
+    document.getElementById('allEventModalBackdrop').addEventListener('click', closeAllEventModal);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeAllEventModal(); }
+    });
+}());
+</script>
+{% endblock %}

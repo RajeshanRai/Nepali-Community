@@ -1,0 +1,1358 @@
+{% extends 'base.html' %}
+{% block title %}Support Our Community - Donate Today{% endblock %}
+
+{% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #1a1a1a;
+        --accent: #FF6B35;
+        --accent-dark: #E55A25;
+        --pink: #FFB6D9;
+        --success: #FF6B35;
+        --info: #FF6B35;
+        --light: #f8f9fa;
+        --dark: #333;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* Hero Section */
+    .donate-hero {
+        background: white;
+        color: var(--dark);
+        padding: 6rem 2rem;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+
+    .donate-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: rgba(255, 107, 53, 0.05);
+        border-radius: 50%;
+    }
+
+    .donate-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 107, 53, 0.05);
+        border-radius: 50%;
+    }
+
+    .donate-hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .donate-hero h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        color: var(--dark);
+        animation: slideDown 0.8s ease;
+    }
+
+    .donate-hero p {
+        font-size: 1.3rem;
+        margin-bottom: 0;
+        color: #666;
+        animation: slideUp 0.8s ease 0.2s backwards;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Stats Section */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin: 4rem 0;
+        padding: 0 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent), var(--pink));
+    }
+
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-icon {
+        font-size: 3rem;
+        color: var(--accent);
+        margin-bottom: 1rem;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 1rem 0;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 1rem;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+        background: white;
+        padding: 3rem 2rem;
+        margin: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .progress-title {
+        font-size: 1.5rem;
+        color: var(--dark);
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .progress-bar-container {
+        background: #e0e0e0;
+        border-radius: 20px;
+        height: 30px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--pink));
+        width: 45%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+        position: relative;
+    }
+
+    .progress-bar-fill::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 20px;
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .progress-info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.95rem;
+        color: #666;
+    }
+
+    /* Main Form Section */
+    .donation-form-container {
+        max-width: 900px;
+        margin: 4rem auto;
+        padding: 0 2rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-section-title {
+        font-size: 1.8rem;
+        color: var(--dark);
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid var(--accent);
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .form-section-title i {
+        font-size: 1.5rem;
+        color: var(--accent);
+    }
+
+    /* Tier Selection */
+    .tier-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .tier-option {
+        position: relative;
+    }
+
+    .tier-label {
+        display: block;
+        cursor: pointer;
+    }
+
+    .tier-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+        border: 2px solid #e0e0e0;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .tier-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--accent);
+        box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
+    }
+
+    .tier-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .tier-option input[type="radio"]:checked+.tier-label .tier-card {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+        border-color: var(--primary);
+        box-shadow: 0 10px 30px rgba(220, 53, 69, 0.25);
+    }
+
+    .tier-badge {
+        display: inline-block;
+        background: var(--accent);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+    }
+
+    .tier-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0.8rem 0;
+    }
+
+    .tier-amount {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--accent);
+        margin: 0.8rem 0;
+    }
+
+    .tier-desc {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    /* Custom Amount */
+    .custom-amount-container {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.05) 0%, rgba(255, 107, 53, 0.08) 100%);
+        border: 2px dashed var(--accent);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        display: none;
+    }
+
+    .custom-amount-container.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+
+    .custom-amount-container label {
+        display: block;
+        margin-bottom: 0.8rem;
+        font-weight: 600;
+        color: var(--dark);
+    }
+
+    .custom-amount-container input {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid var(--accent);
+        border-radius: 8px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .custom-amount-container input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+    }
+
+    /* Form Groups */
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.6rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group textarea {
+        padding: 0.9rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+    }
+
+    .form-group textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+
+    /* Checkboxes */
+    .checkbox-container {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.05), rgba(255, 182, 217, 0.05));
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .checkbox-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+        margin-top: 0.2rem;
+        cursor: pointer;
+        accent-color: var(--accent);
+    }
+
+    .checkbox-item label {
+        cursor: pointer;
+        margin: 0;
+        font-weight: 500;
+        flex: 1;
+    }
+
+    .checkbox-item small {
+        display: block;
+        color: #666;
+        margin-top: 0.3rem;
+    }
+
+    /* Interact Section */
+    .interact-section {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 182, 217, 0.08) 100%);
+        border-left: 5px solid var(--accent);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+
+    .interact-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .interact-logo {
+        font-size: 2.5rem;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .interact-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+    }
+
+    .interact-subtitle {
+        color: var(--accent);
+        font-size: 0.9rem;
+        margin: 0.3rem 0 0 0;
+    }
+
+    .interact-desc {
+        color: #555;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .interact-steps {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .interact-steps ol {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .interact-steps li {
+        margin-bottom: 0.8rem;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .interact-steps strong {
+        color: var(--accent);
+    }
+
+    .transfer-email {
+        display: inline-block;
+        background: white;
+        padding: 0.8rem 1.2rem;
+        border-radius: 8px;
+        border: 2px solid var(--accent);
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin: 1rem 0;
+    }
+
+    /* Payment Method Selector */
+    .payment-method-selector {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .payment-option input[type="radio"] {
+        display: none;
+    }
+
+    .payment-option input[type="radio"]:checked+.payment-label {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+        color: white;
+        border-color: var(--accent);
+        box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+    }
+
+    .payment-option input[type="radio"]:checked+.payment-label .payment-icon {
+        color: white;
+    }
+
+    .payment-option input[type="radio"]:checked+.payment-label small {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .payment-label {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .payment-label:hover {
+        border-color: var(--accent);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .payment-icon {
+        font-size: 1.8rem;
+        color: var(--accent);
+        transition: all 0.3s ease;
+    }
+
+    .payment-text {
+        text-align: left;
+    }
+
+    .payment-text strong {
+        display: block;
+        color: var(--dark);
+        margin-bottom: 0.3rem;
+    }
+
+    .payment-text small {
+        color: #999;
+        font-size: 0.85rem;
+    }
+
+    /* Payment Sections */
+    .payment-section {
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Card Section */
+    .card-section {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 182, 217, 0.08) 100%);
+        border-left: 5px solid var(--accent);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-logo {
+        font-size: 2.5rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+    }
+
+    .card-subtitle {
+        color: var(--accent);
+        font-size: 0.9rem;
+        margin: 0.3rem 0 0 0;
+    }
+
+    .card-desc {
+        color: #555;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .security-badge {
+        background: rgba(255, 107, 53, 0.1);
+        padding: 1rem;
+        border-radius: 8px;
+        color: var(--accent);
+        font-weight: 600;
+        text-align: center;
+        margin-top: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    /* Card form styles */
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="password"],
+    .form-group textarea {
+        padding: 0.9rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    .form-group input[type="password"]:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+    }
+
+    /* Buttons */
+    .submit-container {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-submit {
+        flex: 1;
+        min-width: 250px;
+        padding: 1.2rem;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
+    }
+
+    .btn-submit:active {
+        transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .security-note {
+        text-align: center;
+        color: #666;
+        margin-top: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    /* FAQ Section */
+    .faq-section {
+        max-width: 900px;
+        margin: 5rem auto 3rem;
+        padding: 0 2rem;
+    }
+
+    .faq-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--dark);
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .faq-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .faq-item {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .faq-item:hover {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        transform: translateY(-5px);
+    }
+
+    .faq-item h4 {
+        color: var(--accent);
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+    }
+
+    .faq-item p {
+        color: #666;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    /* Error Messages */
+    .error-message {
+        background: #fee;
+        border-left: 4px solid var(--accent);
+        padding: 1.2rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        color: #c00;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .donate-hero {
+            padding: 4rem 1rem;
+        }
+
+        .donate-hero h1 {
+            font-size: 2.2rem;
+        }
+
+        .form-card {
+            padding: 2rem;
+        }
+
+        .tier-grid {
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        }
+
+        .submit-container {
+            flex-direction: column;
+        }
+
+        .btn-submit {
+            min-width: 100%;
+        }
+
+        .interact-section {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="donate-hero">
+    <div class="donate-hero-content">
+        <h1>Support Our Community</h1>
+        <p>Every donation strengthens the Nepali Community of Vancouver</p>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-grid" style="max-width: 1200px; margin-left: auto; margin-right: auto;">
+    <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-coins"></i></div>
+        <div class="stat-number">$4,560</div>
+        <div class="stat-label">Raised This Month</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-users"></i></div>
+        <div class="stat-number">342</div>
+        <div class="stat-label">Generous Supporters</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-bullseye"></i></div>
+        <div class="stat-number">$10,000</div>
+        <div class="stat-label">Monthly Goal</div>
+    </div>
+</div>
+
+<!-- Progress Section -->
+<div class="progress-container" style="max-width: 1200px; margin-left: auto; margin-right: auto;">
+    <h3 class="progress-title"><i class="fas fa-chart-line"></i> Campaign Progress</h3>
+    <div class="progress-bar-container">
+        <div class="progress-bar-fill">45% Achieved</div>
+    </div>
+    <div class="progress-info">
+        <span><strong>$4,560</strong> of $10,000</span>
+        <span>45% Complete</span>
+    </div>
+</div>
+
+<!-- Main Form -->
+<div class="donation-form-container">
+    <div class="form-card">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="error-message">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post" id="donationForm">
+            {% csrf_token %}
+
+            <!-- Tier Selection -->
+            <h2 class="form-section-title"><i class="fas fa-layer-group"></i> Select Your Donation Level</h2>
+
+            <div class="tier-grid">
+                <div class="tier-option">
+                    <input type="radio" name="donation_amount" value="20" id="tier20" required>
+                    <label for="tier20" class="tier-label">
+                        <div class="tier-card">
+                            <span class="tier-badge">Popular</span>
+                            <h3 class="tier-name">Supporter</h3>
+                            <div class="tier-amount">$20</div>
+                            <p class="tier-desc">One-time or Monthly</p>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="tier-option">
+                    <input type="radio" name="donation_amount" value="50" id="tier50">
+                    <label for="tier50" class="tier-label">
+                        <div class="tier-card">
+                            <span class="tier-badge">Recommended</span>
+                            <h3 class="tier-name">Friend</h3>
+                            <div class="tier-amount">$50</div>
+                            <p class="tier-desc">One-time or Monthly</p>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="tier-option">
+                    <input type="radio" name="donation_amount" value="100" id="tier100">
+                    <label for="tier100" class="tier-label">
+                        <div class="tier-card">
+                            <span class="tier-badge">Premium</span>
+                            <h3 class="tier-name">Patron</h3>
+                            <div class="tier-amount">$100</div>
+                            <p class="tier-desc">One-time or Monthly</p>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="tier-option">
+                    <input type="radio" name="donation_amount" value="custom" id="tierCustom">
+                    <label for="tierCustom" class="tier-label">
+                        <div class="tier-card">
+                            <span class="tier-badge">Custom</span>
+                            <h3 class="tier-name">Your Choice</h3>
+                            <div class="tier-amount">$?</div>
+                            <p class="tier-desc">Any Amount</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Custom Amount -->
+            <div class="custom-amount-container" id="customAmountContainer">
+                <label for="{{ form.custom_amount.id_for_label }}">
+                    <i class="fas fa-pen-fancy"></i> Enter Your Custom Amount
+                </label>
+                {{ form.custom_amount }}
+                {% if form.custom_amount.errors %}
+                <small style="color: var(--primary); margin-top: 0.5rem;">{{ form.custom_amount.errors }}</small>
+                {% endif %}
+            </div>
+
+            <!-- Donor Information -->
+            <h2 class="form-section-title"><i class="fas fa-user-circle"></i> Your Information</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.donor_name.id_for_label }}">
+                        <i class="fas fa-signature"></i> Full Name
+                    </label>
+                    {{ form.donor_name }}
+                    {% if form.donor_name.errors %}
+                    <small style="color: var(--primary);">{{ form.donor_name.errors }}</small>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.donor_email.id_for_label }}">
+                        <i class="fas fa-envelope"></i> Email Address
+                    </label>
+                    {{ form.donor_email }}
+                    {% if form.donor_email.errors %}
+                    <small style="color: var(--primary);">{{ form.donor_email.errors }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Interact Email -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.interact_email.id_for_label }}">
+                        <i class="fas fa-exchange-alt"></i> Interact e-Transfer Email
+                    </label>
+                    {{ form.interact_email }}
+                    {% if form.interact_email.errors %}
+                    <small style="color: var(--primary);">{{ form.interact_email.errors }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Options -->
+            <h2 class="form-section-title"><i class="fas fa-sliders-h"></i> Donation Options</h2>
+
+            <div class="checkbox-container">
+                <div class="checkbox-item">
+                    {{ form.is_recurring }}
+                    <label for="{{ form.is_recurring.id_for_label }}">
+                        <strong>Make this a monthly recurring donation</strong>
+                        <small>Support our community with an automatic monthly contribution</small>
+                    </label>
+                </div>
+
+                <div class="checkbox-item">
+                    {{ form.anonymous }}
+                    <label for="{{ form.anonymous.id_for_label }}">
+                        <strong>Keep my donation anonymous</strong>
+                        <small>Your contribution will remain private</small>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Purpose -->
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label for="{{ form.purpose.id_for_label }}">
+                    <i class="fas fa-heart"></i> Purpose (Optional)
+                </label>
+                {{ form.purpose }}
+                <small style="color: #666; margin-top: 0.5rem;">e.g., "Scholarship Fund", "Community Programs",
+                    "Cultural Events"</small>
+                {% if form.purpose.errors %}
+                <small style="color: var(--primary);">{{ form.purpose.errors }}</small>
+                {% endif %}
+            </div>
+
+            <!-- Payment Method Selection -->
+            <h2 class="form-section-title"><i class="fas fa-credit-card"></i> Payment Method</h2>
+
+            <div class="payment-method-selector"
+                data-selected-payment="{{ form.payment_method.value|default:'interact' }}">
+                {% for value, label in form.payment_method.field.choices %}
+                <div class="payment-option">
+                    <input type="radio" name="{{ form.payment_method.name }}" value="{{ value }}"
+                        id="payment_{{ value }}" onchange="togglePaymentMethod('{{ value }}')">
+                    <label for="payment_{{ value }}" class="payment-label">
+                        <span class="payment-icon">
+                            {% if value == "interact" %}
+                            <i class="fas fa-university"></i>
+                            {% else %}
+                            <i class="fas fa-credit-card"></i>
+                            {% endif %}
+                        </span>
+                        <span class="payment-text">
+                            <strong>{{ label }}</strong>
+                            {% if value == "interact" %}
+                            <small>Fast • Secure • Direct Bank Transfer</small>
+                            {% else %}
+                            <small>Visa • Mastercard • Debit Card</small>
+                            {% endif %}
+                        </span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if form.payment_method.errors %}
+            <small style="color: var(--primary); margin-top: 0.5rem;">{{ form.payment_method.errors }}</small>
+            {% endif %}
+
+            <!-- Interact Payment Section -->
+            <div id="interactSection" class="payment-section">
+                <h2 class="form-section-title"><i class="fas fa-building-columns"></i> Interact e-Transfer Payment</h2>
+
+                <div class="interact-section">
+                    <div class="interact-header">
+                        <div class="interact-logo">💳</div>
+                        <div style="text-align: left;">
+                            <h3 class="interact-title">Interact e-Transfer</h3>
+                            <p class="interact-subtitle">✓ Safe • Secure • Bank-to-Bank</p>
+                        </div>
+                    </div>
+
+                    <p class="interact-desc">
+                        Transfer funds directly from your bank account to ours using Interact e-Transfer. This secure
+                        method ensures your
+                        donation reaches us quickly while minimizing transaction fees.
+                    </p>
+
+                    <!-- Interact Email -->
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="{{ form.interact_email.id_for_label }}">
+                            <i class="fas fa-envelope"></i> Interact Email
+                        </label>
+                        {{ form.interact_email }}
+                        {% if form.interact_email.errors %}
+                        <small style="color: var(--primary);">{{ form.interact_email.errors }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="interact-steps">
+                        <strong style="color: var(--dark); display: block; margin-bottom: 1rem;">
+                            <i class="fas fa-tasks"></i> How to Complete Your Donation:
+                        </strong>
+                        <ol>
+                            <li>Log into your <strong>bank's online or mobile app</strong></li>
+                            <li>Select the <strong>Interact e-Transfer</strong> option</li>
+                            <li>Enter the amount: <strong>$</strong><span id="transferAmount">20</span></li>
+                            <li>Send to: <span
+                                    style="color: var(--accent); font-weight: 700;">donations@nepalicommunityvancouver.ca</span>
+                            </li>
+                            <li>Add your <strong>reference number</strong> in the message (see confirmation email)</li>
+                            <li>Complete the transfer and we'll confirm within <strong>24 hours</strong></li>
+                        </ol>
+                    </div>
+
+                    <div style="text-align: center; padding: 1rem 0;">
+                        <span class="transfer-email">donations@nepalicommunityvancouver.ca</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Payment Section -->
+            <div id="cardSection" class="payment-section" style="display: none;">
+                <h2 class="form-section-title"><i class="fas fa-credit-card"></i> Card Payment</h2>
+
+                <div class="card-section">
+                    <div class="card-header">
+                        <div class="card-logo">💳</div>
+                        <div style="text-align: left;">
+                            <h3 class="card-title">Credit/Debit Card</h3>
+                            <p class="card-subtitle">✓ Visa • Mastercard • Debit</p>
+                        </div>
+                    </div>
+
+                    <p class="card-desc">
+                        Pay securely with your credit or debit card. Your payment will be processed immediately.
+                    </p>
+
+                    <!-- Card Name -->
+                    <div class="form-group">
+                        <label for="{{ form.card_name.id_for_label }}">
+                            <i class="fas fa-user-card"></i> Name on Card
+                        </label>
+                        {{ form.card_name }}
+                        {% if form.card_name.errors %}
+                        <small style="color: var(--primary);">{{ form.card_name.errors }}</small>
+                        {% endif %}
+                    </div>
+
+                    <!-- Card Number -->
+                    <div class="form-group">
+                        <label for="{{ form.card_number.id_for_label }}">
+                            <i class="fas fa-hashtag"></i> Card Number
+                        </label>
+                        {{ form.card_number }}
+                        {% if form.card_number.errors %}
+                        <small style="color: var(--primary);">{{ form.card_number.errors }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-row">
+                        <!-- Card Expiry -->
+                        <div class="form-group">
+                            <label for="{{ form.card_expiry.id_for_label }}">
+                                <i class="fas fa-calendar"></i> Expiry (MM/YY)
+                            </label>
+                            {{ form.card_expiry }}
+                            {% if form.card_expiry.errors %}
+                            <small style="color: var(--primary);">{{ form.card_expiry.errors }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Card CVV -->
+                        <div class="form-group">
+                            <label for="{{ form.card_cvv.id_for_label }}">
+                                <i class="fas fa-lock"></i> CVV
+                            </label>
+                            {{ form.card_cvv }}
+                            {% if form.card_cvv.errors %}
+                            <small style="color: var(--primary);">{{ form.card_cvv.errors }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="security-badge">
+                        <i class="fas fa-shield-alt"></i> Your card information is encrypted and secure
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="submit-container">
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <i class="fas fa-heart"></i> Proceed to Donate
+                </button>
+            </div>
+
+            <div class="security-note">
+                <i class="fas fa-shield-alt"></i> Your information is secure and protected. We never store payment card
+                details.
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- FAQ Section -->
+<div class="faq-section">
+    <h2 class="faq-title"><i class="fas fa-question-circle"></i> Frequently Asked Questions</h2>
+
+    <div class="faq-grid">
+        <div class="faq-item">
+            <h4><i class="fas fa-lock"></i> Is my donation secure?</h4>
+            <p>Yes! Both Interact e-Transfer and card payments are encrypted and secure. Your personal information is
+                protected and never shared with third parties.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4><i class="fas fa-credit-card"></i> What payment methods do you accept?</h4>
+            <p>We accept Interact e-Transfer and credit/debit cards (Visa, Mastercard). Choose the payment method that
+                works best for you.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4><i class="fas fa-recycle"></i> Can I donate monthly?</h4>
+            <p>Yes! Check the "Make this a monthly recurring donation" option, and we'll send you a reminder each month
+                or charge your card automatically (for card payments).</p>
+        </div>
+
+        <div class="faq-item">
+            <h4><i class="fas fa-receipt"></i> Do I get a tax receipt?</h4>
+            <p>Yes! Once your donation is confirmed, we'll email you an official tax receipt. Ensure you're registered
+                with Canada Revenue Agency.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4><i class="fas fa-shield-alt"></i> Is my card information safe?</h4>
+            <p>Absolutely! We use industry-standard encryption for card payments. We never store your full card details
+                on our servers.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4><i class="fas fa-handshake"></i> How will my donation help?</h4>
+            <p>Your donation supports scholarships, cultural programs, community events, youth initiatives, and services
+                for Nepali families.</p>
+        </div>
+
+        <div class="faq-item">
+            <h4><i class="fas fa-user-secret"></i> Can my donation be anonymous?</h4>
+            <p>Yes! Check the anonymous option and your name won't appear in our public donor list while still
+                supporting the community.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const tierRadios = document.querySelectorAll('input[name="donation_amount"]');
+    const customContainer = document.getElementById('customAmountContainer');
+    const customInput = document.querySelector('input[name="custom_amount"]');
+    const transferAmount = document.getElementById('transferAmount');
+    const submitBtn = document.getElementById('submitBtn');
+    const donationForm = document.getElementById('donationForm');
+    const interactSection = document.getElementById('interactSection');
+    const cardSection = document.getElementById('cardSection');
+
+    // Handle tier selection
+    tierRadios.forEach(radio => {
+        radio.addEventListener('change', function () {
+            if (this.value === 'custom') {
+                customContainer.classList.add('show');
+                customInput.focus();
+                transferAmount.textContent = '?';
+            } else {
+                customContainer.classList.remove('show');
+                transferAmount.textContent = this.value;
+            }
+        });
+    });
+
+    // Update amount display
+    customInput.addEventListener('input', function () {
+        if (this.value) {
+            transferAmount.textContent = this.value;
+        }
+    });
+
+    // Toggle payment method
+    function togglePaymentMethod(method) {
+        if (method === 'interact') {
+            interactSection.style.display = 'block';
+            cardSection.style.display = 'none';
+            // Clear card fields
+            document.querySelector('input[name="card_name"]').value = '';
+            document.querySelector('input[name="card_number"]').value = '';
+            document.querySelector('input[name="card_expiry"]').value = '';
+            document.querySelector('input[name="card_cvv"]').value = '';
+        } else if (method === 'card') {
+            interactSection.style.display = 'none';
+            cardSection.style.display = 'block';
+            // Clear interact email
+            document.querySelector('input[name="interact_email"]').value = '';
+        }
+    }
+
+    // Form submission
+    donationForm.addEventListener('submit', function (e) {
+        const selected = document.querySelector('input[name="donation_amount"]:checked');
+        const donorName = document.querySelector('input[name="donor_name"]').value.trim();
+        const anonymous = document.querySelector('input[name="anonymous"]').checked;
+        const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
+        const paymentMethod = selectedPayment ? selectedPayment.value : '';
+
+        if (!selected) {
+            e.preventDefault();
+            alert('Please select a donation amount.');
+            return false;
+        }
+
+        if (!anonymous && !donorName) {
+            e.preventDefault();
+            alert('Please enter your name or check the anonymous option.');
+            return false;
+        }
+
+        if (!paymentMethod) {
+            e.preventDefault();
+            alert('Please select a payment method.');
+            return false;
+        }
+
+        // Validate payment method specific fields
+        if (paymentMethod === 'interact') {
+            const interactEmail = document.querySelector('input[name="interact_email"]').value.trim();
+            if (!interactEmail) {
+                e.preventDefault();
+                alert('Please provide your Interact email address.');
+                return false;
+            }
+        } else if (paymentMethod === 'card') {
+            const cardName = document.querySelector('input[name="card_name"]').value.trim();
+            const cardNumber = document.querySelector('input[name="card_number"]').value.trim();
+            const cardExpiry = document.querySelector('input[name="card_expiry"]').value.trim();
+            const cardCvv = document.querySelector('input[name="card_cvv"]').value.trim();
+
+            if (!cardName) {
+                e.preventDefault();
+                alert('Please enter the name on your card.');
+                return false;
+            }
+            if (!cardNumber) {
+                e.preventDefault();
+                alert('Please enter your card number.');
+                return false;
+            }
+            if (!cardExpiry) {
+                e.preventDefault();
+                alert('Please enter the card expiry date (MM/YY).');
+                return false;
+            }
+            if (!cardCvv) {
+                e.preventDefault();
+                alert('Please enter your card security code (CVV).');
+                return false;
+            }
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+        // Submit the form normally - it will redirect to success page
+        donationForm.submit();
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function () {
+        const checked = document.querySelector('input[name="donation_amount"]:checked');
+        if (checked) {
+            transferAmount.textContent = checked.value === 'custom' ? '?' : checked.value;
+        }
+
+        // Set initial payment method display
+        const paymentSelector = document.querySelector('.payment-method-selector');
+        const selectedPayment = paymentSelector ? paymentSelector.dataset.selectedPayment : 'interact';
+        const paymentRadio = document.querySelector('input[name="payment_method"][value="' + selectedPayment + '"]');
+        const fallbackRadio = document.querySelector('input[name="payment_method"]');
+        const activeRadio = paymentRadio || fallbackRadio;
+
+        if (activeRadio) {
+            activeRadio.checked = true;
+            togglePaymentMethod(activeRadio.value);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends 'dashboard/admin_base.html' %}
+
+{% block title %}Categories{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active">Categories</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-tags"></i> Categories</h1>
+        <p>Manage project and event categories</p>
+    </div>
+    <div class="page-header-actions">
+        <a href="{% url 'dashboard:category_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create Category
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        {% if message.tags == 'error' %}<i class="fas fa-exclamation-circle"></i>{% endif %}
+        {% if message.tags == 'success' %}<i class="fas fa-check-circle"></i>{% endif %}
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="content-card">
+    <div class="content-card-body">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Introduction</th>
+                        <th>Programs</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td>#{{ category.id }}</td>
+                        <td><strong>{{ category.name }}</strong></td>
+                        <td>{{ category.introduction|truncatewords:10 }}</td>
+                        <td><span class="badge badge-info">{{ category.programs.count }}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon btn-edit" onclick="editCategory({{ category.id }})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon btn-delete"
+                                    onclick="deleteCategory({{ category.id }}, '{{ category.name|escapejs }}', {{ category.programs.count }}, {{ category.committees.count }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No categories found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function editCategory(id) {
+        window.location.href = `/dashboard/admin/categories/${id}/edit/`;
+    }
+
+    function deleteCategory(id, name, programsCount, committeesCount) {
+        const totalDependencies = programsCount + committeesCount;
+        const options = {
+            url: `/dashboard/admin/categories/${id}/delete/`,
+            itemName: name,
+            itemType: 'category'
+        };
+
+        if (totalDependencies > 0) {
+            const dependencies = [];
+            if (programsCount > 0) {
+                dependencies.push(`${programsCount} program(s)`);
+            }
+            if (committeesCount > 0) {
+                dependencies.push(`${committeesCount} committee(s)`);
+            }
+            options.dependencies = {
+                count: totalDependencies,
+                items: dependencies
+            };
+        }
+
+        confirmDelete(options);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'emails/base.html' %}
+
+{% block email_body %}
+<p class="greeting">{{ greeting }}</p>
+<p>{{ summary }}</p>
+
+<div class="receipt-card">
+    <h3>Donation Receipt</h3>
+    <table role="presentation" class="receipt-table" cellpadding="0" cellspacing="0" width="100%">
+        <tr><td>Donation Amount</td><td>{{ amount_text }}</td></tr>
+        <tr><td>Reference Number</td><td>{{ reference_number }}</td></tr>
+        <tr><td>Receipt Date</td><td>{{ donation_date_text }}</td></tr>
+        <tr><td>Payment Method</td><td>{{ payment_method_text }}</td></tr>
+        <tr><td>Recurring Donation</td><td>{{ recurring_text }}</td></tr>
+    </table>
+</div>
+
+{% if next_steps %}
+<div class="highlight-block">
+    <h3>Next steps</h3>
+    <ul>
+        {% for item in next_steps %}
+        <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if cta_text and cta_url %}
+<p class="cta-wrap">
+    <a href="{{ cta_url }}" class="cta-btn">{{ cta_text }}</a>
+</p>
+{% endif %}
+
+<p class="closing">With gratitude,<br>{{ brand_name }} Team</p>
+{% endblock %}

@@ -1,0 +1,703 @@
+/* =====================================================
+   UTILITY CLASSES
+   Reusable utility classes for spacing, display, etc.
+   ===================================================== */
+
+/* ===== Spacing Utilities ===== */
+
+/* Margin */
+.m-0 {
+    margin: 0 !important;
+}
+
+.m-auto {
+    margin: auto !important;
+}
+
+.mt-0 {
+    margin-top: 0 !important;
+}
+
+.mt-xs {
+    margin-top: var(--spacing-xs) !important;
+}
+
+.mt-sm {
+    margin-top: var(--spacing-sm) !important;
+}
+
+.mt-md {
+    margin-top: var(--spacing-md) !important;
+}
+
+.mt-lg {
+    margin-top: var(--spacing-lg) !important;
+}
+
+.mt-xl {
+    margin-top: var(--spacing-xl) !important;
+}
+
+.mt-2xl {
+    margin-top: var(--spacing-2xl) !important;
+}
+
+.mt-3xl {
+    margin-top: var(--spacing-3xl) !important;
+}
+
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.mb-xs {
+    margin-bottom: var(--spacing-xs) !important;
+}
+
+.mb-sm {
+    margin-bottom: var(--spacing-sm) !important;
+}
+
+.mb-md {
+    margin-bottom: var(--spacing-md) !important;
+}
+
+.mb-lg {
+    margin-bottom: var(--spacing-lg) !important;
+}
+
+.mb-xl {
+    margin-bottom: var(--spacing-xl) !important;
+}
+
+.mb-2xl {
+    margin-bottom: var(--spacing-2xl) !important;
+}
+
+.mb-3xl {
+    margin-bottom: var(--spacing-3xl) !important;
+}
+
+.ml-0 {
+    margin-left: 0 !important;
+}
+
+.ml-auto {
+    margin-left: auto !important;
+}
+
+.ml-sm {
+    margin-left: var(--spacing-sm) !important;
+}
+
+.ml-md {
+    margin-left: var(--spacing-md) !important;
+}
+
+.ml-lg {
+    margin-left: var(--spacing-lg) !important;
+}
+
+.mr-0 {
+    margin-right: 0 !important;
+}
+
+.mr-auto {
+    margin-right: auto !important;
+}
+
+.mr-sm {
+    margin-right: var(--spacing-sm) !important;
+}
+
+.mr-md {
+    margin-right: var(--spacing-md) !important;
+}
+
+.mr-lg {
+    margin-right: var(--spacing-lg) !important;
+}
+
+.mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.my-0 {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Padding */
+.p-0 {
+    padding: 0 !important;
+}
+
+.pt-0 {
+    padding-top: 0 !important;
+}
+
+.pt-sm {
+    padding-top: var(--spacing-sm) !important;
+}
+
+.pt-md {
+    padding-top: var(--spacing-md) !important;
+}
+
+.pt-lg {
+    padding-top: var(--spacing-lg) !important;
+}
+
+.pt-xl {
+    padding-top: var(--spacing-xl) !important;
+}
+
+.pt-2xl {
+    padding-top: var(--spacing-2xl) !important;
+}
+
+.pb-0 {
+    padding-bottom: 0 !important;
+}
+
+.pb-sm {
+    padding-bottom: var(--spacing-sm) !important;
+}
+
+.pb-md {
+    padding-bottom: var(--spacing-md) !important;
+}
+
+.pb-lg {
+    padding-bottom: var(--spacing-lg) !important;
+}
+
+.pb-xl {
+    padding-bottom: var(--spacing-xl) !important;
+}
+
+.pb-2xl {
+    padding-bottom: var(--spacing-2xl) !important;
+}
+
+.pl-sm {
+    padding-left: var(--spacing-sm) !important;
+}
+
+.pl-md {
+    padding-left: var(--spacing-md) !important;
+}
+
+.pl-lg {
+    padding-left: var(--spacing-lg) !important;
+}
+
+.pr-sm {
+    padding-right: var(--spacing-sm) !important;
+}
+
+.pr-md {
+    padding-right: var(--spacing-md) !important;
+}
+
+.pr-lg {
+    padding-right: var(--spacing-lg) !important;
+}
+
+.px-0 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.py-0 {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Gap */
+.gap-xs {
+    gap: var(--spacing-xs) !important;
+}
+
+.gap-sm {
+    gap: var(--spacing-sm) !important;
+}
+
+.gap-md {
+    gap: var(--spacing-md) !important;
+}
+
+.gap-lg {
+    gap: var(--spacing-lg) !important;
+}
+
+.gap-xl {
+    gap: var(--spacing-xl) !important;
+}
+
+/* ===== Display Utilities ===== */
+
+.d-none {
+    display: none !important;
+}
+
+.d-block {
+    display: block !important;
+}
+
+.d-inline {
+    display: inline !important;
+}
+
+.d-inline-block {
+    display: inline-block !important;
+}
+
+.d-flex {
+    display: flex !important;
+}
+
+.d-inline-flex {
+    display: inline-flex !important;
+}
+
+.d-grid {
+    display: grid !important;
+}
+
+/* ===== Flexbox Utilities ===== */
+
+.flex-row {
+    flex-direction: row !important;
+}
+
+.flex-column {
+    flex-direction: column !important;
+}
+
+.flex-row-reverse {
+    flex-direction: row-reverse !important;
+}
+
+.flex-column-reverse {
+    flex-direction: column-reverse !important;
+}
+
+.flex-wrap {
+    flex-wrap: wrap !important;
+}
+
+.flex-nowrap {
+    flex-wrap: nowrap !important;
+}
+
+.justify-start {
+    justify-content: flex-start !important;
+}
+
+.justify-end {
+    justify-content: flex-end !important;
+}
+
+.justify-center {
+    justify-content: center !important;
+}
+
+.justify-between {
+    justify-content: space-between !important;
+}
+
+.justify-around {
+    justify-content: space-around !important;
+}
+
+.align-start {
+    align-items: flex-start !important;
+}
+
+.align-end {
+    align-items: flex-end !important;
+}
+
+.align-center {
+    align-items: center !important;
+}
+
+.align-baseline {
+    align-items: baseline !important;
+}
+
+.align-stretch {
+    align-items: stretch !important;
+}
+
+.flex-1 {
+    flex: 1 !important;
+}
+
+.flex-auto {
+    flex: 1 1 auto !important;
+}
+
+.flex-initial {
+    flex: 0 1 auto !important;
+}
+
+.flex-none {
+    flex: none !important;
+}
+
+/* ===== Grid Utilities ===== */
+
+.grid-cols-1 {
+    grid-template-columns: repeat(1, 1fr) !important;
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+}
+
+.grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+}
+
+.grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr) !important;
+}
+
+.grid-cols-auto {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+}
+
+/* ===== Width & Height Utilities ===== */
+
+.w-100 {
+    width: 100% !important;
+}
+
+.w-auto {
+    width: auto !important;
+}
+
+.w-50 {
+    width: 50% !important;
+}
+
+.w-25 {
+    width: 25% !important;
+}
+
+.h-100 {
+    height: 100% !important;
+}
+
+.h-auto {
+    height: auto !important;
+}
+
+.min-h-screen {
+    min-height: 100vh !important;
+}
+
+/* ===== Position Utilities ===== */
+
+.position-relative {
+    position: relative !important;
+}
+
+.position-absolute {
+    position: absolute !important;
+}
+
+.position-fixed {
+    position: fixed !important;
+}
+
+.position-sticky {
+    position: sticky !important;
+}
+
+/* ===== Overflow Utilities ===== */
+
+.overflow-hidden {
+    overflow: hidden !important;
+}
+
+.overflow-auto {
+    overflow: auto !important;
+}
+
+.overflow-scroll {
+    overflow: scroll !important;
+}
+
+.overflow-visible {
+    overflow: visible !important;
+}
+
+/* ===== Border Utilities ===== */
+
+.border {
+    border: 1px solid var(--color-border) !important;
+}
+
+.border-0 {
+    border: none !important;
+}
+
+.border-top {
+    border-top: 1px solid var(--color-border) !important;
+}
+
+.border-bottom {
+    border-bottom: 1px solid var(--color-border) !important;
+}
+
+.border-left {
+    border-left: 1px solid var(--color-border) !important;
+}
+
+.border-right {
+    border-right: 1px solid var(--color-border) !important;
+}
+
+.rounded {
+    border-radius: var(--radius-md) !important;
+}
+
+.rounded-sm {
+    border-radius: var(--radius-sm) !important;
+}
+
+.rounded-lg {
+    border-radius: var(--radius-lg) !important;
+}
+
+.rounded-xl {
+    border-radius: var(--radius-xl) !important;
+}
+
+.rounded-full {
+    border-radius: var(--radius-full) !important;
+}
+
+.rounded-none {
+    border-radius: 0 !important;
+}
+
+/* ===== Shadow Utilities ===== */
+
+.shadow-none {
+    box-shadow: none !important;
+}
+
+.shadow-sm {
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.shadow-md {
+    box-shadow: var(--shadow-md) !important;
+}
+
+.shadow-lg {
+    box-shadow: var(--shadow-lg) !important;
+}
+
+.shadow-xl {
+    box-shadow: var(--shadow-xl) !important;
+}
+
+/* ===== Background Utilities ===== */
+
+.bg-white {
+    background-color: white !important;
+}
+
+.bg-light {
+    background-color: var(--color-bg-light) !important;
+}
+
+.bg-gray {
+    background-color: var(--color-bg-gray) !important;
+}
+
+.bg-primary {
+    background-color: var(--color-primary) !important;
+}
+
+.bg-accent {
+    background-color: var(--color-accent) !important;
+}
+
+.bg-success {
+    background-color: var(--color-success) !important;
+}
+
+.bg-warning {
+    background-color: var(--color-warning) !important;
+}
+
+.bg-error {
+    background-color: var(--color-error) !important;
+}
+
+.bg-transparent {
+    background-color: transparent !important;
+}
+
+/* ===== Cursor Utilities ===== */
+
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
+.cursor-default {
+    cursor: default !important;
+}
+
+.cursor-not-allowed {
+    cursor: not-allowed !important;
+}
+
+/* ===== Visibility Utilities ===== */
+
+.visible {
+    visibility: visible !important;
+}
+
+.invisible {
+    visibility: hidden !important;
+}
+
+.opacity-0 {
+    opacity: 0 !important;
+}
+
+.opacity-50 {
+    opacity: 0.5 !important;
+}
+
+.opacity-100 {
+    opacity: 1 !important;
+}
+
+/* ===== Pointer Events ===== */
+
+.pointer-events-none {
+    pointer-events: none !important;
+}
+
+.pointer-events-auto {
+    pointer-events: auto !important;
+}
+
+/* ===== User Select ===== */
+
+.select-none {
+    user-select: none !important;
+}
+
+.select-text {
+    user-select: text !important;
+}
+
+.select-all {
+    user-select: all !important;
+}
+
+/* ===== Responsive Utilities ===== */
+
+@media (max-width: 768px) {
+    .d-md-none {
+        display: none !important;
+    }
+
+    .d-md-block {
+        display: block !important;
+    }
+
+    .d-md-flex {
+        display: flex !important;
+    }
+
+    .flex-md-column {
+        flex-direction: column !important;
+    }
+
+    .w-md-100 {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .d-sm-none {
+        display: none !important;
+    }
+
+    .d-sm-block {
+        display: block !important;
+    }
+
+    .d-sm-flex {
+        display: flex !important;
+    }
+
+    .w-sm-100 {
+        width: 100% !important;
+    }
+}
+
+/* ===== Transition Utilities ===== */
+
+.transition {
+    transition: all var(--transition-base) !important;
+}
+
+.transition-fast {
+    transition: all var(--transition-fast) !important;
+}
+
+.transition-slow {
+    transition: all var(--transition-slow) !important;
+}
+
+.transition-none {
+    transition: none !important;
+}
+
+/* ===== Transform Utilities ===== */
+
+.transform {
+    transform: translateZ(0) !important;
+}
+
+.transform-none {
+    transform: none !important;
+}
+
+/* ===== Z-index Utilities ===== */
+
+.z-0 {
+    z-index: 0 !important;
+}
+
+.z-10 {
+    z-index: 10 !important;
+}
+
+.z-20 {
+    z-index: 20 !important;
+}
+
+.z-dropdown {
+    z-index: var(--z-dropdown) !important;
+}
+
+.z-sticky {
+    z-index: var(--z-sticky) !important;
+}
+
+.z-modal {
+    z-index: var(--z-modal) !important;
+}

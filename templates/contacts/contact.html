@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Contact - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/programs.css' %}">
+<link rel="stylesheet" href="{% static 'css/contacts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="program-hero">
+        <h1>Get in Touch</h1>
+        <p style="margin-top:0.5rem;">We'd love to hear from you. We reply within 24 hours.</p>
+    </section>
+
+    <div class="contact-cards">
+        <div class="contact-card card-location">
+            <div class="card-illustration">
+                <span class="illustration-ring"></span>
+                <i class="fas fa-map-marked-alt"></i>
+            </div>
+            <h3>Community Center</h3>
+            <p>123 Main Street, Vancouver, BC V6A 1A1</p>
+            <p>Near Kingsway and Main</p>
+            <button class="btn">Get Directions</button>
+        </div>
+        <div class="contact-card card-phone">
+            <div class="card-illustration">
+                <span class="illustration-ring"></span>
+                <i class="fas fa-phone"></i>
+            </div>
+            <h3>Call Us</h3>
+            <p>Main: +1 (604) 555-0123</p>
+            <p>Emergency: +1 (604) 555-0199</p>
+            <button class="btn">Click to Call</button>
+        </div>
+        <div class="contact-card card-email">
+            <div class="card-illustration">
+                <span class="illustration-ring"></span>
+                <i class="fas fa-envelope"></i>
+            </div>
+            <h3>Email Us</h3>
+            <p>info@nepalicommunityvancouver.ca</p>
+            <button class="btn">Send Email</button>
+        </div>
+        <div class="contact-card card-social">
+            <div class="card-illustration">
+                <span class="illustration-ring"></span>
+                <i class="fas fa-share-alt"></i>
+            </div>
+            <h3>Follow Us</h3>
+            <div class="social-links">
+                <a href="#" class="social-link social-link--facebook" aria-label="Facebook" data-name="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-link social-link--instagram" aria-label="Instagram" data-name="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="social-link social-link--twitter" aria-label="Twitter" data-name="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-link social-link--youtube" aria-label="YouTube" data-name="YouTube"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <section class="contact-message-zone">
+        <div class="contact-form-header">
+            <h2>Send a Message</h2>
+            <p>Share your inquiry and our team will follow up with the right person as quickly as possible.</p>
+        </div>
+
+        <div class="contact-form-layout">
+            <form method="post" enctype="multipart/form-data" class="contact-form" id="contactMessageForm">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="form-global-errors">
+                    {% for err in form.non_field_errors %}
+                    <p>{{ err }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="form-row form-row-primary">
+                    <div class="form-group animated-group">
+                        <label for="id_name" class="form-label">
+                            <i class="fas fa-user"></i> Your Name <span class="required">*</span>
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}<div class="field-error">{{ form.name.errors.0 }}</div>{% endif %}
+                        <div class="input-hint">What should we call you?</div>
+                    </div>
+
+                    <div class="form-group animated-group">
+                        <label for="id_email" class="form-label">
+                            <i class="fas fa-envelope"></i> Email <span class="required">*</span>
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<div class="field-error">{{ form.email.errors.0 }}</div>{% endif %}
+                        <div class="input-hint">We will reply to this address.</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group animated-group">
+                        <label for="id_phone" class="form-label">
+                            <i class="fas fa-phone"></i> Phone
+                        </label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}<div class="field-error">{{ form.phone.errors.0 }}</div>{% endif %}
+                        <div class="input-hint">Optional. Add if you prefer a callback.</div>
+                    </div>
+
+                    <div class="form-group animated-group">
+                        <label for="id_subject" class="form-label">
+                            <i class="fas fa-comment-alt"></i> Subject <span class="required">*</span>
+                        </label>
+                        {{ form.subject }}
+                        {% if form.subject.errors %}<div class="field-error">{{ form.subject.errors.0 }}</div>{% endif %}
+                        <div class="input-hint">Briefly describe your request.</div>
+                    </div>
+                </div>
+
+                <div class="form-group animated-group">
+                    <div class="label-with-meta">
+                        <label for="id_message" class="form-label">
+                            <i class="fas fa-pen-fancy"></i> Message <span class="required">*</span>
+                        </label>
+                        <span class="char-counter" id="messageCounter">0</span>
+                    </div>
+                    {{ form.message }}
+                    {% if form.message.errors %}<div class="field-error">{{ form.message.errors.0 }}</div>{% endif %}
+                    <div class="input-hint">Include key dates, context, and how we can help.</div>
+                </div>
+
+                <div class="form-group animated-group attachment-group">
+                    <label for="id_attachment" class="form-label">
+                        <i class="fas fa-paperclip"></i> Attachment
+                    </label>
+                    <div class="attachment-dropzone" id="attachmentDropzone">
+                        {{ form.attachment }}
+                        <div class="attachment-text" id="attachmentText">Drop file here or click to upload (optional)</div>
+                    </div>
+                    {% if form.attachment.errors %}<div class="field-error">{{ form.attachment.errors.0 }}</div>{% endif %}
+                    <div class="input-hint">Accepted: images, PDF, DOC, DOCX.</div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-large submit-btn" id="contactSubmitBtn">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </div>
+            </form>
+
+            <aside class="contact-form-sidepanel" aria-label="Response Expectations">
+                <h3><i class="fas fa-bolt"></i> Response Timeline</h3>
+                <p>Most inquiries receive a reply within 24 hours. Urgent matters are prioritized first.</p>
+
+                <div class="sidepanel-list">
+                    <div class="sidepanel-item">
+                        <strong>General Queries</strong>
+                        <span>Within one business day</span>
+                    </div>
+                    <div class="sidepanel-item">
+                        <strong>Programs and Events</strong>
+                        <span>Same day during active sessions</span>
+                    </div>
+                    <div class="sidepanel-item">
+                        <strong>Membership Support</strong>
+                        <span>Handled by the admin team</span>
+                    </div>
+                </div>
+
+                <div class="sidepanel-note">
+                    <i class="fas fa-lock"></i>
+                    <span>Your contact details are used only for communication about your request.</span>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <section style="margin:2rem 0;">
+        <h2>Our Location</h2>
+        <p style="margin: 0 0 0.75rem 0;">Hindu Buddhist Foundation, Surrey, BC, Canada</p>
+        <iframe src="https://www.google.com/maps?q=Hindu%20Buddhist%20Foundation%20Surrey%20BC%20Canada&output=embed"
+            width="100%" height="300" frameborder="0" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    </section>
+</div>
+
+<script>
+(function () {
+    const messageField = document.getElementById('id_message');
+    const messageCounter = document.getElementById('messageCounter');
+    const attachmentInput = document.getElementById('id_attachment');
+    const attachmentText = document.getElementById('attachmentText');
+    const submitBtn = document.getElementById('contactSubmitBtn');
+    const contactForm = document.getElementById('contactMessageForm');
+
+    function updateMessageCount() {
+        if (!messageField || !messageCounter) return;
+        messageCounter.textContent = String((messageField.value || '').trim().length);
+    }
+
+    if (messageField) {
+        messageField.addEventListener('input', updateMessageCount);
+        updateMessageCount();
+    }
+
+    if (attachmentInput && attachmentText) {
+        attachmentInput.addEventListener('change', function () {
+            const fileName = this.files && this.files.length ? this.files[0].name : '';
+            attachmentText.textContent = fileName || 'Drop file here or click to upload (optional)';
+        });
+    }
+
+    if (contactForm && submitBtn) {
+        contactForm.addEventListener('submit', function () {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        });
+    }
+})();
+</script>
+{% endblock %}

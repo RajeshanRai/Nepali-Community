@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Privacy Policy - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<style>
+    .policy-page {
+        background: #ffffff;
+        min-height: 100vh;
+    }
+
+    .policy-hero {
+        background: transparent;
+        color: #111827;
+        padding: 2.25rem 1.5rem 1.25rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .policy-hero::before {
+        content: none;
+    }
+
+    .policy-hero h1 {
+        font-size: 2.1rem;
+        font-weight: 800;
+        margin-bottom: 0.6rem;
+        position: relative;
+        z-index: 1;
+        color: #111827;
+    }
+
+    .policy-hero p {
+        font-size: 1rem;
+        opacity: 1;
+        color: #4b5563;
+        max-width: 700px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .policy-container {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem;
+    }
+
+    .policy-updated {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        padding: 0.9rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+        color: #374151;
+    }
+
+    .policy-section {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+        border: 1px solid #e5e7eb;
+    }
+
+    .policy-section h2 {
+        color: #111827;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin: 0 0 0.8rem;
+        padding: 0;
+        background: transparent;
+        border-radius: 0;
+        display: block;
+    }
+
+    .policy-section h2::before {
+        content: none;
+    }
+
+    .policy-section h3 {
+        color: #374151;
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin: 1.5rem 0 0.75rem;
+    }
+
+    .policy-section p {
+        color: #4b5563;
+        line-height: 1.65;
+        margin-bottom: 1rem;
+    }
+
+    .policy-section ul,
+    .policy-section ol {
+        color: #4b5563;
+        line-height: 1.65;
+        margin: 1rem 0 1rem 1.5rem;
+    }
+
+    .policy-section li {
+        margin-bottom: 0.5rem;
+    }
+
+    .policy-section strong {
+        color: var(--color-black);
+        font-weight: 600;
+    }
+
+    .contact-box {
+        background: #ffffff;
+        color: #111827;
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+        margin-top: 1.5rem;
+        border: 1px solid #e5e7eb;
+    }
+
+    .contact-box h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .contact-box p {
+        margin-bottom: 1rem;
+        opacity: 1;
+        color: #374151;
+    }
+
+    .contact-box a {
+        color: #111827;
+        text-decoration: underline;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .policy-hero h1 {
+            font-size: 2rem;
+            color: #111827;
+        }
+
+        .policy-hero p {
+            font-size: 1rem;
+        }
+
+        .policy-container {
+            padding: 2rem 1rem;
+        }
+
+        .policy-section {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="policy-page">
+    <div class="policy-hero">
+        <h1>Privacy Policy</h1>
+        <p>Your privacy matters to us. Learn how we collect, use, and protect your personal information.</p>
+    </div>
+
+    <div class="policy-container">
+        <div class="policy-updated">
+            <strong>Last Updated:</strong> March 19, 2026
+        </div>
+
+        <div class="policy-section">
+            <h2>Scope and Commitment</h2>
+            <p>This Privacy Policy explains how Nepali Community of Vancouver ("NCV", "we", "us") collects, uses, shares, and protects personal information when you use our website, register for programs, volunteer, donate, or contact us.</p>
+            <p>We design our services with privacy and security in mind. We do not sell personal information. We limit collection to what we need to operate, improve, and protect our community services.</p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Information We Collect</h2>
+
+            <h3>Information You Provide</h3>
+            <ul>
+                <li><strong>Account and profile data:</strong> Name, email, username, phone number, and profile details.</li>
+                <li><strong>Program and event data:</strong> Registrations, attendance-related details, and participant preferences you choose to share.</li>
+                <li><strong>Volunteer data:</strong> Application details, skills, availability, and related coordination notes.</li>
+                <li><strong>Donation data:</strong> Donation amount, date, and related records. Card or bank payment details are processed by payment partners, not stored by NCV unless explicitly required for receipts or reconciliation.</li>
+                <li><strong>Messages and support data:</strong> Information you provide through contact forms, email, or support requests.</li>
+            </ul>
+
+            <h3>Information Collected Automatically</h3>
+            <ul>
+                <li><strong>Device and log data:</strong> IP address, browser type, operating system, date/time of access, and request metadata.</li>
+                <li><strong>Usage data:</strong> Pages viewed, features used, and interaction patterns that help us improve reliability and usability.</li>
+                <li><strong>Cookie and session data:</strong> Authentication, security, and preference cookies needed to run core site functions.</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>How We Use Your Information</h2>
+            <ol>
+                <li>Deliver and manage programs, events, volunteer opportunities, and community services.</li>
+                <li>Create and maintain accounts, verify identity where needed, and provide customer support.</li>
+                <li>Send service messages, program updates, receipts, and important administrative notices.</li>
+                <li>Process donations, maintain financial records, and meet accounting and legal obligations.</li>
+                <li>Monitor, secure, and improve our website, including fraud prevention and abuse detection.</li>
+                <li>Analyze trends and performance to improve product quality and user experience.</li>
+            </ol>
+        </div>
+
+        <div class="policy-section">
+            <h2>Lawful Bases and Consent</h2>
+            <p>Depending on context, we process personal information based on one or more of the following:</p>
+            <ul>
+                <li><strong>Performance of services:</strong> To deliver what you request (for example, registrations or volunteer coordination).</li>
+                <li><strong>Legitimate interests:</strong> To run, secure, and improve our services responsibly.</li>
+                <li><strong>Legal obligations:</strong> To comply with applicable law, tax, accounting, and regulatory requirements.</li>
+                <li><strong>Consent:</strong> Where required or appropriate, including optional communications or specific data uses.</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>How We Share Information</h2>
+            <p>We do not sell personal information. We share information only as needed to operate our services and meet legal obligations.</p>
+            <ul>
+                <li><strong>Service providers:</strong> Hosting, email, payment processing, analytics, and operational support partners under contractual safeguards.</li>
+                <li><strong>Program partners:</strong> Limited details required for co-hosted activities, only where necessary and appropriate.</li>
+                <li><strong>Legal and safety disclosures:</strong> Where required by law or needed to protect rights, safety, and platform integrity.</li>
+                <li><strong>Organizational changes:</strong> If NCV undergoes reorganization, merger, or asset transfer, information may be transferred subject to applicable safeguards and notice requirements.</li>
+            </ul>
+        </div>
+
+        <div class="policy-section">
+            <h2>Cookies and Similar Technologies</h2>
+            <p>We use cookies and similar technologies to operate secure sessions, remember preferences, and understand service performance.</p>
+            <ul>
+                <li><strong>Strictly necessary cookies:</strong> Required for authentication, security, and core features.</li>
+                <li><strong>Preference cookies:</strong> Store interface preferences to improve continuity of experience.</li>
+                <li><strong>Analytics cookies:</strong> Help us understand traffic and improve usability.</li>
+            </ul>
+            <p>You can manage cookies in your browser settings. Disabling some cookies may affect service availability.</p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Security</h2>
+            <p>We apply administrative, technical, and physical safeguards designed to protect personal information, including transport encryption, access controls, and role-based data access.</p>
+            <ul>
+                <li>Encryption in transit (HTTPS/TLS) for supported connections.</li>
+                <li>Credential protection and secure password hashing.</li>
+                <li>Operational monitoring, backup controls, and least-privilege access.</li>
+            </ul>
+            <p>No method of transmission or storage is fully secure. We continuously improve our controls to reduce risk.</p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Data Retention</h2>
+            <p>We retain personal information for as long as needed for the purposes described in this Policy, including legal, accounting, tax, dispute resolution, and records management requirements. When data is no longer needed, we delete or de-identify it using reasonable methods.</p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Your Privacy Rights</h2>
+            <p>Subject to applicable law, you may request to access, correct, update, delete, or restrict use of your personal information, and may withdraw consent where processing is based on consent.</p>
+            <p>To make a request, contact us using the details below. We may verify your identity before processing requests, and some rights may be limited by law.</p>
+        </div>
+
+        <div class="policy-section">
+            <h2>International and Third-Party Services</h2>
+            <p>Some service providers may process data outside your province or country. Where this occurs, we use reasonable contractual and organizational safeguards appropriate to the sensitivity of the information and applicable legal requirements.</p>
+            <p>Our website may link to third-party sites. Their privacy practices are governed by their own policies, not this Policy.</p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Children and Youth</h2>
+            <p>Our public website is not directed to children under 13. If we learn that personal information from a child under 13 was collected without appropriate authorization, we will take steps to delete it.</p>
+            <p>For youth participation in programs, we may collect guardian contact details and consent information where required.</p>
+        </div>
+
+        <div class="policy-section">
+            <h2>Policy Updates</h2>
+            <p>We may update this Privacy Policy to reflect legal, operational, or product changes. If we make material updates, we will post the revised Policy on this page and update the "Last Updated" date above.</p>
+        </div>
+
+        <div class="contact-box">
+            <h3>Contact Us About Privacy</h3>
+            <p>If you have questions, concerns, or privacy requests, contact us:</p>
+            <p>
+                <strong>Email:</strong> <a href="mailto:privacy@nepalivc.ca">privacy@nepalivc.ca</a><br>
+                <strong>Phone:</strong> +1 (604) 123-4567<br>
+                <strong>Address:</strong> Nepali Community of Vancouver, Vancouver, BC, Canada
+            </p>
+            <p style="margin-bottom: 0;">
+                You may also contact the Office of the Privacy Commissioner of Canada if you believe your privacy rights have been infringed.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

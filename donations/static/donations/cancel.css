@@ -1,0 +1,144 @@
+/* Donation Cancellation Page Styles */
+
+:root {
+    --color-black: #1a1a1a;
+    --color-orange: #FF6B35;
+    --color-pink: #FFB6D9;
+    --accent-dark: #E55A25;
+}
+
+.cancel-container {
+    max-width: 600px;
+    margin: 4rem auto;
+    padding: 2rem;
+}
+
+.cancel-box {
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.cancel-icon {
+    font-size: 4rem;
+    color: var(--color-orange);
+    margin-bottom: 1rem;
+    animation: shake 0.6s ease;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-10px);
+    }
+
+    75% {
+        transform: translateX(10px);
+    }
+}
+
+.cancel-title {
+    color: var(--color-black);
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+.cancel-message {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.info-box {
+    background: rgba(255, 107, 53, 0.08);
+    border-left: 4px solid var(--color-orange);
+    padding: 1rem;
+    border-radius: 5px;
+    margin: 1.5rem 0;
+    text-align: left;
+}
+
+.info-box p {
+    color: var(--color-black);
+    margin: 0.5rem 0;
+}
+
+.info-box i {
+    color: var(--color-orange);
+}
+
+.contact-email {
+    font-weight: 700;
+    color: var(--color-orange);
+}
+
+.buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: var(--color-orange);
+    color: white;
+    padding: 0.75rem 2rem;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: var(--accent-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    padding: 0.75rem 2rem;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.reason-section {
+    background: rgba(255, 107, 53, 0.05);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    text-align: left;
+    border-left: 4px solid var(--color-orange);
+}
+
+.reason-section h3 {
+    color: var(--color-orange);
+    margin-top: 0;
+}
+
+.reason-section p {
+    color: #666;
+    margin: 0.5rem 0;
+}

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block email_title %}{{ title }}{% endblock %}</title>
+    <style>
+        {{ mail_css|safe }}
+    </style>
+</head>
+<body>
+    <div class="preheader">{{ title }} | {{ brand_name }}</div>
+    <table role="presentation" class="mail-shell" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td align="center">
+                <table role="presentation" class="mail-card" cellpadding="0" cellspacing="0" width="640">
+                    <tr>
+                        <td class="mail-header">
+                            <div class="brand">{{ brand_name }}</div>
+                            <h1>{% block header_title %}{{ title }}{% endblock %}</h1>
+                            <p class="header-subtitle">Community updates delivered with care</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="mail-body">
+                            {% block email_body %}
+                                <p class="greeting">{{ greeting }}</p>
+                                <p>{{ intro }}</p>
+
+                                {% for line in paragraphs %}
+                                <p>{{ line }}</p>
+                                {% endfor %}
+
+                                {% if highlights %}
+                                <div class="highlight-block">
+                                    <h3>What you should know</h3>
+                                    <ul>
+                                        {% for item in highlights %}
+                                        <li>{{ item }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+
+                                {% if cta_text and cta_url %}
+                                <p class="cta-wrap">
+                                    <a href="{{ cta_url }}" class="cta-btn">{{ cta_text }}</a>
+                                </p>
+                                {% endif %}
+
+                                <p class="closing">{{ closing|linebreaksbr }}</p>
+                            {% endblock %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="mail-footer">
+                            <p>This message was sent by {{ brand_name }}.</p>
+                            <p>Please do not reply directly to this automated notification.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

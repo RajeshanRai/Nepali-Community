@@ -1,0 +1,1 @@
+[success.js content from old location]

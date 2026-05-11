@@ -1,0 +1,37 @@
+.two-factor-shell .auth-card {
+    max-width: 980px;
+}
+
+.two-factor-card .auth-display {
+    max-width: 15ch;
+}
+
+.two-factor-card .auth-form-panel {
+    display: grid;
+    align-content: center;
+}
+
+.two-factor-card input[name="code"] {
+    letter-spacing: 0.2em;
+    text-align: center;
+    font-weight: 700;
+}
+
+.two-factor-resend-form {
+    margin-top: 14px;
+}
+
+.two-factor-resend-btn {
+    width: 100%;
+    justify-content: center;
+}
+
+@media (max-width: 760px) {
+    .two-factor-shell {
+        padding: 12px;
+    }
+
+    .two-factor-card .auth-display {
+        max-width: none;
+    }
+}

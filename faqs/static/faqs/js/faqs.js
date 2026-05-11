@@ -1,0 +1,1 @@
+[faqs.js content from old location]

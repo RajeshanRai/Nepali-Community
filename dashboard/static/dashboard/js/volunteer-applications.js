@@ -1,0 +1,505 @@
+(function () {
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i += 1) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === `${name}=`) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function isValidCsrfToken(value) {
+        return typeof value === 'string'
+            && value !== 'NOTPROVIDED'
+            && value !== 'undefined'
+            && value !== 'null'
+            && (value.length === 32 || value.length === 64);
+    }
+
+    function getCsrfToken() {
+        const candidates = [];
+
+        document.querySelectorAll('input[name="csrfmiddlewaretoken"]').forEach((input) => {
+            candidates.push(input.value);
+        });
+
+        const hiddenToken = document.getElementById('csrfTokenValue');
+        if (hiddenToken) {
+            candidates.push(hiddenToken.value);
+        }
+
+        candidates.push(getCookie('csrftoken'));
+
+        const valid = candidates.find((token) => isValidCsrfToken(token));
+        return valid || '';
+    }
+
+    function notify(message, type) {
+        if (typeof showToast === 'function') {
+            showToast(message, type || 'info');
+            return;
+        }
+        if (typeof showNotification === 'function') {
+            showNotification(message, type || 'info');
+            return;
+        }
+        alert(message);
+    }
+
+    async function confirmAction(options) {
+        if (window.GlobalUI && typeof window.GlobalUI.confirm === 'function') {
+            return window.GlobalUI.confirm(options);
+        }
+        return Promise.resolve(window.confirm(options.message || 'Are you sure?'));
+    }
+
+    function bindStatusFilters(containerId, tableId) {
+        const container = document.getElementById(containerId);
+        const table = document.getElementById(tableId);
+        if (!container || !table) {
+            return;
+        }
+
+        const buttons = container.querySelectorAll('.filter-btn');
+        const rows = table.querySelectorAll('tbody tr[data-status]');
+
+        buttons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const selected = button.dataset.status;
+                buttons.forEach((btn) => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                rows.forEach((row) => {
+                    const status = row.dataset.status;
+                    const visible = selected === 'all' || status === selected;
+                    row.style.display = visible ? '' : 'none';
+                });
+            });
+        });
+    }
+
+    function bindSearch(inputId, tableId, fields) {
+        const input = document.getElementById(inputId);
+        const table = document.getElementById(tableId);
+        if (!input || !table) {
+            return;
+        }
+
+        const rows = table.querySelectorAll('tbody tr[data-status]');
+
+        input.addEventListener('input', () => {
+            const query = input.value.trim().toLowerCase();
+            rows.forEach((row) => {
+                const text = fields
+                    .map((index) => (row.cells[index] ? row.cells[index].innerText : ''))
+                    .join(' ')
+                    .toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        });
+    }
+
+    function openDetailsModal(items) {
+        const modal = document.getElementById('volunteerDetailsModal');
+        const grid = document.getElementById('volunteerDetailsGrid');
+        if (!modal || !grid) {
+            return;
+        }
+
+        grid.innerHTML = items
+            .map((item) => {
+                const fullClass = item.full ? ' full' : '';
+                return `<div class="detail-item${fullClass}"><label>${item.label}</label><p>${item.value || '-'}</p></div>`;
+            })
+            .join('');
+
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetailsModal() {
+        const modal = document.getElementById('volunteerDetailsModal');
+        if (!modal) {
+            return;
+        }
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    function openActionModal(row, type, action, id) {
+        const modal = document.getElementById('volunteerActionModal');
+        const itemType = document.getElementById('actionItemType');
+        const itemId = document.getElementById('actionItemId');
+        const actionVerb = document.getElementById('actionVerb');
+        const recordLabel = document.getElementById('actionRecordLabel');
+        const verbLabel = document.getElementById('actionVerbLabel');
+        const targetLabel = document.getElementById('actionTargetLabel');
+        const note = document.getElementById('actionAdminNote');
+        const submitBtn = document.getElementById('actionSubmitBtn');
+
+        if (!modal || !itemType || !itemId || !actionVerb || !recordLabel || !verbLabel || !targetLabel || !submitBtn) {
+            return;
+        }
+
+        const typeLabel = type === 'application' ? 'Opportunity Application' : 'Volunteer Request';
+        const actionLabel = action === 'approve'
+            ? 'Approve'
+            : action === 'reject'
+                ? 'Reject'
+                : 'Delete';
+        const statusText = row?.dataset?.statusText || 'Unknown';
+        const nameText = row?.dataset?.name || 'Unknown';
+        const emailText = row?.dataset?.email || 'No email';
+
+        itemType.value = type;
+        itemId.value = id;
+        actionVerb.value = action;
+        recordLabel.textContent = `${typeLabel} #${id}`;
+        verbLabel.textContent = actionLabel;
+        targetLabel.textContent = `${nameText} (${emailText}) - current status: ${statusText}`;
+        submitBtn.textContent = actionLabel;
+        submitBtn.classList.toggle('btn-danger', action === 'reject' || action === 'delete');
+        submitBtn.classList.toggle('btn-primary', action !== 'reject' && action !== 'delete');
+
+        if (note) {
+            note.value = '';
+        }
+
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeActionModal() {
+        const modal = document.getElementById('volunteerActionModal');
+        if (!modal) {
+            return;
+        }
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    function bindDetailsModalClose() {
+        document.querySelectorAll('[data-close-volunteer-modal]').forEach((node) => {
+            node.addEventListener('click', closeDetailsModal);
+        });
+
+        document.querySelectorAll('[data-close-volunteer-action-modal]').forEach((node) => {
+            node.addEventListener('click', closeActionModal);
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeDetailsModal();
+                closeActionModal();
+            }
+        });
+    }
+
+    function statusBadge(type, action) {
+        if (type === 'application') {
+            if (action === 'approve') {
+                return '<span class="status-badge status-approved">Accepted</span>';
+            }
+            return '<span class="status-badge status-rejected">Rejected</span>';
+        }
+
+        // Request statuses: accepted, assigned, rejected
+        if (action === 'approve') {
+            return '<span class="status-badge status-approved">Accepted</span>';
+        }
+        if (action === 'assign') {
+            return '<span class="status-badge status-approved">Assigned</span>';
+        }
+        return '<span class="status-badge status-rejected">Rejected</span>';
+    }
+
+    async function postAction(url, extraData) {
+        const csrfToken = getCsrfToken();
+        if (!csrfToken) {
+            throw new Error('CSRF token not found. Please refresh and try again.');
+        }
+
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        if (extraData && typeof extraData === 'object') {
+            Object.keys(extraData).forEach((key) => {
+                if (extraData[key] !== undefined && extraData[key] !== null) {
+                    formData.append(key, extraData[key]);
+                }
+            });
+        }
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData,
+            credentials: 'same-origin'
+        });
+
+        const payload = await response.json().catch(() => ({}));
+
+        if (!response.ok || payload.success === false) {
+            const message = payload.message || payload.error || `Request failed with status ${response.status}`;
+            throw new Error(message);
+        }
+
+        return payload;
+    }
+
+    function updateRowAfterAction(row, type, action) {
+        if (!row || action === 'delete') {
+            if (row && action === 'delete') {
+                row.remove();
+            }
+            return;
+        }
+
+        const statusCellIndex = type === 'application' ? 4 : 9;
+        const statusCell = row.cells[statusCellIndex];
+        const actionsCell = row.cells[row.cells.length - 1];
+
+        if (statusCell) {
+            statusCell.innerHTML = statusBadge(type, action);
+        }
+
+        if (row.dataset) {
+            if (type === 'application') {
+                row.dataset.status = action === 'approve' ? 'accepted' : 'rejected';
+            } else {
+                if (action === 'approve') {
+                    row.dataset.status = 'accepted';
+                } else if (action === 'assign') {
+                    row.dataset.status = 'assigned';
+                } else {
+                    row.dataset.status = 'closed';
+                }
+            }
+        }
+
+        // Update assignment field availability for requests
+        if (type === 'request') {
+            const select = row.querySelector('.request-opportunity-select');
+            if (select) {
+                const status = row.dataset.status;
+                select.disabled = status === 'closed' || status === 'assigned';
+            }
+        }
+
+        if (actionsCell) {
+            const id = actionsCell.querySelector('button[data-id]')?.dataset.id;
+            if (!id) {
+                return;
+            }
+
+            const scopeClass = type === 'application' ? 'action-application' : 'action-request';
+            let actionsHtml = `
+                <div class="action-buttons">
+                    <button class="btn-icon btn-view ${scopeClass}" data-id="${id}" data-action="view" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </button>`;
+
+            if (type === 'application' && action === 'approve') {
+                // For accepted applications, show assign button
+                actionsHtml += `
+                    <button class="btn-icon btn-assign volunteer-assign-btn" data-id="${id}" data-name="${row.dataset.name || ''}" title="Assign to Program">
+                        <i class="fas fa-tasks"></i>
+                    </button>`;
+            }
+
+            actionsHtml += `
+                    <button class="btn-icon btn-delete ${scopeClass}" data-id="${id}" data-action="delete" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+
+            actionsCell.innerHTML = actionsHtml;
+        }
+    }
+
+    function getDetailsPayload(type, row) {
+        const data = row.dataset;
+        if (type === 'application') {
+            return [
+                { label: 'Applicant', value: data.name },
+                { label: 'Email', value: data.email },
+                { label: 'Phone', value: data.phone },
+                { label: 'Opportunity', value: data.opportunity },
+                { label: 'Applied Date', value: data.applied },
+                { label: 'Status', value: data.statusText },
+                { label: 'Motivation', value: data.motivation, full: true },
+                { label: 'Experience', value: data.experience, full: true },
+                { label: 'Availability', value: data.availability, full: true }
+            ];
+        }
+
+        return [
+            { label: 'Name', value: data.name },
+            { label: 'Email', value: data.email },
+            { label: 'Phone', value: data.phone },
+            { label: 'Address', value: data.address },
+            { label: 'Type', value: data.type },
+            { label: 'Expertise', value: data.expertise },
+            { label: 'Schedule', value: data.schedule, full: true },
+            { label: 'Purpose', value: data.purpose, full: true },
+            { label: 'Submitted', value: data.submitted },
+            { label: 'Status', value: data.statusText }
+        ];
+    }
+
+    function bindActionFormSubmit() {
+        const form = document.getElementById('volunteerActionForm');
+        if (!form) {
+            return;
+        }
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const itemType = document.getElementById('actionItemType')?.value;
+            const itemId = document.getElementById('actionItemId')?.value;
+            const action = document.getElementById('actionVerb')?.value;
+            const note = document.getElementById('actionAdminNote')?.value || '';
+            const submitBtn = document.getElementById('actionSubmitBtn');
+
+            if (!itemType || !itemId || !action) {
+                notify('Missing action details. Please retry.', 'error');
+                return;
+            }
+
+            const basePath = itemType === 'application'
+                ? '/dashboard/volunteers/applications/'
+                : '/dashboard/volunteers/requests/';
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+            }
+
+            try {
+                const response = await postAction(`${basePath}${itemId}/${action}/`, {
+                    admin_note: note.trim(),
+                    reason: note.trim()
+                });
+
+                const selector = itemType === 'application' ? '.action-application' : '.action-request';
+                const row = Array.from(document.querySelectorAll(selector))
+                    .find((btn) => btn.dataset.id === String(itemId))
+                    ?.closest('tr');
+
+                updateRowAfterAction(row, itemType, action);
+                notify(response.message || 'Action completed successfully.', 'success');
+                closeActionModal();
+                bindActions();
+                document.dispatchEvent(new CustomEvent('volunteerDataUpdated'));
+            } catch (error) {
+                notify(error.message || 'Action failed.', 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                }
+            }
+        });
+    }
+
+    function bindActionHandlers(scopeSelector, type) {
+        document.querySelectorAll(scopeSelector).forEach((button) => {
+            button.addEventListener('click', async () => {
+                const action = button.dataset.action;
+                const id = button.dataset.id;
+                const row = button.closest('tr');
+
+                if (!id || !action || !row) {
+                    return;
+                }
+
+                if (action === 'view') {
+                    openDetailsModal(getDetailsPayload(type, row));
+                    return;
+                }
+
+                openActionModal(row, type, action, id);
+            });
+        });
+    }
+
+    function bindRequestAssignmentDropdowns() {
+        document.querySelectorAll('.request-opportunity-select').forEach((select) => {
+            select.addEventListener('change', async () => {
+                const opportunityId = select.value;
+                const requestId = select.dataset.requestId;
+                const row = select.closest('tr');
+                const previousValue = select.dataset.previousValue || '';
+
+                if (!opportunityId || !requestId) {
+                    select.dataset.previousValue = opportunityId || previousValue;
+                    return;
+                }
+
+                const optionLabel = select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : 'selected program';
+                const confirmed = await confirmAction({
+                    title: 'Assign volunteer request',
+                    message: `Assign this volunteer request to "${optionLabel}"?`,
+                    okText: 'Assign'
+                });
+                if (!confirmed) {
+                    select.value = previousValue;
+                    return;
+                }
+
+                select.disabled = true;
+                try {
+                    const response = await postAction(`/dashboard/volunteers/requests/${requestId}/assign/`, {
+                        opportunity_id: opportunityId
+                    });
+                    updateRowAfterAction(row, 'request', 'assign');
+                    select.dataset.previousValue = opportunityId;
+                    notify(response.message || 'Volunteer assigned successfully.', 'success');
+                } catch (error) {
+                    select.value = previousValue;
+                    notify(error.message || 'Assignment failed.', 'error');
+                } finally {
+                    const currentStatus = row?.dataset?.status;
+                    select.disabled = currentStatus === 'closed' || currentStatus === 'assigned';
+                }
+            });
+
+            select.dataset.previousValue = select.value || '';
+        });
+    }
+
+    function clearActionBindings() {
+        document.querySelectorAll('.action-application, .action-request').forEach((button) => {
+            const clone = button.cloneNode(true);
+            button.parentNode.replaceChild(clone, button);
+        });
+    }
+
+    function bindActions() {
+        clearActionBindings();
+        bindActionHandlers('.action-application', 'application');
+        bindActionHandlers('.action-request', 'request');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        bindStatusFilters('application-status-filters', 'applications-table');
+        bindStatusFilters('request-status-filters', 'requests-table');
+        bindSearch('application-search', 'applications-table', [1, 2]);
+        bindSearch('request-search', 'requests-table', [1, 2, 3]);
+        bindRequestAssignmentDropdowns();
+        bindDetailsModalClose();
+        bindActionFormSubmit();
+        bindActions();
+    });
+})();

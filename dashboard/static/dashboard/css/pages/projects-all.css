@@ -1,0 +1,96 @@
+﻿.search-filter-section {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-box-inline {
+    position: relative;
+    flex: 1;
+    min-width: 300px;
+}
+
+.search-box-inline i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6B7280;
+}
+
+.search-box-inline input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid var(--text-muted);
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--text-muted);
+    background: var(--card-bg);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.filter-btn.active {
+    background: #3B82F6;
+    color: var(--card-bg);
+    border-color: #3B82F6;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-view {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+}
+
+.btn-view:hover {
+    background: #3B82F6;
+    color: var(--card-bg);
+}
+
+.btn-edit {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22C55E;
+}
+
+.btn-edit:hover {
+    background: #22C55E;
+    color: var(--card-bg);
+}
+
+.btn-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+}
+
+.btn-delete:hover {
+    background: #EF4444;
+    color: var(--card-bg);
+}

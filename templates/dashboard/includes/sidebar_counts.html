@@ -1,0 +1,25 @@
+{# Dashboard sidebar counts - uses context processor values automatically #}
+{% load dashboard_tags %}
+
+<div class="sidebar-stats">
+    {% if pending_projects_count %}
+    <div class="stat-item">
+        <span class="stat-label">Pending Projects</span>
+        <span class="stat-value">{{ pending_projects_count }}</span>
+    </div>
+    {% endif %}
+    
+    {% if pending_applications_count %}
+    <div class="stat-item">
+        <span class="stat-label">Pending Applications</span>
+        <span class="stat-value">{{ pending_applications_count }}</span>
+    </div>
+    {% endif %}
+    
+    {% if unread_notifications_count %}
+    <div class="stat-item">
+        <span class="stat-label">Unread Notifications</span>
+        <span class="stat-value">{{ unread_notifications_count }}</span>
+    </div>
+    {% endif %}
+</div>

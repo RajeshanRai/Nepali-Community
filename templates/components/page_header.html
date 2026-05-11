@@ -1,0 +1,112 @@
+{# =====================================================
+REUSABLE PAGE HEADER COMPONENT
+Usage: {% include 'components/page_header.html' with title="Programs" subtitle="Browse community events" %}
+===================================================== #}
+
+<section class="page-header{% if additional_classes %} {{ additional_classes }}{% endif %}" {% if data_aos
+    %}data-aos="{{ data_aos }}" {% endif %}>
+    <div class="container">
+        {# Breadcrumbs (Optional) #}
+        {% if breadcrumbs %}
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+            {% for crumb in breadcrumbs %}
+            {% if not forloop.last %}
+            <a href="{{ crumb.url }}">{{ crumb.text }}</a>
+            <span class="breadcrumbs-separator" aria-hidden="true">/</span>
+            {% else %}
+            <span aria-current="page">{{ crumb.text }}</span>
+            {% endif %}
+            {% endfor %}
+        </nav>
+        {% endif %}
+
+        {# Badge/Kicker (Optional) #}
+        {% if kicker %}
+        <div class="badge badge-accent mb-md">{{ kicker }}</div>
+        {% endif %}
+
+        {# Title #}
+        <h1>{{ title }}</h1>
+
+        {# Subtitle/Description #}
+        {% if subtitle %}
+        <p>{{ subtitle }}</p>
+        {% endif %}
+
+        {# Actions (Optional) #}
+        {% if actions %}
+        <div class="btn-group mt-lg">
+            {{ actions }}
+        </div>
+        {% endif %}
+
+        {# Meta Information (Optional) #}
+        {% if meta %}
+        <div class="card-meta mt-md">
+            {% for item in meta %}
+            <div class="card-meta-item">
+                {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
+                <span>{{ item.text }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{#
+USAGE EXAMPLES:
+
+1. Simple Page Header:
+{% include 'components/page_header.html' with
+title="Community Programs"
+subtitle="Join us for cultural events and activities"
+%}
+
+2. With Breadcrumbs:
+{% include 'components/page_header.html' with
+title="Event Details"
+breadcrumbs=breadcrumb_list
+%}
+Where breadcrumb_list = [
+{'text': 'Home', 'url': '/'},
+{'text': 'Events', 'url': '/events/'},
+{'text': 'Dashain Festival'}
+]
+
+3. With Actions:
+{% include 'components/page_header.html' with
+title="Volunteer Opportunities"
+subtitle="Make a difference in your community"
+actions=action_html
+%}
+
+4. With Meta Info:
+{% include 'components/page_header.html' with
+title="Festival Registration"
+subtitle="Dashain 2026"
+meta=meta_list
+%}
+Where meta_list = [
+{'icon': 'fas fa-calendar', 'text': 'October 15, 2026'},
+{'icon': 'fas fa-map-marker-alt', 'text': 'Vancouver Community Center'},
+{'icon': 'fas fa-users', 'text': '250+ Registered'}
+]
+
+5. With Kicker Badge:
+{% include 'components/page_header.html' with
+kicker="New"
+title="Dance Workshop"
+subtitle="Learn traditional Nepali dance"
+%}
+
+PARAMETERS:
+- title: Page title (required)
+- subtitle: Subtitle/description text (optional)
+- kicker: Small badge text above title (optional)
+- breadcrumbs: List of {text, url} dictionaries (optional)
+- actions: HTML for action buttons (optional)
+- meta: List of {icon, text} dictionaries (optional)
+- data_aos: AOS animation name
+- additional_classes: Extra CSS classes
+#}

@@ -1,0 +1,118 @@
+﻿.confirm-delete-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 2rem;
+    text-align: center;
+}
+
+.confirm-icon {
+    font-size: 4rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirm-icon.warning {
+    color: #EF4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.confirm-content h2 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.75rem;
+}
+
+.confirm-content p {
+    color: #6B7280;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.opportunity-info {
+    background: #FEE2E2;
+    border-left: 4px solid #EF4444;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.opportunity-info h3 {
+    color: #7F1D1D;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+}
+
+.opportunity-info .text-muted {
+    color: #9A3412;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-danger {
+    background: #EF4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #DC2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.btn-secondary {
+    background: #D1D5DB;
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: #9CA3AF;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 480px) {
+    .confirm-delete-section {
+        padding: 2rem 1rem;
+    }
+
+    .confirm-icon {
+        font-size: 3rem;
+    }
+
+    .confirm-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .opportunity-info {
+        margin: 1.5rem 0;
+    }
+}

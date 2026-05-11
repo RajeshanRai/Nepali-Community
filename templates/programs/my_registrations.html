@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Registrations - Nepali Community of Vancouver{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/programs.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container programs-page-shell registrations-page fade-in">
+    <section class="registrations-hero slide-up" data-aos="fade-up">
+        <div>
+            <h1>My Event Registrations</h1>
+            <p>Track upcoming events and manage your participation in one place.</p>
+        </div>
+        <div class="registrations-kpi">
+            <span class="kpi-number">{{ registrations|length }}</span>
+            <span class="kpi-label">Total Registered</span>
+        </div>
+    </section>
+
+    <nav class="programs-nav programs-nav-professional" data-aos="fade-up" data-aos-delay="80">
+        <a href="{% url 'program_list' %}" class="programs-nav-item" data-section="all-events">
+            <i class="fas fa-calendar-check"></i> All Events
+        </a>
+        <a href="{% url 'my_registrations' %}" class="programs-nav-item active" data-section="my-registrations">
+            <i class="fas fa-bookmark"></i> My Registrations
+        </a>
+        <a href="{% url 'calendar' %}" class="programs-nav-item" data-section="community-calendar">
+            <i class="fas fa-calendar-alt"></i> Community Calendar
+        </a>
+    </nav>
+
+    <div id="registrations-feedback" class="registrations-feedback" aria-live="polite"></div>
+
+    {% if registrations %}
+    <section class="registrations-list" id="registrations-list" data-aos="fade-up" data-aos-delay="120">
+        {% for registration in registrations %}
+        <article class="registration-card slide-up" data-program-card-id="{{ registration.program.id }}"
+            style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+            <div class="registration-date">
+                <span class="month">{{ registration.program.date|date:"M" }}</span>
+                <span class="day">{{ registration.program.date|date:"d" }}</span>
+            </div>
+
+            <div class="registration-content">
+                <h3>{{ registration.program.title }}</h3>
+                <p>{{ registration.program.description|default:"No description available"|truncatechars:140 }}</p>
+                <div class="registration-meta">
+                    <span><i class="fas fa-map-marker-alt"></i> {{ registration.program.location }}</span>
+                    <span><i class="fas fa-clock"></i> Registered {{ registration.registered_at|date:"M d, Y" }}</span>
+                </div>
+            </div>
+
+            <div class="registration-actions">
+                <a href="{% url 'program_detail' registration.program.id %}" class="btn btn-secondary">View Details</a>
+                <button class="btn-unregister btn btn-outline-orange" data-program-id="{{ registration.program.id }}">
+                    Unregister
+                </button>
+            </div>
+        </article>
+        {% endfor %}
+    </section>
+    {% else %}
+    <section class="registrations-empty slide-up" data-aos="fade-up" data-aos-delay="120">
+        <i class="fas fa-calendar-times"></i>
+        <h3>No Registrations Yet</h3>
+        <p>You have not registered for any events yet. Start by exploring upcoming programs.</p>
+        <a href="{% url 'program_list' %}" class="btn btn-primary">Browse Events</a>
+    </section>
+    {% endif %}
+</div>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const feedbackEl = document.getElementById('registrations-feedback');
+    const listEl = document.getElementById('registrations-list');
+
+    function showFeedback(message, type = 'success') {
+        feedbackEl.textContent = message;
+        feedbackEl.className = `registrations-feedback show ${type}`;
+        setTimeout(() => {
+            feedbackEl.className = 'registrations-feedback';
+        }, 3500);
+    }
+
+    document.querySelectorAll('.btn-unregister').forEach((btn) => {
+        btn.addEventListener('click', function () {
+            const programId = this.getAttribute('data-program-id');
+            const proceed = window.GlobalUI.confirm({
+                title: 'Unregister from event',
+                message: 'Are you sure you want to unregister from this event?',
+                okText: 'Unregister',
+                variant: 'danger'
+            });
+
+            proceed.then((confirmed) => {
+                if (!confirmed) {
+                    return;
+                }
+
+                fetch(`/programs/${programId}/unregister/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then((r) => r.json())
+                    .then((data) => {
+                        if (data.success) {
+                            const card = document.querySelector(`[data-program-card-id="${programId}"]`);
+                            if (card) {
+                                card.remove();
+                            }
+                            showFeedback(data.message || 'Successfully unregistered.', 'success');
+
+                            if (listEl && listEl.children.length === 0) {
+                                window.location.reload();
+                            }
+                        } else {
+                            showFeedback(data.message || 'Unable to unregister at this time.', 'error');
+                        }
+                    })
+                    .catch(() => {
+                        showFeedback('Unregister request failed. Please try again.', 'error');
+                    });
+            });
+        });
+    });
+</script>
+{% endblock %}

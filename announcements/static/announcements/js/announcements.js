@@ -1,0 +1,1 @@
+[announcements.js content from old location]

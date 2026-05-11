@@ -1,0 +1,121 @@
+﻿.opportunities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.opportunity-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.5s ease;
+}
+
+.opportunity-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.card-subtitle {
+    font-size: 0.85rem;
+    color: #9CA3AF;
+    margin-top: 0.25rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+}
+
+.card-body p {
+    color: #4B5563;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.opportunity-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.meta-item {
+    font-size: 0.9rem;
+    color: #6B7280;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.meta-item i {
+    color: #FF7A00;
+    width: 20px;
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--text-muted);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FF7A00, #3B82F6);
+    transition: width 0.3s ease;
+}
+
+.card-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--text-muted);
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-info {
+    background: #3B82F6;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #2563EB;
+}
+
+@media (max-width: 768px) {
+    .opportunities-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-footer {
+        flex-direction: column;
+    }
+
+    .btn-sm {
+        width: 100%;
+        justify-content: center;
+    }
+}
+

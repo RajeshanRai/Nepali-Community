@@ -1,0 +1,1 @@
+[donate.js content from old location]

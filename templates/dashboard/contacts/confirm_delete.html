@@ -1,0 +1,31 @@
+{% extends 'dashboard/admin_base.html' %}
+
+{% block title %}Delete Contact Message{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard:contact_messages_list' %}">Contact Messages</a></li>
+<li class="breadcrumb-item active">Delete</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-trash"></i> Delete Contact Message</h1>
+        <p>This action cannot be undone.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="content-card-body">
+        <p>Are you sure you want to delete message <strong>#{{ message_obj.pk }}</strong> from <strong>{{
+                message_obj.name }}</strong>?</p>
+        <form method="POST">
+            {% csrf_token %}
+            <a href="{% url 'dashboard:contact_messages_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Delete</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1 @@
+[partners.js content from old location]

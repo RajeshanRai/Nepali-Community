@@ -1,0 +1,121 @@
+/* =====================================================
+   RESPONSIVE BREAKPOINTS
+   Standardized media query breakpoints   
+   ===================================================== */
+
+/* Mobile First Approach - Define breakpoints for larger screens */
+
+/* Extra Small Devices (Mobile Portrait) */
+/* Default styles apply here, no media query needed */
+/* < 640px */
+
+/* Small Devices (Mobile Landscape) */
+@custom-media --sm (min-width: 640px);
+
+/* Medium Devices (Tablets) */
+@custom-media --md (min-width: 768px);
+
+/* Large Devices (Desktop) */
+@custom-media --lg (min-width: 1024px);
+
+/* Extra Large Devices (Large Desktop) */
+@custom-media --xl (min-width: 1280px);
+
+/* 2X Large Devices (Extra Large Desktop) */
+@custom-media --2xl (min-width: 1536px);
+
+/* Max-width breakpoints (for specific overrides) */
+@custom-media --max-sm (max-width: 639px);
+@custom-media --max-md (max-width: 767px);
+@custom-media --max-lg (max-width: 1023px);
+@custom-media --max-xl (max-width: 1279px);
+
+/* Common Usage Examples:
+   
+   Mobile First (Recommended):
+   .element {
+       padding: 1rem;
+   }
+   @media (min-width: 768px) {
+       .element {
+           padding: 2rem;
+       }
+   }
+   
+   Desktop First:
+   .element {
+       padding: 2rem;
+   }
+   @media (max-width: 767px) {
+       .element {
+           padding: 1rem;
+       }
+   }
+*/
+
+/* Accessibility: Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Print Styles */
+@media print {
+    * {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    a,
+    a:visited {
+        text-decoration: underline;
+    }
+
+    a[href]::after {
+        content: " (" attr(href) ")";
+    }
+
+    abbr[title]::after {
+        content: " (" attr(title) ")";
+    }
+
+    pre,
+    blockquote {
+        border: 1px solid #999;
+        page-break-inside: avoid;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tr,
+    img {
+        page-break-inside: avoid;
+    }
+
+    img {
+        max-width: 100% !important;
+    }
+
+    p,
+    h2,
+    h3 {
+        orphans: 3;
+        widows: 3;
+    }
+
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
+}

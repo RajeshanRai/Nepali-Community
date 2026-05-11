@@ -1,0 +1,1 @@
+[contacts.js content from old location]

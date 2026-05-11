@@ -1,0 +1,73 @@
+﻿.confirm-container {
+    max-width: 500px;
+    margin: 4rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.confirm-container h1 {
+    color: #EF4444;
+    margin-bottom: 1rem;
+}
+
+.confirm-container p {
+    color: #6B7280;
+    margin-bottom: 2rem;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-danger {
+    background: #EF4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #DC2626;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: var(--text-muted);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: #D1D5DB;
+}
+
+.confirm-item-title {
+    color: var(--text-primary);
+}
+
+.inline-form {
+    display: inline;
+}
+
+.event-info {
+    background: var(--bg-light);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.confirm-item-title.flush-top {
+    margin-top: 0;
+}

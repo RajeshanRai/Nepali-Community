@@ -1,0 +1,707 @@
+/* ===================================
+   DASHBOARD RESPONSIVE & COMPACT MODE
+   Enhanced responsiveness for all dashboard interactions
+   =================================== */
+
+:root {
+    --button-height: 40px;
+    --button-height-compact: 36px;
+    --button-padding: 12px 16px;
+    --button-padding-compact: 8px 12px;
+    --modal-padding: 24px;
+    --modal-padding-compact: 16px;
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===================================
+   BUTTON SYSTEM - RESPONSIVE
+   =================================== */
+
+.btn {
+    padding: var(--button-padding);
+    height: var(--button-height);
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    user-select: none;
+    text-decoration: none;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Button Loading State */
+.btn:disabled,
+.btn.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: -100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Icon-only Buttons */
+.btn-icon {
+    width: var(--button-height);
+    height: var(--button-height);
+    padding: 0;
+    border-radius: 8px;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.btn-icon:hover {
+    transform: translateY(-2px);
+}
+
+.btn-icon:active {
+    transform: scale(0.95);
+}
+
+/* Action Button Group */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.action-buttons.compact {
+    gap: 4px;
+}
+
+/* Button Size Variants */
+.btn-sm {
+    padding: 8px 12px;
+    height: 32px;
+    font-size: 13px;
+}
+
+.btn-lg {
+    padding: 14px 20px;
+    height: 48px;
+    font-size: 15px;
+}
+
+/* ===================================
+   MODAL/POPUP RESPONSIVE ENHANCEMENTS
+   =================================== */
+
+.modal,
+.decision-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    animation: fadeIn 0.2s ease;
+}
+
+.modal.show,
+.modal[style*="display: flex"],
+.decision-modal[style*="display: flex"] {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        background: rgba(0, 0, 0, 0);
+    }
+    to {
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* Modal Content Wrapper */
+.modal-content,
+.details-modal-content,
+.decision-modal-content {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Desktop Modal */
+@media (min-width: 1025px) {
+    .modal-content,
+    .details-modal-content,
+    .decision-modal-content {
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+    }
+}
+
+/* Tablet Modal */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .modal-content,
+    .details-modal-content,
+    .decision-modal-content {
+        max-width: 90%;
+        width: auto;
+        max-height: 80vh;
+    }
+}
+
+/* Mobile Modal */
+@media (max-width: 768px) {
+    .modal-content,
+    .details-modal-content,
+    .decision-modal-content {
+        width: 95%;
+        max-width: none;
+        max-height: 85vh;
+        margin: 20px;
+        border-radius: 16px;
+    }
+    
+    .modal,
+    .decision-modal {
+        padding: 20px;
+    }
+}
+
+/* Modal Header / Footer Sticky Behavior */
+.modal-header,
+.modal-footer,
+.details-modal-header,
+.details-modal-footer {
+    padding: var(--modal-padding);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.modal-header,
+.details-modal-header {
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.modal-footer,
+.details-modal-footer {
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-body,
+.details-modal-body {
+    padding: var(--modal-padding);
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Decision Modal Specific */
+.decision-modal-body {
+    padding: var(--modal-padding);
+    text-align: center;
+}
+
+.decision-modal-body h2 {
+    margin: 0 0 12px 0;
+    font-size: 18px;
+    color: var(--text-primary);
+}
+
+.decision-modal-body p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.decision-modal-footer {
+    padding: var(--modal-padding);
+    gap: 12px;
+    justify-content: center;
+    padding-top: 0;
+}
+
+/* ===================================
+   COMPACT MODE BUTTON ADJUSTMENTS
+   =================================== */
+
+.sidebar.collapsed {
+    --button-height: var(--button-height-compact);
+    --button-padding: var(--button-padding-compact);
+    --modal-padding: var(--modal-padding-compact);
+}
+
+.sidebar.collapsed .btn {
+    padding: var(--button-padding-compact);
+    height: var(--button-height-compact);
+    font-size: 13px;
+}
+
+.sidebar.collapsed .btn-icon {
+    width: var(--button-height-compact);
+    height: var(--button-height-compact);
+    font-size: 14px;
+}
+
+.sidebar.collapsed .modal-header,
+.sidebar.collapsed .modal-footer,
+.sidebar.collapsed .details-modal-header,
+.sidebar.collapsed .details-modal-footer,
+.sidebar.collapsed .decision-modal-body,
+.sidebar.collapsed .decision-modal-footer {
+    padding: var(--modal-padding-compact);
+}
+
+.sidebar.collapsed .modal-body,
+.sidebar.collapsed .details-modal-body {
+    padding: var(--modal-padding-compact);
+}
+
+/* ===================================
+   TABLE ACTION BUTTONS RESPONSIVE
+   =================================== */
+
+.data-table .action-buttons {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+.table-responsive-ready {
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive-ready table thead th,
+.table-responsive-ready .data-table thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 12;
+    background: #f8fafc !important;
+}
+
+.table-responsive-wide {
+    max-width: 100%;
+}
+
+.table-responsive-wide table {
+    min-width: 1400px;
+}
+
+.table-responsive-wide table.ultra-wide-table thead th:first-child,
+.table-responsive-wide table.ultra-wide-table tbody td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 11;
+    background: #ffffff;
+}
+
+.table-responsive-wide table.ultra-wide-table thead th:first-child {
+    z-index: 15;
+    background: #f8fafc !important;
+}
+
+.table-responsive-wide .action-buttons {
+    flex-wrap: nowrap !important;
+    white-space: nowrap;
+}
+
+.table-responsive-wide .btn-icon {
+    width: clamp(24px, 2vw, 32px);
+    height: clamp(24px, 2vw, 32px);
+    font-size: clamp(11px, 1vw, 14px);
+    border-radius: 8px;
+}
+
+.data-table .btn-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+}
+
+@media (max-width: 768px) {
+    .data-table .action-buttons {
+        gap: 4px;
+    }
+    
+    .data-table .btn-icon {
+        width: 22px;
+        height: 22px;
+        font-size: 10px;
+    }
+
+    .table-responsive-wide .btn-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .data-table {
+        font-size: 12px;
+    }
+    
+    .data-table .action-buttons {
+        gap: 2px;
+        flex-direction: column;
+    }
+
+    .table-responsive-wide .data-table .action-buttons {
+        flex-direction: row;
+        gap: 4px;
+    }
+    
+    .data-table .btn-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 9px;
+    }
+
+    .table-responsive-wide table {
+        min-width: 1600px;
+    }
+
+    .table-responsive-wide .btn-icon {
+        width: 26px;
+        height: 26px;
+        font-size: 10px;
+    }
+}
+
+/* ===================================
+   TOAST NOTIFICATIONS RESPONSIVE
+   =================================== */
+
+.toast-container {
+    bottom: 20px !important;
+    top: auto !important;
+    right: 20px;
+    left: auto;
+    z-index: 10000;
+    gap: 12px;
+}
+
+@media (max-width: 768px) {
+    .toast-container {
+        right: 12px;
+        bottom: 12px;
+    }
+    
+    .toast {
+        min-width: auto;
+        max-width: 280px;
+        font-size: 13px;
+        padding: 12px 16px;
+    }
+}
+
+/* ===================================
+   FORMS IN MODALS - RESPONSIVE
+   =================================== */
+
+.modal-body form,
+.details-modal-body form,
+.decision-modal-body form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modal-body .form-group,
+.details-modal-body .form-group,
+.decision-modal-body .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.modal-body .form-group label,
+.details-modal-body .form-group label,
+.decision-modal-body .form-group label {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.modal-body .form-group input,
+.modal-body .form-group textarea,
+.modal-body .form-group select,
+.details-modal-body .form-group input,
+.details-modal-body .form-group textarea,
+.details-modal-body .form-group select,
+.decision-modal-body .form-group input,
+.decision-modal-body .form-group textarea,
+.decision-modal-body .form-group select {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modal-body .form-group input:focus,
+.modal-body .form-group textarea:focus,
+.modal-body .form-group select:focus,
+.details-modal-body .form-group input:focus,
+.details-modal-body .form-group textarea:focus,
+.details-modal-body .form-group select:focus,
+.decision-modal-body .form-group input:focus,
+.decision-modal-body .form-group textarea:focus,
+.decision-modal-body .form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+/* ===================================
+   DETAILS GRID - RESPONSIVE
+   =================================== */
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.details-grid .details-full {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+.details-grid label {
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    display: block;
+}
+
+.details-grid p {
+    margin: 0;
+    color: var(--text-primary);
+    word-break: break-word;
+}
+
+/* ===================================
+   TOOLBAR RESPONSIVE
+   =================================== */
+
+.pending-toolbar,
+.content-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.toolbar-left {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.toolbar-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-box-inline {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.search-box-inline input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.search-box-inline input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.search-box-inline i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.toolbar-select {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    background: #fff;
+    color: var(--text-primary);
+}
+
+.toolbar-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+@media (max-width: 768px) {
+    .toolbar-left,
+    .toolbar-right {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .search-box-inline {
+        min-width: 100%;
+    }
+}
+
+/* ===================================
+   ACCESSIBILITY ENHANCEMENTS
+   =================================== */
+
+.btn:focus-visible,
+.btn-icon:focus-visible,
+.toolbar-select:focus-visible,
+.search-box-inline input:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+    .btn,
+    .btn-icon,
+    .modal-content,
+    .details-modal-content,
+    .decision-modal-content {
+        border: 1px solid var(--text-primary);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .btn,
+    .btn-icon,
+    .modal,
+    .decision-modal,
+    .modal-content,
+    .details-modal-content,
+    .decision-modal-content,
+    .toast {
+        animation: none;
+        transition: none;
+    }
+}
+
+/* ===================================
+   VISIBILITY & OVERFLOW FIX
+   Ensure modals and popups never leak
+   =================================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 9998;
+    display: none;
+}
+
+.modal-overlay.show {
+    display: block;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+/* ===================================
+   NAVBAR ISOLATION FOR DASHBOARD
+   Ensure no main navbar appears in dashboard
+   =================================== */
+
+.dashboard-page .navbar,
+.dashboard-page .main-nav,
+.admin_base .navbar,
+.admin_base .main-nav {
+    display: none !important;
+}
+
+/* Ensure admin_base has proper isolation */
+#admin_base,
+[data-dashboard] {
+    isolation: isolate;
+}

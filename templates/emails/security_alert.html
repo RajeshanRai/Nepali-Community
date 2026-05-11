@@ -1,0 +1,31 @@
+{% extends 'emails/base.html' %}
+
+{% block email_body %}
+<p class="greeting">{{ greeting }}</p>
+
+<div class="security-banner">{{ severity_label }}</div>
+<p>{{ summary }}</p>
+
+{% if action_items %}
+<div class="highlight-block security-block">
+    <h3>Recommended actions</h3>
+    <ul>
+        {% for item in action_items %}
+        <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if support_text %}
+<p>{{ support_text }}</p>
+{% endif %}
+
+{% if cta_text and cta_url %}
+<p class="cta-wrap">
+    <a href="{{ cta_url }}" class="cta-btn">{{ cta_text }}</a>
+</p>
+{% endif %}
+
+<p class="closing">Security Team,<br>{{ brand_name }}</p>
+{% endblock %}

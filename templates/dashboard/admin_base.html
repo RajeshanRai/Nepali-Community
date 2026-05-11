@@ -1,0 +1,505 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %} - Nepali Community</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.svg' %}">
+
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    {% include 'dashboard/includes/head_assets.html' %}
+
+    {% block extra_css %}{% endblock %}
+
+    <style>
+        /* Force shared dashboard detail modals to render as popup overlays. */
+        .details-modal {
+            display: none !important;
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 1200 !important;
+        }
+
+        .details-modal.show {
+            display: block !important;
+        }
+
+        .details-modal-backdrop {
+            position: absolute !important;
+            inset: 0 !important;
+            background: rgba(2, 6, 23, 0.52) !important;
+        }
+
+        .details-modal-content {
+            position: relative !important;
+            max-width: 820px !important;
+            width: min(820px, calc(100% - 1.5rem)) !important;
+            margin: 6vh auto !important;
+            background: #ffffff !important;
+            border-radius: 12px !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28) !important;
+            z-index: 1 !important;
+        }
+    </style>
+
+    {% block late_css %}{% endblock %}
+</head>
+
+<body class="dashboard-page" data-dashboard="true">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-text">Administrator</span>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="true">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-tools">
+            <label class="sidebar-quick-filter" for="sidebarQuickFilter">
+                <i class="fas fa-compass"></i>
+                <input type="search" id="sidebarQuickFilter" placeholder="Quick filter" autocomplete="off">
+            </label>
+            <div class="sidebar-favorites" aria-label="Favorites">
+                <a href="{% url 'dashboard:admin_overview' %}" class="sidebar-favorite-link {% if request.resolver_match.url_name == 'admin_overview' %}active{% endif %}" title="Dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'dashboard:projects_pending' %}" class="sidebar-favorite-link {% if 'projects/pending' in request.path %}active{% endif %}" title="Pending Approval">
+                    <i class="fas fa-clock"></i>
+                    <span>Pending</span>
+                </a>
+                <a href="{% url 'dashboard:volunteers_applications' %}" class="sidebar-favorite-link {% if 'volunteers/applications' in request.path %}active{% endif %}" title="Volunteer Applications">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Applications</span>
+                </a>
+                <a href="{% url 'dashboard:notifications' %}" class="sidebar-favorite-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span>Alerts</span>
+                </a>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <!-- Dashboard Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">MAIN</div>
+                <a href="{% url 'dashboard:admin_overview' %}" data-tooltip="Dashboard"
+                    class="nav-item {% if request.resolver_match.url_name == 'admin_overview' %}active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'dashboard:admin_analytics' %}" data-tooltip="Analytics"
+                    class="nav-item {% if request.resolver_match.url_name == 'admin_analytics' %}active{% endif %}">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="{% url 'dashboard:admin_activity' %}" data-tooltip="Recent Activity"
+                    class="nav-item {% if request.resolver_match.url_name == 'admin_activity' %}active{% endif %}">
+                    <i class="fas fa-history"></i>
+                    <span>Recent Activity</span>
+                </a>
+            </div>
+
+            <!-- Events Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">EVENTS</div>
+                <a href="{% url 'dashboard:projects_all' %}" data-tooltip="All Events"
+                    class="nav-item {% if 'projects' in request.path %}active{% endif %}">
+                    <i class="fas fa-folder"></i>
+                    <span>All Events</span>
+                    {% if pending_projects_count %}
+                    <span class="badge badge-warning">{{ pending_projects_count }}</span>
+                    {% endif %}
+                </a>
+                <a href="{% url 'dashboard:projects_pending' %}" data-tooltip="Pending Approval" class="nav-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Pending Approval</span>
+                </a>
+                <a href="{% url 'dashboard:projects_approved' %}" data-tooltip="Approved" class="nav-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Approved</span>
+                </a>
+                <a href="{% url 'dashboard:projects_rejected' %}" data-tooltip="Rejected" class="nav-item">
+                    <i class="fas fa-times-circle"></i>
+                    <span>Rejected</span>
+                </a>
+                <a href="{% url 'dashboard:event_create' %}" data-tooltip="Create New Event" class="nav-item">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Create New Event</span>
+                </a>
+            </div>
+
+            <!-- Volunteers Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">VOLUNTEERS</div>
+                <a href="{% url 'dashboard:volunteers_all' %}" data-tooltip="All Volunteers"
+                    class="nav-item {% if 'volunteers' in request.path %}active{% endif %}">
+                    <i class="fas fa-users"></i>
+                    <span>All Volunteers</span>
+                </a>
+                <a href="{% url 'dashboard:volunteer_opportunity_create' %}" data-tooltip="Add Opportunity"
+                    class="nav-item">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Add Opportunity</span>
+                </a>
+                <a href="{% url 'dashboard:volunteers_applications' %}" data-tooltip="Applications" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Applications</span>
+                    {% if pending_applications_count %}
+                    <span class="badge badge-info">{{ pending_applications_count }}</span>
+                    {% endif %}
+                </a>
+            </div>
+
+            <!-- Users Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">USERS</div>
+                <a href="{% url 'dashboard:profiles' %}" data-tooltip="Profiles"
+                    class="nav-item {% if request.resolver_match.url_name == 'profiles' %}active{% endif %}">
+                    <i class="fas fa-id-badge"></i>
+                    <span>Profiles</span>
+                </a>
+                <a href="{% url 'dashboard:users_all' %}" data-tooltip="All Users"
+                    class="nav-item {% if 'users' in request.path %}active{% endif %}">
+                    <i class="fas fa-user"></i>
+                    <span>All Users</span>
+                </a>
+                <a href="{% url 'dashboard:users_roles' %}" data-tooltip="Roles & Permissions" class="nav-item">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Roles & Permissions</span>
+                </a>
+            </div>
+
+            <!-- Donations Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">DONATIONS</div>
+                <a href="{% url 'dashboard:donations_list' %}" data-tooltip="Donations" class="nav-item {% if 'donations' in request.path %}active{% endif %}">
+                    <i class="fas fa-hand-holding-heart"></i>
+                    <span>Donation Records</span>
+                </a>
+            </div>
+
+            <!-- Content Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">CONTENT</div>
+                <a href="{% url 'dashboard:categories_list' %}" data-tooltip="Categories" class="nav-item">
+                    <i class="fas fa-tags"></i>
+                    <span>Categories</span>
+                </a>
+                <a href="{% url 'dashboard:announcements_list' %}" data-tooltip="Announcements" class="nav-item">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>Announcements</span>
+                </a>
+                <a href="{% url 'dashboard:faqs_list' %}" data-tooltip="FAQs" class="nav-item">
+                    <i class="fas fa-question-circle"></i>
+                    <span>FAQs</span>
+                </a>
+            </div>
+
+            <!-- Organization Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">ORGANIZATION</div>
+                <a href="{% url 'dashboard:partners_list' %}" data-tooltip="Partners" class="nav-item {% if 'partners' in request.path %}active{% endif %}">
+                    <i class="fas fa-handshake"></i>
+                    <span>Partners</span>
+                </a>
+                <a href="{% url 'dashboard:team_members_list' %}" data-tooltip="Team Members" class="nav-item {% if 'team-members' in request.path %}active{% endif %}">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Team Members</span>
+                </a>
+            </div>
+
+            <!-- Communication Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">COMMUNICATION</div>
+                <a href="{% url 'dashboard:contact_messages_list' %}" data-tooltip="Contact Messages" class="nav-item {% if 'contact-messages' in request.path %}active{% endif %}">
+                    <i class="fas fa-envelope"></i>
+                    <span>Contact Messages</span>
+                </a>
+                <a href="{% url 'dashboard:notifications' %}" data-tooltip="Notifications" class="nav-item {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                    {% if unread_notifications_count %}
+                    <span class="badge badge-danger">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </a>
+            </div>
+
+            <!-- Reports Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">ANALYTICS</div>
+                <a href="{% url 'dashboard:reports_monthly' %}" data-tooltip="Monthly Reports" class="nav-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Monthly Reports</span>
+                </a>
+                <a href="{% url 'dashboard:reports_volunteers' %}" data-tooltip="Volunteer Activity" class="nav-item">
+                    <i class="fas fa-route"></i>
+                    <span>Volunteer Activity</span>
+                </a>
+                <a href="{% url 'dashboard:reports_projects' %}" data-tooltip="Event Success Rate" class="nav-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Event Success Rate</span>
+                </a>
+            </div>
+
+            <!-- Settings Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">SYSTEM</div>
+                <a href="{% url 'dashboard:settings' %}" data-tooltip="Settings" class="nav-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="{% url 'dashboard:system_design' %}" data-tooltip="System Design" class="nav-item {% if request.resolver_match.url_name == 'system_design' %}active{% endif %}">
+                    <i class="fas fa-project-diagram"></i>
+                    <span>System Live</span>
+                </a>
+            
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{% url 'profile' %}" class="sidebar-user" aria-label="Open my profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper" id="mainWrapper">
+        <!-- Top Navbar -->
+        <header class="top-navbar">
+            <div class="navbar-left">
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search events, users, volunteers..." id="globalSearch">
+                </div>
+            </div>
+
+            <div class="navbar-right">
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="action-btn" title="Add New Event"
+                        onclick="window.location.href='{% url 'dashboard:event_create' %}'">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+
+                <!-- Notifications -->
+                <div class="navbar-item notifications-dropdown">
+                    <button class="notification-btn" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        {% if unread_notifications_count %}
+                        <span class="notification-badge">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                    </button>
+                    <div class="dropdown-menu notifications-menu" id="notificationsMenu">
+                        <div class="dropdown-header">
+                            <h4>Notifications</h4>
+                            {% if unread_notifications_count %}
+                            <a href="{% url 'dashboard:mark_all_notifications_read' %}" class="mark-all-read" id="markAllNotificationsRead">Mark all as read</a>
+                            {% endif %}
+                        </div>
+                        <div class="notifications-list">
+                            {% if dropdown_notifications %}
+                                {% for item in dropdown_notifications %}
+                                <a href="{{ item.url }}" class="notification-item {% if item.unread %}unread{% endif %}">
+                                    <div class="notification-icon {{ item.bg_class }}">
+                                        <i class="{{ item.icon }}"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <p class="notification-text">{{ item.message }}</p>
+                                        <span class="notification-time">{{ item.created_at|timesince }} ago</span>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            {% else %}
+                                <div class="notifications-empty-state">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <p>No live notifications right now.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="dropdown-footer">
+                            <a href="{% url 'dashboard:notifications' %}">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Profile -->
+                <div class="navbar-item user-dropdown">
+                    <a href="{% url 'profile' %}" class="user-avatar-link" aria-label="Open my profile">
+                        <div class="user-avatar-small" aria-hidden="true">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                    </a>
+                    <button class="user-btn" id="userBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
+                        <span class="user-name-nav">{{ request.user.username }}</span>
+                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                    </button>
+                    <div class="dropdown-menu user-menu" id="userMenu">
+                        <div class="dropdown-header">
+                            <div class="user-info-dropdown">
+                                <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+                                <span>{{ request.user.email }}</span>
+                            </div>
+                        </div>
+                        <a href="{% url 'profile' %}" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            My Profile
+                        </a>
+                        <a href="{% url 'dashboard:settings' %}" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'logout' %}" class="dropdown-item text-danger">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="page-content">
+            {% block breadcrumb %}
+            <div class="breadcrumb-section">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:admin_overview' %}">Dashboard</a></li>
+                        {% block breadcrumb_items %}{% endblock %}
+                    </ol>
+                </nav>
+            </div>
+            {% endblock %}
+
+            {% block page_header %}{% endblock %}
+
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i
+                        class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <p class="footer-copy">&copy; 2026 Nepali Community of Vancouver. All rights reserved.</p>
+                    <div class="footer-meta">
+                        <span class="footer-status-dot" aria-hidden="true"></span>
+                        <span>Dashboard systems operational</span>
+                    </div>
+                </div>
+
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    {% include 'dashboard/includes/script_assets.html' %}
+
+    {% block extra_js %}{% endblock %}
+
+    <script>
+        function getCsrfToken() {
+            const csrfCookie = document.cookie
+                .split('; ')
+                .find((row) => row.startsWith('csrftoken='));
+            return csrfCookie ? decodeURIComponent(csrfCookie.split('=')[1]) : '';
+        }
+
+        function initNotificationActions() {
+            const markAllReadLink = document.getElementById('markAllNotificationsRead');
+            if (!markAllReadLink) {
+                return;
+            }
+
+            markAllReadLink.addEventListener('click', async function (event) {
+                event.preventDefault();
+
+                if (markAllReadLink.dataset.loading === 'true') {
+                    return;
+                }
+
+                markAllReadLink.dataset.loading = 'true';
+                const originalText = markAllReadLink.textContent;
+                markAllReadLink.textContent = 'Marking...';
+
+                try {
+                    const response = await fetch(markAllReadLink.href, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCsrfToken(),
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || 'Unable to mark notifications as read.');
+                    }
+
+                    document.querySelectorAll('#notificationsMenu .notification-item.unread').forEach((item) => {
+                        item.classList.remove('unread');
+                    });
+
+                    const notificationBadge = document.querySelector('.notification-badge');
+                    if (notificationBadge) {
+                        notificationBadge.remove();
+                    }
+
+                    markAllReadLink.remove();
+                } catch (error) {
+                    markAllReadLink.textContent = originalText;
+                } finally {
+                    delete markAllReadLink.dataset.loading;
+                }
+            });
+        }
+
+        // Initialize sidebar
+        document.addEventListener('DOMContentLoaded', function () {
+            initSidebar();
+            initDropdowns();
+            initGlobalSearch();
+            initRouteHighlights();
+            initNotificationActions();
+        });
+    </script>
+</body>
+
+</html>
