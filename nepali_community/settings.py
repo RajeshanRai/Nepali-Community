@@ -19,23 +19,34 @@ from django.core.exceptions import ImproperlyConfigured
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-def _load_env_file(file_path: Path) -> None:
-    """Load KEY=VALUE pairs from a local .env file into process environment."""
-    if not file_path.exists():
-        return
+# def _load_env_file(file_path: Path) -> None:
+#     """Load KEY=VALUE pairs from a local .env file into process environment."""
+#     if not file_path.exists():
+#         return
 
-    for raw_line in file_path.read_text(encoding='utf-8').splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith('#') or '=' not in line:
-            continue
-        key, value = line.split('=', 1)
-        key = key.strip()
-        value = value.strip().strip('"').strip("'")
-        if key:
-            os.environ.setdefault(key, value)
+#     for raw_line in file_path.read_text(encoding='utf-8').splitlines():
+#         line = raw_line.strip()
+#         if not line or line.startswith('#') or '=' not in line:
+#             continue
+#         key, value = line.split('=', 1)
+#         key = key.strip()
+#         value = value.strip().strip('"').strip("'")
+#         if key:
+#             os.environ.setdefault(key, value)
 
 
-_load_env_file(BASE_DIR / '.env')
+# _load_env_file(BASE_DIR / '.env')
+
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+
+if os.path.exists(ENV_PATH):
+    with open(ENV_PATH) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            os.environ[key.strip()] = value.strip().strip('"').strip("'")
 
 
 def _required_env(name: str) -> str:
