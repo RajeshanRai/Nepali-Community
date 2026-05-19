@@ -619,6 +619,8 @@ def event_create(request):
                     summary='A new event is now open for registrations.',
                     event_name=event.title,
                     event_date=event.date.strftime('%B %d, %Y'),
+                    event_time=event.start_time.strftime('%I:%M %p') if event.start_time else 'TBA',
+                    ticket_info=event.ticket_info or 'Free',
                     venue_text=event.location or 'Venue details will be shared shortly.',
                     category_text=event.get_event_type_display() if hasattr(event, 'get_event_type_display') else (event.event_type or 'Community Event'),
                     detail_points=[
@@ -660,6 +662,8 @@ def event_edit(request, pk):
                         summary=f"Important updates were made to {updated_event.title}.",
                         event_name=updated_event.title,
                         event_date=updated_event.date.strftime('%B %d, %Y'),
+                        event_time=updated_event.start_time.strftime('%I:%M %p') if updated_event.start_time else 'TBA',
+                        ticket_info=updated_event.ticket_info or 'Free',
                         venue_text=updated_event.location or 'Venue details will be shared shortly.',
                         category_text=updated_event.get_event_type_display() if hasattr(updated_event, 'get_event_type_display') else (updated_event.event_type or 'Community Event'),
                         detail_points=[
@@ -1139,6 +1143,8 @@ def event_request_approve(request, pk):
                 summary='A newly approved event is now available for community registration.',
                 event_name=program.title,
                 event_date=program.date.strftime('%B %d, %Y'),
+                event_time=program.start_time.strftime('%I:%M %p') if program.start_time else 'TBA',
+                ticket_info=program.ticket_info or 'Free',
                 venue_text=program.location or 'Venue details will be shared shortly.',
                 category_text=program.get_event_type_display() if hasattr(program, 'get_event_type_display') else (program.event_type or 'Community Event'),
                 detail_points=[
@@ -1147,15 +1153,14 @@ def event_request_approve(request, pk):
                 ],
             ),
         )
-        
         return JsonResponse({
-            'success': True, 
+            'success': True,
             'message': 'Request approved and program created successfully',
             'program_id': program.id
         })
     except Exception as e:
         return JsonResponse({
-            'success': False, 
+            'success': False,
             'message': f'Error approving request: {str(e)}'
         }, status=500)
 

@@ -6,9 +6,11 @@
 
 <div class="event-card">
     <h2>{{ event_name }}</h2>
-    <p><strong>When:</strong> {{ event_date }}</p>
-    <p><strong>Where:</strong> {{ venue_text }}</p>
-    <p><strong>Category:</strong> {{ category_text }}</p>
+    <p><strong>Event Date: </strong> {{ event_date }}</p>
+    {% if event_time %}<p><strong>Commencement Time: </strong> {{ event_time }}</p>{% endif %}
+    <p><strong>Venue Details:</strong> {{ venue_text }}</p>
+    {% if ticket_info %}<p><strong>Admission: </strong> {{ ticket_info }}</p>{% endif %}
+    <p><strong>Experience:</strong> {{ category_text }}</p>
 </div>
 
 {% if detail_points %}
@@ -28,5 +30,8 @@
 </p>
 {% endif %}
 
-<p class="closing">See you soon,<br>{{ brand_name }} Team</p>
+<p class="closing">Thank you for being part of this special occasion.<br>
+We cannot wait to welcome you.<br><br>
+With appreciation,<br>
+{{ brand_name }}</p>
 {% endblock %}

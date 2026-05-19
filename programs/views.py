@@ -459,13 +459,17 @@ class RegisterForEventView(View):
                     success = True
 
                     if request.user.email:
+                        event_time_text = program.start_time.strftime('%I:%M %p') if program.start_time else 'TBA'
+                        ticket_info_text = program.ticket_info or 'Free'
                         send_notification_email(
                             subject=f"Event registration confirmed: {program.title}",
                             message=(
                                 f"Hi {request.user.get_full_name() or request.user.username},\n\n"
                                 f"You are registered for: {program.title}\n"
                                 f"Date: {program.date}\n"
-                                f"Location: {program.location or 'TBA'}\n\n"
+                                f"Time: {event_time_text}\n"
+                                f"Location: {program.location or 'TBA'}\n"
+                                f"Tickets: {ticket_info_text}\n\n"
                                 "Thank you for participating."
                             ),
                             recipients=[request.user.email],
@@ -475,8 +479,10 @@ class RegisterForEventView(View):
                                 summary='Your seat has been reserved successfully.',
                                 event_name=program.title,
                                 event_date=program.date.strftime('%B %d, %Y'),
+                                event_time=event_time_text,
                                 venue_text=program.location or 'Community venue details will be shared shortly.',
                                 category_text=program.get_event_type_display() if hasattr(program, 'get_event_type_display') else (program.event_type or 'Community Event'),
+                                ticket_info=ticket_info_text,
                                 detail_points=[
                                     'Please arrive 10-15 minutes early for smooth check-in.',
                                     'Bring any essentials relevant to this event type.',
@@ -501,13 +507,17 @@ class RegisterForEventView(View):
                     success = True
 
                     if registration.guest_email:
+                        event_time_text = program.start_time.strftime('%I:%M %p') if program.start_time else 'TBA'
+                        ticket_info_text = program.ticket_info or 'Free'
                         send_notification_email(
                             subject=f"Event registration confirmed: {program.title}",
                             message=(
                                 f"Hi {registration.guest_name or 'Guest'},\n\n"
                                 f"You are registered for: {program.title}\n"
                                 f"Date: {program.date}\n"
-                                f"Location: {program.location or 'TBA'}\n\n"
+                                f"Time: {event_time_text}\n"
+                                f"Location: {program.location or 'TBA'}\n"
+                                f"Tickets: {ticket_info_text}\n\n"
                                 "Thank you for participating."
                             ),
                             recipients=[registration.guest_email],
@@ -517,8 +527,10 @@ class RegisterForEventView(View):
                                 summary='Your registration has been received and confirmed.',
                                 event_name=program.title,
                                 event_date=program.date.strftime('%B %d, %Y'),
+                                event_time=event_time_text,
                                 venue_text=program.location or 'Community venue details will be shared shortly.',
                                 category_text=program.get_event_type_display() if hasattr(program, 'get_event_type_display') else (program.event_type or 'Community Event'),
+                                ticket_info=ticket_info_text,
                                 detail_points=[
                                     'Please keep this email for your reference.',
                                     'We look forward to welcoming you at the event.',
