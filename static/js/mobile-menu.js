@@ -36,10 +36,14 @@
         document.body.classList.remove('mobile-menu-open');
         document.body.style.overflow = '';
 
-        // Close all dropdowns
+        // Close all dropdowns except stable ones
         dropdowns.forEach(dd => {
+            const trigger = dd.querySelector(':scope > a') || dd.querySelector('a');
+            if (trigger && trigger.dataset && trigger.dataset.stableDropdown === 'true') {
+                // keep stable dropdowns open
+                return;
+            }
             dd.classList.remove('active');
-            const trigger = dd.querySelector(':scope > a');
             if (trigger) {
                 trigger.setAttribute('aria-expanded', 'false');
             }
@@ -91,6 +95,13 @@
         const dropdownLink = dropdown.querySelector(':scope > a') || dropdown.querySelector('a');
 
         if (!dropdownLink) return;
+
+        // If dropdown is marked stable, ensure it's open and don't bind click toggle
+        if (dropdownLink.dataset && dropdownLink.dataset.stableDropdown === 'true') {
+            dropdown.classList.add('active');
+            dropdownLink.setAttribute('aria-expanded', 'true');
+            return;
+        }
 
         dropdownLink.addEventListener('click', function (e) {
             if (!isMobileNavigation()) return;
