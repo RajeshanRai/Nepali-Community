@@ -81,32 +81,36 @@
         }
     });
 
+    // Helper to detect mobile/narrow navigation mode
+    function isMobileNavigation() {
+        return window.innerWidth <= 1024 || navMenu.classList.contains('open');
+    }
+
     // Handle dropdown toggles on mobile
     dropdowns.forEach(dropdown => {
-        const dropdownLink = dropdown.querySelector(':scope > a');
+        const dropdownLink = dropdown.querySelector(':scope > a') || dropdown.querySelector('a');
 
         if (!dropdownLink) return;
 
         dropdownLink.addEventListener('click', function (e) {
-            // Only prevent default and toggle on mobile
-            if (window.innerWidth <= 1024) {
-                e.preventDefault();
-                e.stopPropagation();
+            if (!isMobileNavigation()) return;
 
-                const isActive = dropdown.classList.contains('active');
+            e.preventDefault();
+            e.stopPropagation();
 
-                dropdowns.forEach(dd => {
-                    dd.classList.remove('active');
-                    const trigger = dd.querySelector(':scope > a');
-                    if (trigger) {
-                        trigger.setAttribute('aria-expanded', 'false');
-                    }
-                });
+            const isActive = dropdown.classList.contains('active');
 
-                if (!isActive) {
-                    dropdown.classList.add('active');
-                    dropdownLink.setAttribute('aria-expanded', 'true');
+            dropdowns.forEach(dd => {
+                dd.classList.remove('active');
+                const trigger = dd.querySelector(':scope > a') || dd.querySelector('a');
+                if (trigger) {
+                    trigger.setAttribute('aria-expanded', 'false');
                 }
+            });
+
+            if (!isActive) {
+                dropdown.classList.add('active');
+                dropdownLink.setAttribute('aria-expanded', 'true');
             }
         });
     });

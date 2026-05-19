@@ -253,6 +253,7 @@
             const link = event.target.closest('a[href]');
             if (!link) return;
             if (link.dataset.noLoader === 'true') return;
+            if (link.getAttribute('aria-haspopup') === 'true') return;
             if (link.target === '_blank') return;
             if (link.hasAttribute('download')) return;
             if (!isSameOrigin(link)) return;
