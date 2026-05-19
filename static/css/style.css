@@ -1255,6 +1255,32 @@ i {
         flex: 0;
     }
 
+    /* Fallback initials styling: ensure visibility on white background */
+    .main-navbar .nav-profile-avatar > span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #111827; /* dark text for contrast */
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        background: transparent;
+    }
+
+    /* Make avatar circle stand out with a darker border and deeper shadow */
+    .main-navbar .nav-profile-avatar {
+        border: 2px solid rgba(0, 0, 0, 0.85);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+        background: #ffffff;
+        color: #111827;
+    }
+
+    .main-navbar .nav-profile-avatar img {
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+    }
+
     .main-navbar .nav-profile-cursor-label {
         display: none;
     }
