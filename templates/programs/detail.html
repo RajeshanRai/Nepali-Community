@@ -63,12 +63,19 @@
                             </div>
                         </article>
                         <article class="program-highlight-card" data-reveal>
-                            <span class="program-highlight-card__icon"><i class="fas fa-users" aria-hidden="true"></i></span>
+                            <span class="program-highlight-card__icon"><i class="fas fa-clock" aria-hidden="true"></i></span>
                             <div>
-                                <p class="program-highlight-card__label">Community energy</p>
-                                <strong><span data-attendance-count>{{ object.registered_count }}</span> attending</strong>
+                                <p class="program-highlight-card__label">Starting at</p>
+                                <strong>{% if object.start_time %}{{ object.start_time|time:"g:i A" }}{% else %}TBA{% endif %}</strong>
                             </div>
                         </article>
+                        <article class="program-highlight-card" data-reveal>
+                            <span class="program-highlight-card__icon"><i class="fas fa-ticket-alt" aria-hidden="true"></i></span>
+                            <div>
+                                <p class="program-highlight-card__label">Tickets</p>
+                                <strong>{% if object.ticket_info %}{{ object.ticket_info }}{% else %}Free{% endif %}</strong>
+                            </div>
+      
                     </div>
 
                     <div class="program-section-header" data-reveal>

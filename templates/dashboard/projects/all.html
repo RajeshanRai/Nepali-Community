@@ -43,7 +43,9 @@
                         <th>Title</th>
                         <th>Category</th>
                         <th>Date</th>
+                        <th>Time</th>
                         <th>Location</th>
+                        <th>Tickets</th>
                         <th>Registered</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -60,7 +62,9 @@
                         </td>
                         <td><span class="badge badge-info">{{ event.get_event_type_display }}</span></td>
                         <td>{{ event.date|date:"M d, Y" }}</td>
+                        <td>{% if event.start_time %}{{ event.start_time|time:"g:i A" }}{% else %}TBA{% endif %}</td>
                         <td>{{ event.location|truncatewords:5 }}</td>
+                        <td>{% if event.ticket_info %}{{ event.ticket_info }}{% else %}Free{% endif %}</td>
                         <td>{{ event.registrations.count }}</td>
                         <td>
                             {% if event.date < today %} <span class="status-badge status-completed">Completed</span>
@@ -74,7 +78,9 @@
                                     data-event-title="{{ event.title|escapejs }}"
                                     data-event-category="{{ event.get_event_type_display|escapejs }}"
                                     data-event-date="{{ event.date|date:'M d, Y'|escapejs }}"
+                                    data-event-time="{% if event.start_time %}{{ event.start_time|time:'g:i A'|escapejs }}{% else %}TBA{% endif %}"
                                     data-event-location="{{ event.location|truncatewords:5|escapejs }}"
+                                    data-event-tickets="{% if event.ticket_info %}{{ event.ticket_info|escapejs }}{% else %}Free{% endif %}"
                                     data-event-description="{{ event.description|truncatewords:40|striptags|escapejs }}"
                                     data-event-registered="{{ event.registrations.count }}"
                                     data-event-status="{% if event.date < today %}Completed{% else %}Active{% endif %}"
@@ -97,7 +103,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center text-muted">No events found</td>
+                        <td colspan="11" class="text-center text-muted">No events found</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -124,7 +130,9 @@
                 <div class="detail-item"><label>Email</label><p id="allEventDetailEmail"></p></div>
                 <div class="detail-item"><label>Phone</label><p id="allEventDetailPhone"></p></div>
                 <div class="detail-item"><label>Date</label><p id="allEventDetailDate"></p></div>
+                <div class="detail-item"><label>Time</label><p id="allEventDetailTime"></p></div>
                 <div class="detail-item"><label>Location</label><p id="allEventDetailLocation"></p></div>
+                <div class="detail-item"><label>Tickets</label><p id="allEventDetailTickets"></p></div>
                 <div class="detail-item"><label>Attendees</label><p id="allEventDetailRegistered"></p></div>
                 <div class="detail-item"><label>Status</label><p id="allEventDetailStatus"></p></div>
                 <div class="detail-item full"><label>Description</label><p id="allEventDetailDescription"></p></div>
@@ -154,7 +162,9 @@
         document.getElementById('allEventDetailEmail').textContent = btn.dataset.eventEmail || 'N/A';
         document.getElementById('allEventDetailPhone').textContent = btn.dataset.eventPhone || 'N/A';
         document.getElementById('allEventDetailDate').textContent = btn.dataset.eventDate || '-';
+        document.getElementById('allEventDetailTime').textContent = btn.dataset.eventTime || 'TBA';
         document.getElementById('allEventDetailLocation').textContent = btn.dataset.eventLocation || '-';
+        document.getElementById('allEventDetailTickets').textContent = btn.dataset.eventTickets || 'Free';
         document.getElementById('allEventDetailRegistered').textContent = btn.dataset.eventRegistered || '0';
         document.getElementById('allEventDetailStatus').textContent = btn.dataset.eventStatus || '-';
         document.getElementById('allEventDetailDescription').textContent = btn.dataset.eventDescription || '-';

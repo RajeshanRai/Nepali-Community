@@ -17,6 +17,8 @@ class Program(models.Model):
     live_stream_url = models.URLField(blank=True)
     is_virtual = models.BooleanField(default=False)
     date = models.DateField()
+    start_time = models.TimeField('Start time', null=True, blank=True)
+    ticket_info = models.CharField('Tickets', max_length=100, blank=True)
     event_type = models.CharField(max_length=50, choices=EVENT_TYPES, default='other')
 
     likes = models.PositiveIntegerField(default=0)
