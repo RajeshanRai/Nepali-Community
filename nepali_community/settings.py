@@ -55,11 +55,19 @@ SECRET_KEY = _required_env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # In production, set this via environment variable: export DEBUG=False
-DEBUG=False
+def _boolean_env(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in ('true', '1', 'yes')
+
+DEBUG = _boolean_env('DEBUG', False)
+
 # Configure allowed hosts for your domain
-# In production, set this via environment variable: export ALLOWED_HOSTS='yourdomain.com,www.yourdomain.com'
-# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-ALLOWED_HOSTS = ['rajeshan.pythonanywhere.com']
+# In production, set this via environment variable: export ALLOWED_HOSTS='rajeshan.pythonanywhere.com'
+ALLOWED_HOSTS = [
+    host.strip() for host in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if host.strip()
+]
 
 # Detect local-only host configuration to avoid HTTPS redirects on dev server.
 LOCAL_ONLY_HOSTS = {'localhost', '127.0.0.1', '[::1]'}
