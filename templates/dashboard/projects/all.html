@@ -67,9 +67,14 @@
                         <td>{% if event.ticket_info %}{{ event.ticket_info }}{% else %}Free{% endif %}</td>
                         <td>
                             <div class="registrations-cell">
-                                <strong>{{ event.registrations.all|length }}</strong>
+                                <span class="reg-pill">
+                                    <span class="reg-count">{{ event.registrations.all|length }}</span>
+                                    <span class="reg-label">going</span>
+                                </span>
                                 {% if event.registrations.all|length > 0 %}
-                                <button type="button" class="btn-text btn-view-registrants" data-event-id="{{ event.id }}">View</button>
+                                <button type="button" class="btn-text btn-view-registrants" data-event-id="{{ event.id }}">
+                                    <i class="fas fa-users"></i> View attendees
+                                </button>
                                 <script type="application/json" id="registrants-data-{{ event.id }}">{{ event.registration_json|safe }}</script>
                                 {% endif %}
                             </div>

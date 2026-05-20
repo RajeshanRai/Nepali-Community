@@ -94,3 +94,108 @@
     background: #EF4444;
     color: var(--card-bg);
 }
+    .registrations-cell {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .reg-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(59, 130, 246, 0.12);
+        color: #1D4ED8;
+        font-weight: 700;
+        font-size: 0.88rem;
+    }
+
+    .reg-pill .reg-count {
+        font-size: 1rem;
+    }
+
+    .btn-text.btn-view-registrants {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        background: linear-gradient(135deg, #6366F1, #4F46E5);
+        color: #FFFFFF;
+        padding: 9px 14px;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+        box-shadow: 0 16px 32px rgba(79, 70, 229, 0.15);
+    }
+
+    .btn-text.btn-view-registrants:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 20px 38px rgba(79, 70, 229, 0.22);
+    }
+
+    .registrants-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 12px;
+    }
+
+    .registrants-list li {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+    }
+
+    .registrants-list li strong {
+        display: block;
+        font-size: 0.95rem;
+        color: #0F172A;
+    }
+
+    .registrants-list li .text-muted {
+        display: block;
+        color: #64748B;
+        font-size: 0.82rem;
+        margin-top: 4px;
+    }
+
+    .details-modal-content {
+        max-width: 760px;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .detail-item.full {
+        grid-column: 1 / -1;
+    }
+
+    @media (max-width: 860px) {
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .registrations-cell {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .btn-text.btn-view-registrants {
+            width: 100%;
+            justify-content: center;
+        }
+    }

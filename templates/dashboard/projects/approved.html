@@ -32,6 +32,7 @@
                         <th>Category</th>
                         <th>Date</th>
                         <th>Location</th>
+                        <th>Registered</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -43,6 +44,20 @@
                         <td><span class="type-pill type-{{ project.event_type|default:'other' }}">{{ project.get_event_type_display|default:'Other' }}</span></td>
                         <td>{{ project.date|date:"M d, Y" }}</td>
                         <td>{{ project.location }}</td>
+                        <td>
+                            <div class="registrations-cell">
+                                <span class="reg-pill">
+                                    <span class="reg-count">{{ project.registrations.all|length }}</span>
+                                    <span class="reg-label">going</span>
+                                </span>
+                                {% if project.registrations.all|length > 0 %}
+                                <button type="button" class="btn-text btn-view-registrants" data-event-id="{{ project.id }}">
+                                    <i class="fas fa-users"></i> View
+                                </button>
+                                <script type="application/json" id="approved-registrants-data-{{ project.id }}">{{ project.registration_json|safe }}</script>
+                                {% endif %}
+                            </div>
+                        </td>
                         <td>
                             <div class="action-buttons enhanced-actions">
                                 <button class="btn-icon btn-view project-view-trigger" title="View Details"
@@ -224,6 +239,16 @@
 
     document.querySelectorAll('.project-view-trigger').forEach(function (btn) {
         btn.addEventListener('click', function () { openApprovedProjectModal(btn); });
+    });
+
+    document.querySelectorAll('.btn-view-registrants').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const eventId = btn.dataset.eventId;
+            const viewBtn = document.querySelector('.project-view-trigger[data-event-id="' + eventId + '"]');
+            if (viewBtn) {
+                openApprovedProjectModal(viewBtn);
+            }
+        });
     });
 
     document.getElementById('approvedProjectModalClose').addEventListener('click', closeApprovedProjectModal);
