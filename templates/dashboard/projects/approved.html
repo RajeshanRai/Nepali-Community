@@ -46,6 +46,7 @@
                         <td>
                             <div class="action-buttons enhanced-actions">
                                 <button class="btn-icon btn-view project-view-trigger" title="View Details"
+                                    data-event-id="{{ project.id }}"
                                     data-project-title="{{ project.title|escapejs }}"
                                     data-project-category="{{ project.get_event_type_display|escapejs }}"
                                     data-project-date="{{ project.date|date:'M d, Y'|escapejs }}"
@@ -54,10 +55,13 @@
                                     data-project-requester="N/A"
                                     data-project-email="N/A"
                                     data-project-phone="N/A"
-                                    data-project-attendees="{{ project.registrations.count }}"
+                                    data-project-attendees="{{ project.registrations.all|length }}"
                                     data-project-status="Active">
                                     <i class="fas fa-eye"></i>
                                 </button>
+                                {% if project.registrations.all|length > 0 %}
+                                <script type="application/json" id="approved-registrants-data-{{ project.id }}">{{ project.registration_json|safe }}</script>
+                                {% endif %}
                                 <a class="btn-icon btn-edit" href="{% url 'dashboard:event_edit' project.id %}" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
@@ -130,6 +134,9 @@
                 <div class="detail-item"><label>Date</label><p id="approvedDetailDate"></p></div>
                 <div class="detail-item"><label>Location</label><p id="approvedDetailLocation"></p></div>
                 <div class="detail-item"><label>Attendees</label><p id="approvedDetailAttendees"></p></div>
+                <div class="detail-item full"><label>Registered People</label>
+                    <div id="approvedDetailRegistrants" class="registrants-list"></div>
+                </div>
                 <div class="detail-item"><label>Status</label><p id="approvedDetailStatus"></p></div>
                 <div class="detail-item full"><label>Description</label><p id="approvedDetailDescription"></p></div>
             </div>
@@ -158,6 +165,46 @@
         document.getElementById('approvedDetailDate').textContent = btn.dataset.projectDate || '-';
         document.getElementById('approvedDetailLocation').textContent = btn.dataset.projectLocation || '-';
         document.getElementById('approvedDetailAttendees').textContent = btn.dataset.projectAttendees || '0';
+        const registrantsEl = document.getElementById('approvedDetailRegistrants');
+        registrantsEl.innerHTML = '';
+        const registrantsDataEl = document.getElementById('approved-registrants-data-' + btn.dataset.eventId);
+        if (registrantsDataEl) {
+            let registrants = [];
+            try {
+                registrants = JSON.parse(registrantsDataEl.textContent || '[]');
+            } catch (error) {
+                registrants = [];
+            }
+            if (registrants.length) {
+                const list = document.createElement('ul');
+                list.className = 'registrants-list';
+                registrants.forEach(function (reg) {
+                    const item = document.createElement('li');
+                    const nameEl = document.createElement('strong');
+                    nameEl.textContent = reg.name;
+                    item.appendChild(nameEl);
+                    const details = [];
+                    if (reg.email) {
+                        details.push(reg.email);
+                    }
+                    if (reg.phone) {
+                        details.push(reg.phone);
+                    }
+                    if (details.length) {
+                        const extra = document.createElement('span');
+                        extra.className = 'text-muted';
+                        extra.textContent = ' (' + details.join(' • ') + ')';
+                        item.appendChild(extra);
+                    }
+                    list.appendChild(item);
+                });
+                registrantsEl.appendChild(list);
+            } else {
+                registrantsEl.textContent = 'No registered people yet.';
+            }
+        } else {
+            registrantsEl.textContent = 'No registered people yet.';
+        }
         document.getElementById('approvedDetailStatus').textContent = btn.dataset.projectStatus || 'Active';
         document.getElementById('approvedDetailDescription').textContent = btn.dataset.projectDescription || '-';
 

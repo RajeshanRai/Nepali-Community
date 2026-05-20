@@ -70,6 +70,50 @@ def admin_required(view_func):
     return wrapped_view
 
 
+def build_event_registrant_json_map(events):
+    """
+    Build a safe JSON map of registrants for each event.
+    """
+    registrant_map = {}
+    for event in events:
+        registrants = []
+        for reg in event.registrations.all():
+            if reg.user_id and reg.user:
+                registrants.append({
+                    'name': reg.user.get_full_name() or reg.user.username,
+                    'email': reg.user.email or '',
+                    'phone': reg.guest_phone or '',
+                })
+            else:
+                registrants.append({
+                    'name': reg.guest_name or 'Guest',
+                    'email': reg.guest_email or '',
+                    'phone': reg.guest_phone or '',
+                })
+        registrant_map[event.id] = json.dumps(registrants)
+    return registrant_map
+
+
+def attach_event_registration_json(events):
+    """Attach registration JSON to each event object for template rendering."""
+    for event in events:
+        registrants = []
+        for reg in event.registrations.all():
+            if reg.user_id and reg.user:
+                registrants.append({
+                    'name': reg.user.get_full_name() or reg.user.username,
+                    'email': reg.user.email or '',
+                    'phone': reg.guest_phone or '',
+                })
+            else:
+                registrants.append({
+                    'name': reg.guest_name or 'Guest',
+                    'email': reg.guest_email or '',
+                    'phone': reg.guest_phone or '',
+                })
+        event.registration_json = json.dumps(registrants)
+
+
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     """
     Mixin for class‑based views that restricts access to active superusers.
@@ -2633,7 +2677,13 @@ def admin_activity(request):
 @user_passes_test(staff_required, login_url='login')
 def projects_all(request):
     """All projects listing"""
-    projects = Program.objects.all().order_by('-date')
+    projects = Program.objects.prefetch_related(
+        Prefetch(
+            'registrations',
+            queryset=EventRegistration.objects.select_related('user').order_by('registered_at'),
+        )
+    ).order_by('-date')
+    attach_event_registration_json(projects)
     today = timezone.now().date()
     context = {
         'projects': projects,
@@ -2657,7 +2707,13 @@ def projects_pending(request):
 @user_passes_test(staff_required, login_url='login')
 def projects_approved(request):
     """Approved projects listing"""
-    projects = Program.objects.all().order_by('-date')
+    projects = Program.objects.prefetch_related(
+        Prefetch(
+            'registrations',
+            queryset=EventRegistration.objects.select_related('user').order_by('registered_at'),
+        )
+    ).order_by('-date')
+    attach_event_registration_json(projects)
     context = {
         'projects': projects,
         # sidebar counts injected via context processor

@@ -65,7 +65,15 @@
                         <td>{% if event.start_time %}{{ event.start_time|time:"g:i A" }}{% else %}TBA{% endif %}</td>
                         <td>{{ event.location|truncatewords:5 }}</td>
                         <td>{% if event.ticket_info %}{{ event.ticket_info }}{% else %}Free{% endif %}</td>
-                        <td>{{ event.registrations.count }}</td>
+                        <td>
+                            <div class="registrations-cell">
+                                <strong>{{ event.registrations.all|length }}</strong>
+                                {% if event.registrations.all|length > 0 %}
+                                <button type="button" class="btn-text btn-view-registrants" data-event-id="{{ event.id }}">View</button>
+                                <script type="application/json" id="registrants-data-{{ event.id }}">{{ event.registration_json|safe }}</script>
+                                {% endif %}
+                            </div>
+                        </td>
                         <td>
                             {% if event.date < today %} <span class="status-badge status-completed">Completed</span>
                                 {% else %}
@@ -75,6 +83,7 @@
                         <td>
                             <div class="action-buttons">
                                 <button type="button" class="btn-icon btn-view project-view-trigger" title="View"
+                                    data-event-id="{{ event.id }}"
                                     data-event-title="{{ event.title|escapejs }}"
                                     data-event-category="{{ event.get_event_type_display|escapejs }}"
                                     data-event-date="{{ event.date|date:'M d, Y'|escapejs }}"
@@ -82,7 +91,7 @@
                                     data-event-location="{{ event.location|truncatewords:5|escapejs }}"
                                     data-event-tickets="{% if event.ticket_info %}{{ event.ticket_info|escapejs }}{% else %}Free{% endif %}"
                                     data-event-description="{{ event.description|truncatewords:40|striptags|escapejs }}"
-                                    data-event-registered="{{ event.registrations.count }}"
+                                    data-event-registered="{{ event.registrations.all|length }}"
                                     data-event-status="{% if event.date < today %}Completed{% else %}Active{% endif %}"
                                     data-event-requester="N/A"
                                     data-event-email="N/A"
@@ -134,6 +143,9 @@
                 <div class="detail-item"><label>Location</label><p id="allEventDetailLocation"></p></div>
                 <div class="detail-item"><label>Tickets</label><p id="allEventDetailTickets"></p></div>
                 <div class="detail-item"><label>Attendees</label><p id="allEventDetailRegistered"></p></div>
+                <div class="detail-item full"><label>Registered People</label>
+                    <div id="allEventDetailRegistrants" class="registrants-list"></div>
+                </div>
                 <div class="detail-item"><label>Status</label><p id="allEventDetailStatus"></p></div>
                 <div class="detail-item full"><label>Description</label><p id="allEventDetailDescription"></p></div>
             </div>
@@ -166,6 +178,46 @@
         document.getElementById('allEventDetailLocation').textContent = btn.dataset.eventLocation || '-';
         document.getElementById('allEventDetailTickets').textContent = btn.dataset.eventTickets || 'Free';
         document.getElementById('allEventDetailRegistered').textContent = btn.dataset.eventRegistered || '0';
+        const registrantsEl = document.getElementById('allEventDetailRegistrants');
+        registrantsEl.innerHTML = '';
+        const registrantsDataEl = document.getElementById('registrants-data-' + btn.dataset.eventId);
+        if (registrantsDataEl) {
+            let registrants = [];
+            try {
+                registrants = JSON.parse(registrantsDataEl.textContent || '[]');
+            } catch (error) {
+                registrants = [];
+            }
+            if (registrants.length) {
+                const list = document.createElement('ul');
+                list.className = 'registrants-list';
+                registrants.forEach(function (reg) {
+                    const item = document.createElement('li');
+                    const nameEl = document.createElement('strong');
+                    nameEl.textContent = reg.name;
+                    item.appendChild(nameEl);
+                    const details = [];
+                    if (reg.email) {
+                        details.push(reg.email);
+                    }
+                    if (reg.phone) {
+                        details.push(reg.phone);
+                    }
+                    if (details.length) {
+                        const extra = document.createElement('span');
+                        extra.className = 'text-muted';
+                        extra.textContent = ' (' + details.join(' • ') + ')';
+                        item.appendChild(extra);
+                    }
+                    list.appendChild(item);
+                });
+                registrantsEl.appendChild(list);
+            } else {
+                registrantsEl.textContent = 'No registered people yet.';
+            }
+        } else {
+            registrantsEl.textContent = 'No registered people yet.';
+        }
         document.getElementById('allEventDetailStatus').textContent = btn.dataset.eventStatus || '-';
         document.getElementById('allEventDetailDescription').textContent = btn.dataset.eventDescription || '-';
 
@@ -185,6 +237,16 @@
 
     document.querySelectorAll('.project-view-trigger').forEach(function (btn) {
         btn.addEventListener('click', function () { openAllEventModal(btn); });
+    });
+
+    document.querySelectorAll('.btn-view-registrants').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const eventId = btn.dataset.eventId;
+            const viewBtn = document.querySelector('.project-view-trigger[data-event-id="' + eventId + '"]');
+            if (viewBtn) {
+                openAllEventModal(viewBtn);
+            }
+        });
     });
 
     document.getElementById('allEventModalClose').addEventListener('click', closeAllEventModal);
