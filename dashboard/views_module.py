@@ -787,7 +787,7 @@ def volunteer_opportunities_list(request):
 def volunteer_opportunity_create(request):
     """Create new volunteer opportunity"""
     if request.method == 'POST':
-        form = VolunteerOpportunityForm(request.POST)
+        form = VolunteerOpportunityForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('dashboard:volunteer_opportunities_list')
@@ -802,7 +802,7 @@ def volunteer_opportunity_edit(request, pk):
     """Edit volunteer opportunity"""
     opportunity = get_object_or_404(VolunteerOpportunity, pk=pk)
     if request.method == 'POST':
-        form = VolunteerOpportunityForm(request.POST, instance=opportunity)
+        form = VolunteerOpportunityForm(request.POST, request.FILES, instance=opportunity)
         if form.is_valid():
             form.save()
             return redirect('dashboard:volunteer_opportunities_list')

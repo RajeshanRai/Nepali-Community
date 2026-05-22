@@ -3,8 +3,20 @@
 
 {% block title %}{{ opportunity.title }} - Volunteer{% endblock %}
 
+{% block og_title %}{{ opportunity.title }} | Volunteer - Nepali Community of Vancouver{% endblock %}
+{% block og_description %}{{ opportunity.description|truncatechars:200 }}{% endblock %}
+{% block og_image %}{% if opportunity.image %}{{ request.scheme }}://{{ request.get_host }}{{ opportunity.image.url }}{% else %}{% static 'images/og-default.jpg' %}{% endif %}{% endblock %}
+{% block twitter_title %}{{ opportunity.title }} | Volunteer - Nepali Community of Vancouver{% endblock %}
+{% block twitter_description %}{{ opportunity.description|truncatechars:200 }}{% endblock %}
+{% block twitter_image %}{% if opportunity.image %}{{ request.scheme }}://{{ request.get_host }}{{ opportunity.image.url }}{% else %}{% static 'images/og-default.jpg' %}{% endif %}{% endblock %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'volunteers/css/volunteers.css' %}">
+{% if opportunity.image %}
+<meta property="og:image:width" content="{{ opportunity.image.width }}">
+<meta property="og:image:height" content="{{ opportunity.image.height }}">
+<link rel="image_src" href="{{ request.scheme }}://{{ request.get_host }}{{ opportunity.image.url }}">
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -43,6 +55,12 @@
                     </div>
                     {% endif %}
                 </div>
+
+                {% if opportunity.image %}
+                <div class="volunteer-hero-image-wrap">
+                    <img src="{{ opportunity.image.url }}" alt="{{ opportunity.title }}" class="volunteer-hero-image">
+                </div>
+                {% endif %}
             </div>
 
             <div class="content-section">

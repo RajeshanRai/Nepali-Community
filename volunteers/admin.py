@@ -14,7 +14,7 @@ class VolunteerOpportunityAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('title', 'description', 'category', 'status')
+            'fields': ('title', 'description', 'image', 'category', 'status')
         }),
         ('Location & Time', {
             'fields': ('location', 'is_remote', 'start_date', 'end_date', 'time_commitment')

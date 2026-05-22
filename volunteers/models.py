@@ -22,6 +22,7 @@ class VolunteerOpportunity(models.Model):
     
     title = models.CharField(max_length=300)
     description = models.TextField()
+    image = models.ImageField(upload_to='volunteer_images/', blank=True, null=True, help_text='Primary image shown on the volunteer detail page and for social sharing')
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
     location = models.CharField(max_length=300, blank=True)
     is_remote = models.BooleanField(default=False)

@@ -425,6 +425,21 @@
     border-bottom: 2px solid var(--color-light-gray);
 }
 
+.volunteer-hero-image-wrap {
+    max-width: min(720px, 100%);
+    margin: 1.5rem auto 2rem;
+    overflow: hidden;
+    border-radius: 20px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.08);
+}
+
+.volunteer-hero-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    max-height: 420px;
+}
 
 .opportunity-header .badges {
     display: flex;
@@ -465,6 +480,9 @@
     flex-wrap: wrap;
     gap: 1.5rem;
     color: var(--color-gray);
+    margin-bottom: 1.5rem;
+    font-size: 0.96rem;
+    align-items: center;
 }
 
 
@@ -1157,6 +1175,64 @@
         grid-template-columns: 1fr;
     }
 
+    .main-content,
+    .sidebar {
+        padding: 1.5rem;
+    }
+
+    .main-content {
+        box-shadow: none;
+        border-radius: 0;
+    }
+
+    .sidebar {
+        gap: 1rem;
+    }
+
+    .volunteer-hero-image-wrap {
+        margin: 1rem auto 1.5rem;
+    }
+
+    .opportunity-header {
+        padding-bottom: 1.25rem;
+    }
+
+    .opportunity-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .meta-info {
+        gap: 1rem;
+        font-size: 0.92rem;
+    }
+
+    .meta-item {
+        flex: 1 1 100%;
+    }
+
+    .details-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .details-table td:first-child {
+        width: 100%;
+        padding-bottom: 0.35rem;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .apply-card,
+    .contact-card {
+        padding: 1.25rem;
+    }
+
+    .btn-large {
+        padding: 0.95rem;
+    }
+
     .apply-layout {
         grid-template-columns: 1fr;
     }
@@ -1213,6 +1289,58 @@
 
     .page-header h1 {
         font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 560px) {
+    .detail-container {
+        gap: 1rem;
+    }
+
+    .main-content,
+    .sidebar {
+        padding: 1rem;
+    }
+
+    .volunteer-hero-image-wrap {
+        max-height: 320px;
+    }
+
+    .opportunity-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .meta-info {
+        gap: 0.75rem;
+        font-size: 0.88rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .meta-item {
+        width: 100%;
+    }
+
+    .content-section h2 {
+        font-size: 1.25rem;
+    }
+
+    .details-table td {
+        padding: 0.75rem 0;
+    }
+
+    .apply-card h3,
+    .contact-card h3 {
+        font-size: 1.1rem;
+    }
+
+    .btn-large {
+        font-size: 1rem;
+        padding: 0.85rem;
+    }
+
+    .breadcrumb {
+        font-size: 0.95rem;
     }
 }
 

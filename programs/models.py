@@ -20,6 +20,7 @@ class Program(models.Model):
     start_time = models.TimeField('Start time', null=True, blank=True)
     ticket_info = models.CharField('Tickets', max_length=100, blank=True)
     event_type = models.CharField(max_length=50, choices=EVENT_TYPES, default='other')
+    image = models.ImageField(upload_to='program_images/', blank=True, null=True, help_text='Primary image used on the program detail and for social sharing')
 
     likes = models.PositiveIntegerField(default=0)
     comments_count = models.PositiveIntegerField(default=0)

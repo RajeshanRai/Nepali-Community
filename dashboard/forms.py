@@ -50,10 +50,11 @@ class RequestEventForm(forms.ModelForm):
 class VolunteerOpportunityForm(forms.ModelForm):
     class Meta:
         model = VolunteerOpportunity
-        fields = ['title', 'description', 'category', 'location', 'is_remote', 'start_date', 'end_date', 'time_commitment', 'positions_needed', 'contact_email', 'contact_phone', 'status']
+        fields = ['title', 'description', 'image', 'category', 'location', 'is_remote', 'start_date', 'end_date', 'time_commitment', 'positions_needed', 'positions_filled', 'benefits', 'contact_email', 'contact_phone', 'status']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Opportunity Title'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Full Description'}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
             'category': forms.Select(attrs={'class': 'form-control'}),
             'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Location'}),
             'is_remote': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
@@ -61,6 +62,8 @@ class VolunteerOpportunityForm(forms.ModelForm):
             'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'time_commitment': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 5 hours/week'}),
             'positions_needed': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
+            'positions_filled': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
+            'benefits': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'What volunteers will gain'}),
             'contact_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Contact Email'}),
             'contact_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contact Phone'}),
             'status': forms.Select(attrs={'class': 'form-control'}),

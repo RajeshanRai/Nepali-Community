@@ -1,11 +1,18 @@
 from django.contrib import admin
 from .models import Program, EventRegistration, RequestEvent
 from django.utils import timezone
+from django.utils.html import format_html
 
 
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
-    list_display = ('title', 'community', 'date', 'event_type', 'live_stream_url')
+    def display_image(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="max-height:40px; max-width:80px; object-fit:cover; border-radius:4px;" />', obj.image.url)
+        return '-'
+    display_image.short_description = 'Image'
+
+    list_display = ('display_image', 'title', 'community', 'date', 'event_type', 'live_stream_url')
     list_filter = ('event_type', 'community')
     search_fields = ('title', 'location', 'live_stream_url')
     # Optimized: select_related to prevent N+1 when displaying community names
