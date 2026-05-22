@@ -226,27 +226,25 @@
     }
 
     async function shareProgram() {
-        // Try to include the image when possible (Web Share API level 2)
-        // Share only the URL (and title) so recipient platforms can generate
-        // a single rich preview (image + title + description) from OG tags.
+        // Share title, description, and URL so platforms can use OG tags and
+        // recipients get a meaningful preview and message together.
         const payload = {
             title: programTitle,
+            text: shareText,
             url: programUrl
         };
 
         try {
             if (navigator.share) {
-                    // Share a single, professional message: title + description + URL.
-                    // Sharing the URL allows platforms to generate a rich preview using OG tags.
-                    await navigator.share(payload);
-                    showToast('Event link shared.', 'success');
-                    return;
-                }
+                await navigator.share(payload);
+                showToast('Event link shared.', 'success');
+                return;
+            }
 
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                // Copy only the program URL so pasted messages trigger a link preview
-                await navigator.clipboard.writeText(programUrl);
-                showToast('Event link copied to clipboard.', 'success');
+                // Copy enriched text so pasting into chat keeps title, description, and link.
+                await navigator.clipboard.writeText(shareText);
+                showToast('Event details copied to clipboard.', 'success');
                 return;
             }
         } catch (error) {
