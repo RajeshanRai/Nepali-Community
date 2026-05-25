@@ -274,11 +274,13 @@
                             <strong>{{ object.community.name|default:"NCV Community" }}</strong>
                             <p>The hosting group shaping the gathering and local energy around it.</p>
                         </div>
+                        {% if object.registration_status != 'event_closed' and object.registration_status != 'registration_closed' %}
                         <div class="program-rhythm-card">
                             <small>Attendance</small>
                             <strong><span data-attendance-count>{{ object.registered_count }}</span> people</strong>
                             <p>Momentum is building. Register early to stay in the loop.</p>
                         </div>
+                        {% endif %}
                         <div class="program-rhythm-card">
                             <small>Venue mode</small>
                             <strong>{% if object.is_virtual %}Hybrid-ready{% else %}Physical venue{% endif %}</strong>

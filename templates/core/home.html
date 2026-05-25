@@ -197,7 +197,9 @@
                     <div class="home-v2-meta">
                         <span><i class="fas fa-tag"></i> {{ program.get_event_type_display }}</span>
                         <span><i class="fas fa-map-marker-alt"></i> {{ program.location|fix_mojibake|default:"Location TBA" }}</span>
+                        {% if program.registration_status != 'event_closed' and program.registration_status != 'registration_closed' %}
                         <span><i class="fas fa-user-check"></i> {{ program.registered_count }} attending</span>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="home-v2-program-action">
