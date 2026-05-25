@@ -10,10 +10,12 @@
                 <i class="fas fa-map-marker-alt"></i>
                 {{ program.location|default:"TBA" }}
             </span>
+            {% if program.registration_status != 'event_closed' %}
             <span>
                 <i class="fas fa-users"></i>
                 {{ program.registered_count }} attending
             </span>
+            {% endif %}
             {% if program.is_virtual %}
             <span>
                 <i class="fas fa-video"></i>
