@@ -182,17 +182,14 @@
                             </div>
                                 {% if registration_status == 'event_closed' %}
                                 <div class="program-registration-closed">
-                                    <h3>{{ object.registration_status_label }}</h3>
                                     <p>This event has already taken place. Registration is no longer available.</p>
                                 </div>
                                 {% elif registration_status == 'registration_closed' %}
                                 <div class="program-registration-closed">
-                                    <h3>{{ object.registration_status_label }}</h3>
                                     <p>Registration has been closed by the organizer.</p>
                                 </div>
                                 {% elif registration_status == 'full' and not object.waitlist_enabled %}
                                 <div class="program-registration-closed">
-                                    <h3>{{ object.registration_status_label }}</h3>
                                     <p>This event is fully booked.</p>
                                 </div>
                                 {% else %}
