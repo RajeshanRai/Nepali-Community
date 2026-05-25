@@ -45,8 +45,10 @@
                 <div class="meta-info">
                     <div class="meta-item">
                         <i class="fas fa-users"></i>
+                        {% if opportunity.is_active %}
                         <strong>{{ opportunity.positions_remaining }}</strong> of {{ opportunity.positions_needed }}
                         positions available
+                        {% endif %}
                     </div>
                     {% if opportunity.start_date %}
                     <div class="meta-item">

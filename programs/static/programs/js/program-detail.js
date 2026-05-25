@@ -187,9 +187,13 @@
             if (isAuthenticated) {
                 if (action === 'register') {
                     if (response.ok && data && data.success) {
-                        syncAuthenticatedButton(true);
-                        adjustAttendance(1);
-                        showToast(data.message || 'Registration completed.', 'success');
+                        if (data.waitlist) {
+                            showToast(data.message || 'Added to waitlist.', 'success');
+                        } else {
+                            syncAuthenticatedButton(true);
+                            adjustAttendance(1);
+                            showToast(data.message || 'Registration completed.', 'success');
+                        }
                     } else if (response.ok && isAlreadyRegistered) {
                         // Server confirms user is registered; sync button without forcing reload.
                         syncAuthenticatedButton(true);
@@ -215,8 +219,10 @@
                     throw new Error((data && (data.message || data.error)) || 'Unable to complete registration.');
                 }
                 registrationForm.reset();
-                adjustAttendance(1);
-                showToast(data.message || 'Guest registration completed.', 'success');
+                if (!data.waitlist) {
+                    adjustAttendance(1);
+                }
+                showToast(data.message || (data.waitlist ? 'Added to waitlist.' : 'Guest registration completed.'), 'success');
             }
         } catch (error) {
             showToast(error.message || 'Something went wrong. Please try again.', 'error');

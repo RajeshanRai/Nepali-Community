@@ -4,6 +4,7 @@ from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect
 from django.db import IntegrityError
 from .models import VolunteerOpportunity, VolunteerApplication, VolunteerRequest
+from django.utils import timezone
 from .forms import VolunteerApplicationForm, VolunteerRequestForm
 from users.tracking import track_recent_view
 
@@ -14,7 +15,10 @@ class VolunteerListView(ListView):
     context_object_name = 'opportunities'
     
     def get_queryset(self):
-        qs = VolunteerOpportunity.objects.filter(status='open')
+        # Exclude opportunities that have an end_date in the past even if status remains 'open'
+        today = timezone.localdate()
+        # Return all opportunities so closed/expired items remain visible in the public listing.
+        qs = VolunteerOpportunity.objects.all().order_by('-created_at')
         category = self.request.GET.get('category')
         if category:
             qs = qs.filter(category=category)
@@ -34,6 +38,8 @@ class VolunteerListView(ListView):
             }
 
         context['request_form'] = VolunteerRequestForm(initial=initial_data)
+        # expose today's date for template usage if needed
+        context['today'] = timezone.localdate()
         return context
 
 

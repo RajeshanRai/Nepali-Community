@@ -778,6 +778,7 @@ def volunteer_opportunities_list(request):
         'search': search,
         'selected_status': selected_status,
         'status_options': status_options,
+        'today': timezone.localdate(),
     }
     return render(request, 'dashboard/volunteers/opportunities_list.html', context)
 
@@ -789,7 +790,19 @@ def volunteer_opportunity_create(request):
     if request.method == 'POST':
         form = VolunteerOpportunityForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            # determine status based on positions and dates before saving
+            inst = form.save(commit=False)
+            today = timezone.localdate()
+            # filled when positions_filled >= positions_needed
+            if inst.positions_needed and inst.positions_filled >= inst.positions_needed:
+                inst.status = 'filled'
+            # closed when end_date in the past
+            elif inst.end_date and inst.end_date < today:
+                inst.status = 'closed'
+            else:
+                # default to open unless explicitly closed/filled
+                inst.status = inst.status or 'open'
+            inst.save()
             return redirect('dashboard:volunteer_opportunities_list')
     else:
         form = VolunteerOpportunityForm()
@@ -804,7 +817,17 @@ def volunteer_opportunity_edit(request, pk):
     if request.method == 'POST':
         form = VolunteerOpportunityForm(request.POST, request.FILES, instance=opportunity)
         if form.is_valid():
-            form.save()
+            # compute updated status before saving so dashboard reflects correct state
+            inst = form.save(commit=False)
+            today = timezone.localdate()
+            if inst.positions_needed and inst.positions_filled >= inst.positions_needed:
+                inst.status = 'filled'
+            elif inst.end_date and inst.end_date < today:
+                inst.status = 'closed'
+            else:
+                # keep whatever status admin set unless it conflicts with computed rules
+                inst.status = inst.status or 'open'
+            inst.save()
             return redirect('dashboard:volunteer_opportunities_list')
     else:
         form = VolunteerOpportunityForm(instance=opportunity)

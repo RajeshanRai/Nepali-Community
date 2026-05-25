@@ -165,43 +165,81 @@
 
                         <div class="program-registration-card">
                             <div class="program-registration-card__header">
-                                <h3>Event registration</h3>
+                                    <h3>Event registration</h3>
+                                    <div style="margin-top:0.5rem;">
+                                        <span class="status-badge {{ object.registration_status_class }}">{{ object.registration_status_label }}</span>
+                                    </div>
+                                    {% if object.max_attendees %}
+                                    <div style="margin-top:0.35rem; font-size:0.9rem; color: rgba(26,26,26,0.75);">
+                                        {% if object.seats_remaining and object.seats_remaining > 0 %}
+                                            {{ object.seats_remaining }} seats left
+                                        {% else %}
+                                            Full
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
                                 <p>{% if user.is_authenticated %}Your account lets you register instantly.{% else %}Join as a guest in less than a minute.{% endif %}</p>
                             </div>
-
-                            {% if user.is_authenticated %}
-                            <form class="program-registration-form" data-registration-form data-authenticated="true" action="{% if is_registered %}{% url 'program_unregister' object.id %}{% else %}{% url 'register_event' object.id %}{% endif %}" method="post">
-                                {% csrf_token %}
-                                <div class="program-registration-form__user-pill">
-                                    <i class="fas fa-circle-check" aria-hidden="true"></i>
-                                    <span>Signed in as {{ request.user.get_full_name|default:request.user.username }}</span>
+                                {% if registration_status == 'event_closed' %}
+                                <div class="program-registration-closed">
+                                    <h3>{{ object.registration_status_label }}</h3>
+                                    <p>This event has already taken place. Registration is no longer available.</p>
                                 </div>
-                                <button type="submit" class="program-register-btn {% if is_registered %}is-registered{% endif %}" data-register-button>
-                                    <i class="fas {% if is_registered %}fa-check-circle{% else %}fa-ticket{% endif %}" aria-hidden="true"></i>
-                                    <span>{% if is_registered %}You're registered{% else %}Register now{% endif %}</span>
-                                </button>
-                            </form>
-                            {% else %}
-                            <form class="program-registration-form" data-registration-form data-authenticated="false" action="{% url 'register_event' object.id %}" method="post">
-                                {% csrf_token %}
-                                <label class="program-field">
-                                    <span>Full name</span>
-                                    <input type="text" name="guest_name" placeholder="Your full name" required>
-                                </label>
-                                <label class="program-field">
-                                    <span>Email address</span>
-                                    <input type="email" name="guest_email" placeholder="name@example.com" required>
-                                </label>
-                                <label class="program-field">
-                                    <span>Phone number</span>
-                                    <input type="tel" name="guest_phone" placeholder="Your contact number" required>
-                                </label>
-                                <button type="submit" class="program-register-btn" data-register-button>
-                                    <i class="fas fa-ticket" aria-hidden="true"></i>
-                                    <span>Register as guest</span>
-                                </button>
-                            </form>
-                            {% endif %}
+                                {% elif registration_status == 'registration_closed' %}
+                                <div class="program-registration-closed">
+                                    <h3>{{ object.registration_status_label }}</h3>
+                                    <p>Registration has been closed by the organizer.</p>
+                                </div>
+                                {% elif registration_status == 'full' and not object.waitlist_enabled %}
+                                <div class="program-registration-closed">
+                                    <h3>{{ object.registration_status_label }}</h3>
+                                    <p>This event is fully booked.</p>
+                                </div>
+                                {% else %}
+                                {% if user.is_authenticated %}
+                                <form class="program-registration-form" data-registration-form data-authenticated="true" action="{% if is_registered %}{% url 'program_unregister' object.id %}{% else %}{% url 'register_event' object.id %}{% endif %}" method="post">
+                                    {% csrf_token %}
+                                    <div class="program-registration-form__user-pill">
+                                        <i class="fas fa-circle-check" aria-hidden="true"></i>
+                                        <span>Signed in as {{ request.user.get_full_name|default:request.user.username }}</span>
+                                    </div>
+                                    <button type="submit" class="program-register-btn {% if is_registered %}is-registered{% endif %}" data-register-button>
+                                        <i class="fas {% if is_registered %}fa-check-circle{% else %}fa-ticket{% endif %}" aria-hidden="true"></i>
+                                        <span>
+                                            {% if is_registered %}
+                                                You're registered
+                                            {% else %}
+                                                {% if registration_status == 'full' and object.waitlist_enabled %}
+                                                    Join waitlist
+                                                {% else %}
+                                                    Register now
+                                                {% endif %}
+                                            {% endif %}
+                                        </span>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form class="program-registration-form" data-registration-form data-authenticated="false" action="{% url 'register_event' object.id %}" method="post">
+                                    {% csrf_token %}
+                                    <label class="program-field">
+                                        <span>Full name</span>
+                                        <input type="text" name="guest_name" placeholder="Your full name" required>
+                                    </label>
+                                    <label class="program-field">
+                                        <span>Email address</span>
+                                        <input type="email" name="guest_email" placeholder="name@example.com" required>
+                                    </label>
+                                    <label class="program-field">
+                                        <span>Phone number</span>
+                                        <input type="tel" name="guest_phone" placeholder="Your contact number" required>
+                                    </label>
+                                    <button type="submit" class="program-register-btn" data-register-button>
+                                        <i class="fas fa-ticket" aria-hidden="true"></i>
+                                        <span>{% if registration_status == 'full' and object.waitlist_enabled %}Join waitlist as guest{% else %}Register as guest{% endif %}</span>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                {% endif %}
 
                             <p class="program-registration-card__footnote">Need to explore first? Share the event or save it to your calendar and come back later.</p>
                         </div>

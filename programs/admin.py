@@ -12,11 +12,27 @@ class ProgramAdmin(admin.ModelAdmin):
         return '-'
     display_image.short_description = 'Image'
 
-    list_display = ('display_image', 'title', 'community', 'date', 'event_type', 'live_stream_url')
+    list_display = ('display_image', 'title', 'community', 'date', 'event_type', 'registered_count', 'max_attendees', 'waitlist_enabled', 'registration_status_badge')
     list_filter = ('event_type', 'community')
     search_fields = ('title', 'location', 'live_stream_url')
     # Optimized: select_related to prevent N+1 when displaying community names
     list_select_related = ('community',)
+
+    # include waitlist_enabled and show registered_count as readonly in the form
+    fields = ('community', 'title', 'description', 'location', 'date', 'start_time', 'ticket_info', 'event_type', 'image', 'is_virtual', 'max_attendees', 'registered_count', 'waitlist_enabled', 'registration_closed')
+    readonly_fields = ('registered_count',)
+
+    def registration_status_badge(self, obj):
+        status = getattr(obj, 'registration_status', 'open')
+        label = getattr(obj, 'registration_status_label', '')
+        css = getattr(obj, 'registration_status_class', '')
+        color = '#28a745' if status == 'open' else ('#dc3545' if status == 'event_closed' else ('#ffc107' if status == 'full' else '#6c757d'))
+        return format_html('<span style="display:inline-block;padding:4px 8px;border-radius:6px;background:{};color:#fff;font-weight:600;">{}</span>', color, label)
+    registration_status_badge.short_description = 'Status'
+
+    def total_attended(self, obj):
+        return obj.registered_count or 0
+    total_attended.short_description = 'Total attended'
 
 
 @admin.register(EventRegistration)
@@ -25,6 +41,17 @@ class EventRegistrationAdmin(admin.ModelAdmin):
     list_filter = ('program',)
     search_fields = ('guest_name', 'guest_email', 'user__username')
     # Optimized: select_related to prevent N+1 when displaying user and program names
+    list_select_related = ('user', 'program')
+
+
+from .models import WaitlistEntry
+
+
+@admin.register(WaitlistEntry)
+class WaitlistEntryAdmin(admin.ModelAdmin):
+    list_display = ('user', 'guest_name', 'guest_email', 'program', 'created_at')
+    list_filter = ('program',)
+    search_fields = ('guest_name', 'guest_email', 'user__username')
     list_select_related = ('user', 'program')
 
 

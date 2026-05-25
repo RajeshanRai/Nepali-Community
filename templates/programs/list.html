@@ -49,61 +49,34 @@
 
     <!-- Event List -->
     <section class="event-list">
-        {% if programs %}
-        {% for p in programs %}
-        <div class="event-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:'50' }}">
-            <div class="date">{{ p.date|date:"M d" }}</div>
-            <div style="flex: 1;">
-                <div class="title">{{ p.title }}</div>
-                <p style="margin: 0.35rem 0 0 0; font-size: 0.8rem !important; color: rgba(26, 26, 26, 0.75);">
-                    {{ p.description|truncatechars:150 }}
-                </p>
-                <div class="meta" style="margin-top: 0.45rem;">
-                    <span>
-                        <i class="fas fa-map-marker-alt"></i>
-                        {{ p.location|default:"TBA" }}
-                    </span>
-                    <span>
-                        <i class="fas fa-users"></i>
-                        {{ p.registered_count }} attending
-                    </span>
-                    {% if p.is_virtual %}
-                    <span>
-                        <i class="fas fa-video"></i>
-                        Virtual Event
-                    </span>
-                    {% endif %}
-                </div>
-            </div>
-            <div style="display: flex; gap: 0.6rem !important; flex-wrap: wrap; align-items: center;">
-                {% if request.user.is_authenticated %}
-                {% if p.id in user_registrations %}
-                <button class="btn btn-unregister btn-secondary" data-program-id="{{ p.id }}">
-                    <i class="fas fa-check"></i> Registered
-                </button>
-                {% else %}
-                <button class="btn btn-register btn-primary" data-program-id="{{ p.id }}">
-                    <i class="fas fa-calendar-plus"></i> Register
-                </button>
-                {% endif %}
-                {% else %}
-                <button class="btn btn-register btn-primary" data-program-id="{{ p.id }}"
-                    onclick="alert('Please login to register for events');">
-                    <i class="fas fa-sign-in-alt"></i> Login to Register
-                </button>
-                {% endif %}
-                {% if p.live_stream_url %}
-                <a href="{{ p.live_stream_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-                    <i class="fas fa-circle-play"></i> See live
-                </a>
-                {% endif %}
-                <a href="{% url 'program_detail' p.id %}" class="btn btn-secondary">
-                    <i class="fas fa-info-circle"></i> Details
-                </a>
-            </div>
+        {% if open_programs %}
+        <div class="event-group">
+            <h2 class="event-group-title">Open Events</h2>
+            {% for p in open_programs %}
+                {% include 'programs/_event_card.html' with program=p %}
+            {% endfor %}
         </div>
-        {% endfor %}
-        {% else %}
+        {% endif %}
+
+        {% if full_programs %}
+        <div class="event-group event-group--full">
+            <h2 class="event-group-title">Full Events</h2>
+            {% for p in full_programs %}
+                {% include 'programs/_event_card.html' with program=p %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if closed_programs %}
+        <div class="event-group event-group--closed">
+            <h2 class="event-group-title">Closed Events</h2>
+            {% for p in closed_programs %}
+                {% include 'programs/_event_card.html' with program=p %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if not open_programs and not full_programs and not closed_programs %}
         <div style="text-align: center; padding: 1.25rem 0.85rem; background: #ffffff; border-radius: 16px;">
             <i class="fas fa-calendar-times"
                 style="font-size: 2.2rem; color: rgba(26, 26, 26, 0.2); margin-bottom: 0.55rem;"></i>

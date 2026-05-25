@@ -144,6 +144,30 @@
                         {% if form.ticket_info.errors %}<div class="field-error"><i class="fas fa-exclamation-circle"></i> {{ form.ticket_info.errors.0 }}</div>{% endif %}
                         <small class="form-help">Enter Free or a ticket amount such as $10.</small>
                     </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.max_attendees.id_for_label }}" class="form-label">Max attendees</label>
+                            {{ form.max_attendees }}
+                            {% if form.max_attendees.errors %}<div class="field-error"><i class="fas fa-exclamation-circle"></i> {{ form.max_attendees.errors.0 }}</div>{% endif %}
+                            <small class="form-help">Leave empty for unlimited capacity.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Waitlist</label>
+                            <div class="checkbox-group evf-check">
+                                <label class="checkbox-label">{{ form.waitlist_enabled }} <span>Enable waitlist when full</span></label>
+                            </div>
+                            {% if form.waitlist_enabled.errors %}<div class="field-error"><i class="fas fa-exclamation-circle"></i> {{ form.waitlist_enabled.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Registration</label>
+                            <div class="checkbox-group evf-check">
+                                <label class="checkbox-label">{{ form.registration_closed }} <span>Close registrations manually</span></label>
+                            </div>
+                            {% if form.registration_closed.errors %}<div class="field-error"><i class="fas fa-exclamation-circle"></i> {{ form.registration_closed.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
                 </div>
 
                 {% if event %}
@@ -193,6 +217,14 @@
             <div class="evf-side-block">
                 <div class="evf-k">Tickets</div>
                 <div class="evf-v" id="evfPreviewTickets">Free</div>
+            </div>
+            <div class="evf-side-block">
+                <div class="evf-k">Seats</div>
+                <div class="evf-v" id="evfPreviewSeats">{% if event and event.max_attendees %}{{ event.seats_remaining }} left of {{ event.max_attendees }}{% else %}Unlimited{% endif %}</div>
+            </div>
+            <div class="evf-side-block">
+                <div class="evf-k">Registration</div>
+                <div class="evf-v"><span class="evf-status-pill" id="evfPreviewRegistration">{% if event %}{{ event.registration_status_label }}{% else %}Draft{% endif %}</span></div>
             </div>
             <div class="evf-side-block">
                 <div class="evf-k">Format</div>
@@ -495,6 +527,13 @@
     const previewCommunity = document.getElementById('evfPreviewCommunity');
     const previewDate = document.getElementById('evfPreviewDate');
     const previewFormat = document.getElementById('evfPreviewFormat');
+    const previewSeats = document.getElementById('evfPreviewSeats');
+    const previewRegistration = document.getElementById('evfPreviewRegistration');
+
+    const maxAttendeesEl = document.getElementById('{{ form.max_attendees.id_for_label }}');
+    const waitlistEl = document.getElementById('{{ form.waitlist_enabled.id_for_label }}');
+    const regClosedEl = document.getElementById('{{ form.registration_closed.id_for_label }}');
+    const registeredCount = {{ event.registered_count|default:0 }};
 
     const requiredFields = [title, eventType, community, date].filter(Boolean);
 
@@ -549,6 +588,41 @@
         updateVirtualState();
         updatePreview();
         updateProgress();
+        updateSeatsAndRegistration();
+    }
+
+    function updateSeatsAndRegistration() {
+        // seats
+        let max = null;
+        if (maxAttendeesEl && maxAttendeesEl.value) {
+            const v = Number(maxAttendeesEl.value);
+            if (!Number.isNaN(v) && v >= 0) max = v;
+        }
+        let seatsText = 'Unlimited';
+        if (max !== null) {
+            const remaining = Math.max(0, max - (Number(registeredCount) || 0));
+            seatsText = `${remaining} left of ${max}`;
+        }
+        if (previewSeats) previewSeats.textContent = seatsText;
+
+        // registration status compute
+        let status = 'Open';
+        try {
+            const dateVal = date ? new Date(date.value + 'T00:00:00') : null;
+            const now = new Date();
+            if (dateVal && dateVal < new Date(now.getFullYear(), now.getMonth(), now.getDate())) {
+                status = 'Event closed';
+            } else if (regClosedEl && regClosedEl.checked) {
+                status = 'Registration closed';
+            } else if (max !== null && (max - (Number(registeredCount) || 0)) <= 0) {
+                status = 'Registration full';
+            } else {
+                status = 'Open';
+            }
+        } catch (e) {
+            status = 'Open';
+        }
+        if (previewRegistration) previewRegistration.textContent = status;
     }
 
     [title, description, eventType, community, date, location, isVirtual].forEach((el) => {

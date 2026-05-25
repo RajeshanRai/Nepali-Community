@@ -4,13 +4,17 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.decorators import method_decorator
 from django.http import JsonResponse, HttpResponseRedirect
 from django.views.decorators.http import require_GET
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import render
 from communities.models import Community
+from django.utils import timezone
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from core.email_utils import render_branded_email_template, send_notification_email
 from core.email_utils import send_notification_email, build_event_newsletter_html
-from .models import Program, EventRegistration, RequestEvent
+from .models import Program, EventRegistration, RequestEvent, WaitlistEntry
 from .forms import GuestRegistrationForm, UserRegistrationForm, RequestEventForm
 from users.tracking import track_recent_view
 import json
@@ -328,6 +332,8 @@ class ProgramListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # expose today's date for template comparisons (e.g., disable registration for past events)
+        context['today'] = timezone.localdate()
         # Add user registrations to context
         if self.request.user.is_authenticated:
             user_registrations = EventRegistration.objects.filter(
@@ -346,6 +352,11 @@ class ProgramListView(ListView):
         context['search_q'] = self.request.GET.get('q', '')
         context['request_form'] = RequestEventForm()
         context['communities'] = Community.objects.all().order_by('name')
+        
+        programs = list(context.get('programs', []))
+        context['open_programs'] = [program for program in programs if program.registration_status == 'open']
+        context['full_programs'] = [program for program in programs if program.registration_status == 'full']
+        context['closed_programs'] = [program for program in programs if program.registration_status in ('event_closed', 'registration_closed')]
         
         # Generate event calendar data
         events_by_date = {}
@@ -434,6 +445,18 @@ class ProgramDetailView(DetailView):
             context['registration_form'] = UserRegistrationForm(user=self.request.user)
         else:
             context['registration_form'] = GuestRegistrationForm()
+
+        # mark finished events so templates can disable registration
+        try:
+            context['is_finished'] = program.date < timezone.localdate()
+        except Exception:
+            context['is_finished'] = False
+        # expose registration capacity/status
+        context['seats_remaining'] = program.seats_remaining
+        context['is_full'] = program.is_full
+        context['registration_status'] = program.registration_status
+        context['registration_status_label'] = program.registration_status_label
+        context['registration_status_class'] = program.registration_status_class
             
         return context
 
@@ -447,6 +470,52 @@ class RegisterForEventView(View):
             
             if request.user.is_authenticated:
                 # Logged-in user registration
+                # Block registration if event is finished or manually closed
+                if program.registration_status in ('event_closed', 'registration_closed'):
+                    message = 'Registration is not available for this event.'
+                    success = False
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return JsonResponse({'success': success, 'message': message})
+                    else:
+                        messages.error(request, message)
+                        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/programs/'))
+
+                # If event is full, optionally add to waitlist
+                if program.registration_status == 'full':
+                    if program.waitlist_enabled:
+                        wait_entry, created = WaitlistEntry.objects.get_or_create(user=request.user, program=program)
+                        # compute position
+                        position = WaitlistEntry.objects.filter(program=program, created_at__lte=wait_entry.created_at).count()
+                        message = f"Event is full. You've been added to the waitlist (position {position})."
+                        success = True
+                        # notify admins if waitlist grows beyond threshold
+                        try:
+                            waitlist_count = WaitlistEntry.objects.filter(program=program).count()
+                            threshold = getattr(settings, 'WAITLIST_ADMIN_NOTIFY_THRESHOLD', 10)
+                            if waitlist_count >= threshold:
+                                # build admin recipients
+                                UserModel = get_user_model()
+                                admin_emails = list(UserModel.objects.filter(is_active=True, is_staff=True, email__isnull=False).values_list('email', flat=True))
+                                if admin_emails:
+                                    admin_url = request.build_absolute_uri(f"/admin/programs/program/{program.id}/change/")
+                                    admin_html = render_branded_email_template('emails/waitlist_admin_alert.html', event_name=program.title, event_date=program.date.strftime('%B %d, %Y'), waitlist_count=waitlist_count, admin_url=admin_url)
+                                    send_notification_email(subject=f"Waitlist alert: {program.title}", message=f"{waitlist_count} people are on the waitlist for {program.title}", recipients=admin_emails, html_message=admin_html, send_individually=False)
+                        except Exception:
+                            pass
+                        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                            return JsonResponse({'success': success, 'message': message, 'waitlist': True, 'position': position})
+                        else:
+                            messages.info(request, message)
+                            return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/programs/'))
+                    else:
+                        message = 'Registration is not available for this event.'
+                        success = False
+                        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                            return JsonResponse({'success': success, 'message': message})
+                        else:
+                            messages.error(request, message)
+                            return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/programs/'))
+
                 registration, created = EventRegistration.objects.get_or_create(
                     user=request.user,
                     program=program
@@ -496,10 +565,63 @@ class RegisterForEventView(View):
                 # Guest registration
                 form = GuestRegistrationForm(request.POST)
                 if form.is_valid():
+                    # Block guest registration if event is finished or manually closed
+                    if program.registration_status in ('event_closed', 'registration_closed'):
+                        message = 'Registration is not available for this event.'
+                        success = False
+                        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                            return JsonResponse({'success': success, 'message': message})
+                        else:
+                            messages.error(request, message)
+                            return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/programs/'))
+
+                    # If full, add guest to waitlist if enabled
+                    if program.registration_status == 'full':
+                        if program.waitlist_enabled:
+                            # create waitlist entry from guest form
+                            data = form.cleaned_data
+                            wait_entry, created = WaitlistEntry.objects.get_or_create(
+                                program=program,
+                                guest_email=data.get('guest_email'),
+                                defaults={
+                                    'guest_name': data.get('guest_name'),
+                                    'guest_phone': data.get('guest_phone')
+                                }
+                            )
+                            position = WaitlistEntry.objects.filter(program=program, created_at__lte=wait_entry.created_at).count()
+                            message = f"Event is full. You've been added to the waitlist (position {position})."
+                            success = True
+                            # notify admins if waitlist grows beyond threshold
+                            try:
+                                waitlist_count = WaitlistEntry.objects.filter(program=program).count()
+                                threshold = getattr(settings, 'WAITLIST_ADMIN_NOTIFY_THRESHOLD', 10)
+                                if waitlist_count >= threshold:
+                                    UserModel = get_user_model()
+                                    admin_emails = list(UserModel.objects.filter(is_active=True, is_staff=True, email__isnull=False).values_list('email', flat=True))
+                                    if admin_emails:
+                                        admin_url = request.build_absolute_uri(f"/admin/programs/program/{program.id}/change/")
+                                        admin_html = render_branded_email_template('emails/waitlist_admin_alert.html', event_name=program.title, event_date=program.date.strftime('%B %d, %Y'), waitlist_count=waitlist_count, admin_url=admin_url)
+                                        send_notification_email(subject=f"Waitlist alert: {program.title}", message=f"{waitlist_count} people are on the waitlist for {program.title}", recipients=admin_emails, html_message=admin_html, send_individually=False)
+                            except Exception:
+                                pass
+                            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                                return JsonResponse({'success': success, 'message': message, 'waitlist': True, 'position': position})
+                            else:
+                                messages.info(request, message)
+                                return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/programs/'))
+                        else:
+                            message = 'Registration is not available for this event.'
+                            success = False
+                            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                                return JsonResponse({'success': success, 'message': message})
+                            else:
+                                messages.error(request, message)
+                                return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/programs/'))
+
                     registration = form.save(commit=False)
                     registration.program = program
                     registration.save()
-                    
+
                     program.registered_count += 1
                     program.save()
                     
@@ -576,6 +698,34 @@ class UnregisterForEventView(View):
                 # decrement count but not below zero
                 program.registered_count = max(0, program.registered_count - 1)
                 program.save()
+                # If seats freed, promote first waitlist entry
+                promoted = None
+                try:
+                    promoted = program.promote_from_waitlist()
+                except Exception:
+                    promoted = None
+
+                if promoted:
+                    # send notification to promoted user/guest using branded HTML template
+                    try:
+                        event_url = request.build_absolute_uri(reverse('program_detail', args=[program.id]))
+                        html = render_branded_email_template('emails/waitlist_promotion.html', event_name=program.title, event_date=program.date.strftime('%B %d, %Y'), event_url=event_url)
+                        if promoted.user and promoted.user.email:
+                            send_notification_email(
+                                subject=f"You've been moved from waitlist to registered: {program.title}",
+                                message=(f"Hi {promoted.user.get_full_name() or promoted.user.username},\n\nYou've been moved off the waitlist and are now registered for {program.title} on {program.date}."),
+                                recipients=[promoted.user.email],
+                                html_message=html
+                            )
+                        elif promoted.guest_email:
+                            send_notification_email(
+                                subject=f"You're registered for {program.title}",
+                                message=(f"Hi {promoted.guest_name or 'Guest'},\n\nYou've been moved off the waitlist and are now registered for {program.title} on {program.date}."),
+                                recipients=[promoted.guest_email],
+                                html_message=html
+                            )
+                    except Exception:
+                        pass
                 message = f"You have been unregistered from {program.title}."
                 success = True
             else:

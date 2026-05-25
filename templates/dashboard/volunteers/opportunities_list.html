@@ -63,10 +63,15 @@
                         <h3 class="card-title">{{ opportunity.title }}</h3>
                         <p class="card-subtitle">{{ opportunity.get_category_display }}</p>
                     </div>
+                    {# If the opportunity has an end_date in the past, mark it expired/closed for clarity #}
+                    {% if opportunity.end_date and opportunity.end_date < today %}
+                    <span class="badge badge-danger">Closed (Expired)</span>
+                    {% else %}
                     <span
                         class="badge badge-{% if opportunity.status == 'open' %}success{% elif opportunity.status == 'filled' %}warning{% else %}danger{% endif %}">
                         {{ opportunity.get_status_display }}
                     </span>
+                    {% endif %}
                 </div>
 
                 <div class="card-body">
@@ -89,11 +94,13 @@
                             <span>{{ opportunity.time_commitment }}</span>
                         </div>
 
+                        {% if opportunity.is_active %}
                         <div class="meta-item">
                             <i class="fas fa-users"></i>
                             <span>{{ opportunity.positions_remaining }} / {{ opportunity.positions_needed }}
                                 positions</span>
                         </div>
+                        {% endif %}
 
                         {% if opportunity.start_date %}
                         <div class="meta-item">

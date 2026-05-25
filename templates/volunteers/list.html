@@ -70,11 +70,13 @@
                 </div>
                 {% endif %}
 
+                {% if opportunity.is_active %}
                 <div class="detail-item">
                     <i class="fas fa-users"></i>
                     <span>{{ opportunity.positions_remaining }} position{{ opportunity.positions_remaining|pluralize }}
                         available</span>
                 </div>
+                {% endif %}
             </div>
 
             <div class="card-footer">

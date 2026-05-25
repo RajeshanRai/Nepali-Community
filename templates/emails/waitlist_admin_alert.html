@@ -1,0 +1,8 @@
+{% extends 'emails/base.html' %}
+{% block intro %}Waitlist threshold reached for an event{% endblock %}
+{% block paragraphs %}
+<p>The event <strong>{{ event_name }}</strong> ({{ event_date }}) now has <strong>{{ waitlist_count }}</strong> people on the waitlist.</p>
+<p>You can review or manage the program in the admin: <a href="{{ admin_url }}">Open program in admin</a></p>
+{% endblock %}
+{% block cta_text %}Open Program in Admin{% endblock %}
+{% block cta_url %}{{ admin_url }}{% endblock %}

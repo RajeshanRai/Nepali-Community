@@ -93,7 +93,7 @@
 
     // Handle Event Registration
     function handleRegistration() {
-        const registerButtons = document.querySelectorAll('.btn-register');
+        const registerButtons = document.querySelectorAll('.btn-register, .btn-waitlist');
         const unregisterButtons = document.querySelectorAll('.btn-unregister');
 
         registerButtons.forEach(btn => {
@@ -123,14 +123,18 @@
                     const data = await response.json();
 
                     if (response.ok && data.success) {
-                        showNotification('Successfully registered for the event!', 'success');
-                        // Convert to unregister button
-                        this.classList.remove('btn-register', 'btn-primary');
-                        this.classList.add('btn-unregister', 'btn-secondary');
-                        this.dataset.nextText = '<i class="fas fa-check"></i> Registered';
+                        if (data.waitlist) {
+                            showNotification(data.message || 'Event is full. Added to waitlist.', 'success');
+                        } else {
+                            showNotification('Successfully registered for the event!', 'success');
+                            // Convert to unregister button
+                            this.classList.remove('btn-register', 'btn-primary');
+                            this.classList.add('btn-unregister', 'btn-secondary');
+                            this.dataset.nextText = '<i class="fas fa-check"></i> Registered';
 
-                        // Update attendance count
-                        updateAttendanceCount(programId, 1);
+                            // Update attendance count
+                            updateAttendanceCount(programId, 1);
+                        }
                     } else {
                         showNotification(data.message || data.error || 'Failed to register. Please try again.', 'error');
                     }

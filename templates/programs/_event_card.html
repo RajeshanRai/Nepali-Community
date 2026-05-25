@@ -1,0 +1,92 @@
+<article class="event-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:'50' }}">
+    <div class="date">{{ program.date|date:"M d Y" }}</div>
+    <div style="flex: 1;">
+        <div class="title">{{ program.title }}</div>
+        <p style="margin: 0.35rem 0 0 0; font-size: 0.8rem !important; color: rgba(26, 26, 26, 0.75);">
+            {{ program.description|truncatechars:150 }}
+        </p>
+        <div class="meta" style="margin-top: 0.45rem;">
+            <span>
+                <i class="fas fa-map-marker-alt"></i>
+                {{ program.location|default:"TBA" }}
+            </span>
+            <span>
+                <i class="fas fa-users"></i>
+                {{ program.registered_count }} attending
+            </span>
+            {% if program.is_virtual %}
+            <span>
+                <i class="fas fa-video"></i>
+                Virtual Event
+            </span>
+            {% endif %}
+        </div>
+        {% if program.max_attendees %}
+        <div style="margin-top:0.35rem; font-size:0.82rem; color: rgba(26,26,26,0.7);">
+            {% if program.seats_remaining and program.seats_remaining > 0 %}
+                {{ program.seats_remaining }} seats left
+            {% else %}
+                Full
+            {% endif %}
+        </div>
+        {% endif %}
+        <div style="margin-top:0.6rem; display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
+            <div style="margin-right:0.4rem;">
+                <span class="status-badge {{ program.registration_status_class }}">{{ program.registration_status_label }}</span>
+            </div>
+            {% if program.registration_status == 'event_closed' %}
+                {# Badge already indicates event closed; no extra button needed here #}
+            {% else %}
+                {% if request.user.is_authenticated %}
+                    {% if program.id in user_registrations %}
+                        <button class="btn btn-unregister btn-secondary" data-program-id="{{ program.id }}">
+                            <i class="fas fa-check"></i> Registered
+                        </button>
+                    {% else %}
+                        {% if program.registration_status == 'registration_closed' %}
+                            <button class="btn btn-secondary" disabled>
+                                <i class="fas fa-lock"></i> {{ program.registration_status_label }}
+                            </button>
+                        {% elif program.registration_status == 'full' %}
+                            {% if program.waitlist_enabled %}
+                                <button class="btn btn-waitlist btn-primary" data-program-id="{{ program.id }}" data-waitlist="1">
+                                    <i class="fas fa-users"></i> Join waitlist
+                                </button>
+                            {% else %}
+                                <button class="btn btn-secondary" disabled>
+                                    <i class="fas fa-users"></i> {{ program.registration_status_label }}
+                                </button>
+                            {% endif %}
+                        {% else %}
+                            <button class="btn btn-register btn-primary" data-program-id="{{ program.id }}">
+                                <i class="fas fa-calendar-plus"></i> Register
+                            </button>
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    {% if program.registration_status == 'registration_closed' %}
+                        <button class="btn btn-secondary" disabled>
+                            <i class="fas fa-lock"></i> {{ program.registration_status_label }}
+                        </button>
+                    {% elif program.registration_status == 'full' and program.waitlist_enabled %}
+                        <button class="btn btn-waitlist btn-primary" data-program-id="{{ program.id }}" data-waitlist="1" onclick="alert('Please login to join the waitlist');">
+                            <i class="fas fa-users"></i> Login to Join Waitlist
+                        </button>
+                    {% else %}
+                        <button class="btn btn-register btn-primary" data-program-id="{{ program.id }}" onclick="alert('Please login to register for events');">
+                            <i class="fas fa-sign-in-alt"></i> Login to Register
+                        </button>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+            {% if program.live_stream_url %}
+            <a href="{{ program.live_stream_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                <i class="fas fa-circle-play"></i> See Video
+            </a>
+            {% endif %}
+            <a href="{% url 'program_detail' program.id %}" class="btn btn-secondary">
+                <i class="fas fa-info-circle"></i> Details
+            </a>
+        </div>
+    </div>
+</article>

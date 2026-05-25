@@ -1,0 +1,10 @@
+{% extends 'emails/base.html' %}
+{% block intro %}Good news — you're in!{% endblock %}
+{% block paragraphs %}
+<ul>
+    <li>You were on the waitlist for <strong>{{ event_name }}</strong>.</li>
+    <li>Your seat has been confirmed for <strong>{{ event_date }}</strong>.</li>
+</ul>
+{% endblock %}
+{% block cta_text %}View your registration{% endblock %}
+{% block cta_url %}{{ event_url }}{% endblock %}

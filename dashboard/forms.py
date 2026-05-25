@@ -14,7 +14,7 @@ from core.models import TeamMember
 class ProgramForm(forms.ModelForm):
     class Meta:
         model = Program
-        fields = ['title', 'description', 'date', 'start_time', 'location', 'live_stream_url', 'ticket_info', 'event_type', 'community', 'is_virtual']
+        fields = ['title', 'description', 'date', 'start_time', 'location', 'live_stream_url', 'ticket_info', 'event_type', 'community', 'is_virtual', 'max_attendees', 'waitlist_enabled', 'registration_closed']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Event Title'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Event Description'}),
@@ -25,6 +25,9 @@ class ProgramForm(forms.ModelForm):
             'ticket_info': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Free or $15'}),
             'event_type': forms.Select(attrs={'class': 'form-control'}),
             'is_virtual': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'max_attendees': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
+            'waitlist_enabled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'registration_closed': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'community': forms.Select(attrs={'class': 'form-control'}),
         }
 

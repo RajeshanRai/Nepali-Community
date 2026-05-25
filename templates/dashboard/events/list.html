@@ -99,7 +99,19 @@
                     <span class="event-meta-item">
                         <i class="fas fa-circle-check" aria-hidden="true"></i>
                         <strong>Status</strong>
-                        <span class="badge badge-success event-meta-value">Active</span>
+                        <span class="badge event-meta-value {% if event.registration_status == 'open' %}badge-success{% elif event.registration_status == 'full' %}badge-warning{% else %}badge-secondary{% endif %}">
+                            {{ event.registration_status_label }}
+                        </span>
+                    </span>
+                    <span class="event-meta-item">
+                        <i class="fas fa-chair" aria-hidden="true"></i>
+                        <strong>Seats</strong>
+                        <span class="event-meta-value">{% if event.max_attendees %}{{ event.seats_remaining }} left of {{ event.max_attendees }}{% else %}Unlimited{% endif %}</span>
+                    </span>
+                    <span class="event-meta-item">
+                        <i class="fas fa-user-check" aria-hidden="true"></i>
+                        <strong>Attended</strong>
+                        <span class="event-meta-value">{{ event.registered_count|default:0 }}</span>
                     </span>
                 </div>
 

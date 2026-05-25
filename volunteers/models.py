@@ -59,7 +59,16 @@ class VolunteerOpportunity(models.Model):
     
     @property
     def is_active(self):
-        return self.status == 'open' and self.positions_remaining > 0
+        # Opportunity is active only when status is open, there are remaining positions,
+        # and the end_date has not already passed (if provided).
+        if self.status != 'open':
+            return False
+        if self.positions_remaining <= 0:
+            return False
+        today = timezone.localdate()
+        if self.end_date and self.end_date < today:
+            return False
+        return True
 
 
 class VolunteerApplication(models.Model):

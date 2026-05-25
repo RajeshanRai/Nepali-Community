@@ -44,6 +44,9 @@
 
             <div class="registration-content">
                 <h3>{{ registration.program.title }}</h3>
+                <div style="margin-top:0.3rem;">
+                    <span class="status-badge {{ registration.program.registration_status_class }}">{{ registration.program.registration_status_label }}</span>
+                </div>
                 <p>{{ registration.program.description|default:"No description available"|truncatechars:140 }}</p>
                 <div class="registration-meta">
                     <span><i class="fas fa-map-marker-alt"></i> {{ registration.program.location }}</span>
