@@ -13,6 +13,7 @@ class ProgramAdmin(admin.ModelAdmin):
     display_image.short_description = 'Image'
 
     list_display = ('display_image', 'title', 'community', 'date', 'event_type', 'registered_count', 'max_attendees', 'waitlist_enabled', 'registration_status_badge')
+    list_editable = ('max_attendees',)
     list_filter = ('event_type', 'community')
     search_fields = ('title', 'location', 'live_stream_url')
     # Optimized: select_related to prevent N+1 when displaying community names
