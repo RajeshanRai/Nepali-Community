@@ -10,6 +10,7 @@
 {% block twitter_description %}{{ post.excerpt|default:post.content|striptags|truncatechars:200 }}{% endblock %}
 {% block og_image %}{% if post.image %}{{ request.scheme }}://{{ request.get_host }}{{ post.image.url }}{% else %}{% static 'images/og-default.jpg' %}{% endif %}{% endblock %}
 {% block twitter_image %}{% if post.image %}{{ request.scheme }}://{{ request.get_host }}{{ post.image.url }}{% else %}{% static 'images/og-default.jpg' %}{% endif %}{% endblock %}
+{% block twitter_image_alt %}{{ post.title }} | Nepali Community of Vancouver{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'blogs/css/blogs.css' %}">
@@ -59,7 +60,7 @@
                 <a class="blog-share-btn blog-share-facebook" href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">
                     <i class="fab fa-facebook-f" aria-hidden="true"></i> Facebook
                 </a>
-                <a class="blog-share-btn blog-share-whatsapp" href="https://api.whatsapp.com/send?text={{ post.title|urlencode }}%0A%0A{{ post.excerpt|default:post.content|striptags|truncatechars:120|urlencode }}%0A%0A{{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">
+                <a class="blog-share-btn blog-share-whatsapp" href="https://wa.me/?text={{ post.title|urlencode }}%0A%0A{{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">
                     <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp
                 </a>
                 <a class="blog-share-btn blog-share-x" href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri|urlencode }}&text={{ post.title|urlencode }}" target="_blank" rel="noopener noreferrer">

@@ -258,6 +258,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB (default is 2.5 MB)
 DATA_UPLOAD_MAX_NUMBER_FILES = 100  # Allow up to 100 files per request (default is 1000)
 
+# OpenAI API key support
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
 # custom user model
 AUTH_USER_MODEL = 'users.CustomUser'
 

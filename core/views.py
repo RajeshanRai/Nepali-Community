@@ -1,3 +1,8 @@
+import json
+import logging
+import os
+
+from django.conf import settings
 from django.views.generic import TemplateView, ListView
 from programs.models import Program, EventRegistration
 from django.utils import timezone
@@ -13,6 +18,17 @@ from django.db.models.functions import TruncMonth
 from datetime import timedelta
 from communities.models import Community
 from volunteers.models import VolunteerApplication, VolunteerOpportunity, VolunteerRequest
+from django.views.decorators.csrf import csrf_exempt
+from .models import ChatbotConversation, ChatbotMessage, ChatbotFaq
+
+logger = logging.getLogger(__name__)
+
+try:
+    import openai
+    OPENAI_AVAILABLE = True
+except ImportError:
+    openai = None
+    OPENAI_AVAILABLE = False
 
 
 class HomeView(TemplateView):
@@ -218,3 +234,167 @@ class TermsOfUseView(TemplateView):
 
 class AccessibilityView(TemplateView):
     template_name = 'core/accessibility.html'
+
+
+def _ensure_chat_session(request):
+    if not request.session.session_key:
+        request.session.save()
+    conversation, _ = ChatbotConversation.objects.get_or_create(
+        session_key=request.session.session_key,
+        defaults={
+            'user': request.user if request.user.is_authenticated else None,
+            'last_message': '',
+            'message_count': 0,
+        }
+    )
+    if request.user.is_authenticated and conversation.user is None:
+        conversation.user = request.user
+        conversation.save(update_fields=['user'])
+    return conversation
+
+
+def _match_faq_reply(message):
+    active_faqs = ChatbotFaq.objects.filter(is_active=True)
+    lower = message.lower()
+    for faq in active_faqs:
+        if faq.question.strip().lower() == lower:
+            return faq.answer, 'faq'
+        for keyword in faq.keyword_list():
+            if keyword and keyword in lower:
+                return faq.answer, 'faq'
+    return None, None
+
+
+def _openai_reply(message, user_name=None):
+    if not OPENAI_AVAILABLE or not settings.OPENAI_API_KEY:
+        return None
+    try:
+        client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
+        system_prompt = (
+            'You are a friendly community assistant for the Nepali Community of Vancouver website. '
+            'Answer politely and conversationally, including greetings and casual chat when appropriate. '
+            'Provide navigation help, event guidance, FAQ support, and volunteer information using site links when available. '
+            'If the user asks about contact, mention /contact/, email rajeshanrai05@gmail.com, and phone +1 (778) 885-1041. '
+            'If the user asks for links, include the correct site paths like /faq/, /programs/, /contact/, or /communities. '
+            'Do not invent unsupported contact details or external phone numbers.'
+        )
+        if user_name:
+            system_prompt += f' Greet the user by name when appropriate: {user_name}.'
+        response = client.chat.completions.create(
+            model='gpt-3.5-turbo',
+            messages=[
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': message},
+            ],
+            max_tokens=260,
+            temperature=0.7,
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as exc:
+        logger.exception('OpenAI reply failed')
+        return None
+
+
+@csrf_exempt
+def chatbot_api(request):
+    """Chatbot API with persistent session storage, FAQ matching, and optional OpenAI integration."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except Exception:
+        payload = {}
+
+    msg = (payload.get('message') or '').strip()
+    msg_type = (payload.get('type') or '').lower()
+    requested_url = payload.get('url')
+    user_name = None
+    if request.user.is_authenticated:
+        user_name = getattr(request.user, 'get_full_name', lambda: '')() or getattr(request.user, 'username', '')
+
+    conversation = _ensure_chat_session(request)
+    if msg:
+        conversation.last_message = msg
+        conversation.message_count = conversation.message_count + 1
+        conversation.save(update_fields=['last_message', 'message_count', 'updated_at'])
+        ChatbotMessage.objects.create(
+            conversation=conversation,
+            role='user',
+            content=msg,
+            source='user',
+        )
+
+    if requested_url and msg:
+        page_label = 'page'
+        if requested_url == '/faq/':
+            page_label = 'FAQs'
+        elif requested_url.startswith('/programs'):
+            page_label = 'upcoming events page'
+        elif requested_url == '/contact/':
+            page_label = 'contact page'
+        elif requested_url.startswith('/communities'):
+            page_label = 'community page'
+        reply = f'Sure, I found the {page_label} for you. Click the button below to open it, or ask me another question.'
+        suggestions = [
+            {'label': 'Open this page', 'url': requested_url, 'goDirect': True},
+            'Ask another question',
+        ]
+        source = 'suggestion'
+    else:
+        msg_lower = msg.lower()
+        if msg_type == 'init':
+            if request.user.is_authenticated:
+                reply = f'Hello {user_name}! I am the Nepali Community Helper - I can help with FAQs, events, joining groups, and more. What can I do for you today?'
+            else:
+                reply = 'Hello! I am the Nepali Community Helper - I can help with FAQs, events, joining groups, and more. What can I do for you today?'
+            suggestions = [
+                {'label': 'Show FAQs', 'url': '/faq/'},
+                {'label': 'Upcoming events', 'url': '/programs/'},
+                'Join a community',
+                {'label': 'Contact support', 'url': '/contact/'},
+            ]
+            source = 'init'
+        else:
+            ai_reply = _openai_reply(msg or 'Hi there, how can I help?', user_name=user_name)
+            if ai_reply:
+                reply = ai_reply
+                suggestions = [
+                    {'label': 'Show FAQs', 'url': '/faq/'},
+                    {'label': 'Upcoming events', 'url': '/programs/'},
+                    {'label': 'Contact support', 'url': '/contact/'},
+                ]
+                source = 'openai'
+            else:
+                faq_reply, faq_source = _match_faq_reply(msg)
+                if faq_reply:
+                    reply = faq_reply
+                    suggestions = [
+                        'Ask another question',
+                        {'label': 'Show FAQs', 'url': '/faq/'},
+                        {'label': 'Contact support', 'url': '/contact/'},
+                    ]
+                    source = faq_source
+                else:
+                    reply = 'I didn\'t quite catch that — the AI service appears to be unavailable right now. Please try again later or visit /contact/ for support.'
+                    suggestions = [
+                        {'label': 'Contact support', 'url': '/contact/'},
+                        {'label': 'Show FAQs', 'url': '/faq/'},
+                        {'label': 'Upcoming events', 'url': '/programs/'},
+                    ]
+                    source = 'fallback'
+
+    ChatbotMessage.objects.create(
+        conversation=conversation,
+        role='bot',
+        content=reply,
+        source=source,
+    )
+
+    response_data = {
+        'reply': reply,
+        'suggestions': suggestions,
+        'conversation_id': conversation.pk,
+        'timestamp': timezone.now().isoformat(),
+    }
+    return JsonResponse(response_data)

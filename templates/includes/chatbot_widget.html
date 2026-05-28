@@ -1,0 +1,24 @@
+{% load static %}
+<div id="site-chatbot" aria-hidden="false">
+    <button id="chatbot-toggle" aria-label="Open chat" class="chatbot-button">
+        <i class="fas fa-robot" aria-hidden="true"></i>
+    </button>
+
+    <div id="chatbot-panel" class="chatbot-panel" role="dialog" aria-label="Community chatbot" aria-hidden="true">
+        <header class="chatbot-header">
+            <div class="chatbot-title"><i class="fas fa-robot" aria-hidden="true"></i> Nepali Community Helper</div>
+            <button id="chatbot-close" aria-label="Close chat" class="chatbot-close">×</button>
+        </header>
+
+        <div class="chatbot-messages" id="chatbot-messages" role="log" aria-live="polite"></div>
+        <div class="chatbot-suggestions" id="chatbot-suggestions" aria-label="Suggested replies"></div>
+
+        <form id="chatbot-form" class="chatbot-form" autocomplete="off">
+            <input id="chatbot-input" name="message" type="text" placeholder="Ask about events, join, or FAQ..." aria-label="Message" />
+            <button type="submit" class="chatbot-send">Send</button>
+        </form>
+    </div>
+
+    <link rel="stylesheet" href="{% static 'chatbot/chatbot.css' %}">
+    <script src="{% static 'chatbot/chatbot.js' %}" defer></script>
+</div>

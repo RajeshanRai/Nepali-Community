@@ -17,7 +17,9 @@
         mobileMenuToggle.classList.add('hamburger-hidden');
         mobileMenuToggle.setAttribute('aria-expanded', 'true');
         navMenu.setAttribute('aria-hidden', 'false');
+        document.documentElement.classList.add('mobile-menu-open');
         document.body.classList.add('mobile-menu-open');
+        document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
 
         const firstLink = navMenu.querySelector('a, button');
@@ -33,7 +35,9 @@
         mobileMenuToggle.classList.remove('hamburger-hidden');
         mobileMenuToggle.setAttribute('aria-expanded', 'false');
         navMenu.setAttribute('aria-hidden', 'true');
+        document.documentElement.classList.remove('mobile-menu-open');
         document.body.classList.remove('mobile-menu-open');
+        document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
 
         // Close all dropdowns except stable ones

@@ -706,6 +706,7 @@ i {
         pointer-events: auto;
     }
 
+    html.mobile-menu-open,
     body.mobile-menu-open {
         overflow: hidden;
     }
@@ -727,6 +728,22 @@ i {
 
     .nav-menu-items {
         padding: 1rem 0.85rem 1.4rem;
+        gap: 0.3rem;
+    }
+
+    .main-navbar #navMenu .nav-item,
+    .main-navbar #navMenu .dropdown>a {
+        color: #111;
+    }
+
+    .main-navbar #navMenu .nav-item:hover,
+    .main-navbar #navMenu .dropdown>a:hover,
+    .main-navbar #navMenu .dropdown-content a:hover {
+        color: var(--color-orange);
+    }
+
+    .main-navbar #navMenu .dropdown-content a {
+        color: #111;
     }
 
     .nav-item,
@@ -785,17 +802,44 @@ i {
 
     /* Sidebar Header */
     .nav-menu-header {
-        background: #000000;
-        padding: 1.5rem 1.25rem;
+        background: transparent;
+        padding: 0.85rem 0.85rem 0 0.85rem;
         display: flex;
         align-items: center;
-        gap: 1rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+        gap: 0.75rem;
+        box-shadow: none;
         position: relative;
         overflow: hidden;
         width: 100%;
         box-sizing: border-box;
         flex: 0 0 auto;
+    }
+
+    .mobile-menu-close {
+        margin-left: auto;
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
+    }
+
+    .mobile-menu-close:hover,
+    .mobile-menu-close:focus-visible {
+        background: rgba(255, 255, 255, 0.16);
+        outline: none;
+    }
+
+    .mobile-menu-close i {
+        font-size: 1rem;
+        line-height: 1;
     }
 
     .nav-menu-header::before {
@@ -823,18 +867,23 @@ i {
         }
     }
 
-    .nav-menu-logo {
+    .nav-menu-brand-badge {
         width: 48px;
         height: 48px;
-        background: rgba(255, 255, 255, 0.2);
+        background: #000000;
+        color: #ffffff;
         border-radius: 12px;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        backdrop-filter: blur(10px);
         animation: pulse 3s ease-in-out infinite;
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-decoration: none;
     }
 
     @keyframes pulse {
@@ -3619,6 +3668,27 @@ section h2::after {
         box-sizing: border-box !important;
         flex: 1 1 auto !important;
         min-height: 0 !important;
+        padding: 1rem 0.85rem 1.4rem !important;
+    }
+
+    .main-navbar #navMenu {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        box-sizing: border-box !important;
+    }
+
+    .main-navbar #navMenu .nav-item,
+    .main-navbar #navMenu .dropdown>a {
+        padding: 1rem 1rem !important;
+    }
+
+    .main-navbar #navMenu .dropdown-content a {
+        padding: 0.9rem 1rem !important;
+    }
+
+    .main-navbar #navMenu .nav-item span {
+        white-space: normal !important;
+        word-break: break-word !important;
     }
 }
 

@@ -10,6 +10,7 @@ urlpatterns = [
     path('search/', views.SearchView.as_view(), name='search'),
     path('sitemap.xml', views.SitemapView.as_view(), name='sitemap'),
     path('rss/', views.RSSFeedView.as_view(), name='rss_feed'),
+    path('chatbot/api/message/', views.chatbot_api, name='chatbot_api'),
     path('admin/dashboard/', views.AdminDashboardView.as_view(), name='admin_dashboard'),
     path('admin/dashboard/stats/', views.dashboard_stats_api, name='admin_dashboard_stats'),
 ]
