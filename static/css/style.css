@@ -707,14 +707,14 @@ i {
     }
 
     body.mobile-menu-open {
-        position: fixed;
-        width: 100%;
         overflow: hidden;
     }
 
     .nav-menu.open {
         left: 0;
         box-shadow: 2px 0 50px rgba(0, 0, 0, 0.2);
+        overflow-y: auto;
+        touch-action: auto;
     }
 
     /* Mobile nav sizing and responsiveness */
