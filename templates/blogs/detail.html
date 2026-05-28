@@ -2,13 +2,26 @@
 {% load static %}
 
 {% block title %}{{ post.title }} - Blog{% endblock %}
+{% block meta_description %}{{ post.excerpt|default:post.content|striptags|truncatechars:160 }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ post.title }} | Nepali Community of Vancouver{% endblock %}
+{% block og_description %}{{ post.excerpt|default:post.content|striptags|truncatechars:200 }}{% endblock %}
+{% block twitter_title %}{{ post.title }} | Nepali Community of Vancouver{% endblock %}
+{% block twitter_description %}{{ post.excerpt|default:post.content|striptags|truncatechars:200 }}{% endblock %}
+{% block og_image %}{% if post.image %}{{ request.scheme }}://{{ request.get_host }}{{ post.image.url }}{% else %}{% static 'images/og-default.jpg' %}{% endif %}{% endblock %}
+{% block twitter_image %}{% if post.image %}{{ request.scheme }}://{{ request.get_host }}{{ post.image.url }}{% else %}{% static 'images/og-default.jpg' %}{% endif %}{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'blogs/css/blogs.css' %}">
+{% if post.image %}
+<meta property="og:image:width" content="{{ post.image.width }}">
+<meta property="og:image:height" content="{{ post.image.height }}">
+<link rel="image_src" href="{{ request.scheme }}://{{ request.get_host }}{{ post.image.url }}">
+{% endif %}
 {% endblock %}
 
 {% block content %}
-<div class="container blog-detail-page">
+<div class="container blog-detail-page" data-blog-detail data-blog-title="{{ post.title|escape }}" data-blog-description="{{ post.excerpt|default:post.content|striptags|truncatechars:200|escape }}" data-blog-url="{{ request.build_absolute_uri }}"{% if post.image %} data-blog-image="{{ request.scheme }}://{{ request.get_host }}{{ post.image.url }}"{% endif %}>
     <a href="{% url 'blog_list' %}" class="detail-back-link">
         <i class="fas fa-arrow-left"></i> Back to Blog
     </a>
@@ -44,7 +57,7 @@
                 <a class="blog-share-btn blog-share-facebook" href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">
                     <i class="fab fa-facebook-f" aria-hidden="true"></i> Facebook
                 </a>
-                <a class="blog-share-btn blog-share-whatsapp" href="https://api.whatsapp.com/send?text={{ post.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">
+                <a class="blog-share-btn blog-share-whatsapp" href="https://api.whatsapp.com/send?text={{ post.title|urlencode }}%0A%0A{{ post.excerpt|default:post.content|striptags|truncatechars:120|urlencode }}%0A%0A{{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">
                     <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp
                 </a>
                 <a class="blog-share-btn blog-share-x" href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri|urlencode }}&text={{ post.title|urlencode }}" target="_blank" rel="noopener noreferrer">
@@ -79,18 +92,21 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const blogDetail = document.querySelector('[data-blog-detail]');
         const copyBtn = document.querySelector('.blog-share-copy');
         const moreBtn = document.getElementById('blogShareMoreBtn');
-        if (!copyBtn) return;
+        if (!blogDetail || !copyBtn) return;
+
+        const blogUrl = blogDetail.dataset.blogUrl || window.location.href;
+        const blogTitle = blogDetail.dataset.blogTitle || document.title;
+        const blogDescription = blogDetail.dataset.blogDescription || 'Read this blog on Nepali Community of Vancouver.';
+        const blogImage = blogDetail.dataset.blogImage || '';
+        const shareText = `${blogTitle ? `*${blogTitle}*\n\n` : ''}${blogImage ? blogImage + '\n\n' : ''}${blogDescription}\n\n${blogUrl}`;
 
         if (moreBtn && navigator.share) {
             moreBtn.style.display = 'inline-flex';
             moreBtn.addEventListener('click', function () {
-                const url = moreBtn.dataset.shareUrl;
-                const title = moreBtn.dataset.shareTitle || document.title;
-                if (!url) return;
-
-                navigator.share({ title: title, url: url }).catch(function () {
+                navigator.share({ title: blogTitle, text: shareText, url: blogUrl }).catch(function () {
                     // If share is cancelled or fails, do nothing.
                 });
             });
@@ -98,23 +114,23 @@
 
         const originalHtml = copyBtn.innerHTML;
         copyBtn.addEventListener('click', function () {
-            const url = copyBtn.dataset.copyUrl;
-            if (!url) return;
+            if (!blogUrl) return;
 
             const setCopied = () => {
                 copyBtn.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i> Copied!';
                 setTimeout(() => { copyBtn.innerHTML = originalHtml; }, 1800);
             };
 
+            const textToCopy = shareText;
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url).then(setCopied).catch(function () { fallbackCopy(); });
+                navigator.clipboard.writeText(textToCopy).then(setCopied).catch(function () { fallbackCopy(); });
             } else {
                 fallbackCopy();
             }
 
             function fallbackCopy() {
                 const textarea = document.createElement('textarea');
-                textarea.value = url;
+                textarea.value = textToCopy;
                 textarea.style.position = 'fixed';
                 textarea.style.opacity = '0';
                 textarea.style.pointerEvents = 'none';

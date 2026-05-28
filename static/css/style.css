@@ -689,6 +689,7 @@ i {
         width: 280px;
         max-width: 85vw;
         height: 100vh;
+        min-height: 100vh;
         max-height: 100vh;
         background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
         flex-direction: column;
@@ -703,6 +704,12 @@ i {
         touch-action: pan-y;
         overscroll-behavior: contain;
         pointer-events: auto;
+    }
+
+    body.mobile-menu-open {
+        position: fixed;
+        width: 100%;
+        overflow: hidden;
     }
 
     .nav-menu.open {
