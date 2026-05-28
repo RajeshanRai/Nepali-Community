@@ -280,19 +280,31 @@
 .blog-detail-content h2,
 .blog-detail-content h3,
 .blog-detail-content h4 {
-    color: #111827;
-    margin-top: 1.8rem;
-    margin-bottom: 0.9rem;
-    line-height: 1.25;
+    color: var(--color-black);
+    margin-top: 1rem;
+    margin-bottom: 0.45rem;
+    line-height: var(--line-height-tight);
 }
 .blog-detail-content h2 {
-    font-size: 1.75rem;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
 }
 .blog-detail-content h3 {
-    font-size: 1.35rem;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-medium);
 }
 .blog-detail-content h4 {
-    font-size: 1.15rem;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+}
+
+@media (max-width: 600px) {
+    .blog-detail-content h2 {
+        font-size: var(--font-size-xl);
+    }
+    .blog-detail-content h3 {
+        font-size: var(--font-size-lg);
+    }
 }
 .blog-detail-content p {
     margin-bottom: 1.3rem;
