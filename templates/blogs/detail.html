@@ -38,6 +38,30 @@
             {{ post.content|safe }}
         </div>
 
+        <div class="blog-share-panel">
+            <span>Share this story</span>
+            <div class="blog-share-buttons">
+                <a class="blog-share-btn blog-share-facebook" href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-facebook-f" aria-hidden="true"></i> Facebook
+                </a>
+                <a class="blog-share-btn blog-share-whatsapp" href="https://api.whatsapp.com/send?text={{ post.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-whatsapp" aria-hidden="true"></i> WhatsApp
+                </a>
+                <a class="blog-share-btn blog-share-x" href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri|urlencode }}&text={{ post.title|urlencode }}" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-twitter" aria-hidden="true"></i> X
+                </a>
+                <a class="blog-share-btn blog-share-linkedin" href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-linkedin-in" aria-hidden="true"></i> LinkedIn
+                </a>
+                <button type="button" class="blog-share-btn blog-share-copy" data-copy-url="{{ request.build_absolute_uri }}">
+                    <i class="fas fa-link" aria-hidden="true"></i> Copy link
+                </button>
+                <button type="button" class="blog-share-btn blog-share-more" id="blogShareMoreBtn" data-share-url="{{ request.build_absolute_uri }}" data-share-title="{{ post.title|escapejs }}" style="display: none;">
+                    <i class="fas fa-share-alt" aria-hidden="true"></i> More
+                </button>
+            </div>
+        </div>
+
         {% if recommended_posts %}
         <aside class="blog-recommended">
             <h2>Blogs you might prefer</h2>
@@ -52,4 +76,55 @@
         {% endif %}
     </article>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const copyBtn = document.querySelector('.blog-share-copy');
+        const moreBtn = document.getElementById('blogShareMoreBtn');
+        if (!copyBtn) return;
+
+        if (moreBtn && navigator.share) {
+            moreBtn.style.display = 'inline-flex';
+            moreBtn.addEventListener('click', function () {
+                const url = moreBtn.dataset.shareUrl;
+                const title = moreBtn.dataset.shareTitle || document.title;
+                if (!url) return;
+
+                navigator.share({ title: title, url: url }).catch(function () {
+                    // If share is cancelled or fails, do nothing.
+                });
+            });
+        }
+
+        const originalHtml = copyBtn.innerHTML;
+        copyBtn.addEventListener('click', function () {
+            const url = copyBtn.dataset.copyUrl;
+            if (!url) return;
+
+            const setCopied = () => {
+                copyBtn.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i> Copied!';
+                setTimeout(() => { copyBtn.innerHTML = originalHtml; }, 1800);
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(setCopied).catch(function () { fallbackCopy(); });
+            } else {
+                fallbackCopy();
+            }
+
+            function fallbackCopy() {
+                const textarea = document.createElement('textarea');
+                textarea.value = url;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                textarea.style.pointerEvents = 'none';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                setCopied();
+            }
+        });
+    });
+</script>
 {% endblock %}

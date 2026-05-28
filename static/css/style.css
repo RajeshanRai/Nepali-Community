@@ -689,6 +689,7 @@ i {
         width: 280px;
         max-width: 85vw;
         height: 100vh;
+        max-height: 100vh;
         background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
         flex-direction: column;
         align-items: stretch;
@@ -699,6 +700,8 @@ i {
         transition: left 0.25s ease, box-shadow 0.25s ease;
         padding: 0;
         -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        overscroll-behavior: contain;
         pointer-events: auto;
     }
 
