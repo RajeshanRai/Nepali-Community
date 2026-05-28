@@ -54,6 +54,10 @@ from dashboard.views_module import (
     announcement_create,
     announcement_edit,
     announcement_delete,
+    blog_posts_list,
+    blog_post_create,
+    blog_post_edit,
+    blog_post_delete,
     
     # FAQ Management
     faqs_list,
@@ -163,6 +167,10 @@ __all__ = [
     'announcement_create',
     'announcement_edit',
     'announcement_delete',
+    'blog_posts_list',
+    'blog_post_create',
+    'blog_post_edit',
+    'blog_post_delete',
     
     # FAQ Management
     'faqs_list',

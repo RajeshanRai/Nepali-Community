@@ -108,6 +108,7 @@ INSTALLED_APPS = [
     'volunteers',
     'announcements',
     'faqs',
+    'blogs',
 ]
 
 # Channels configuration

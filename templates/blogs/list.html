@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Blog - Nepal Community{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'blogs/css/blogs.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container blog-page">
+    <section class="blog-hero">
+        <div class="hero-content">
+            <p class="hero-kicker">Community Stories</p>
+            <h1>Blog</h1>
+            <p>Fresh updates, personal journeys, and community insights from Nepal and beyond. Discover voices that connect, inspire, and empower.</p>
+        </div>
+    </section>
+
+    <section class="blog-grid-section">
+        <div class="section-head">
+            <h2>Explore the Nepal community through thoughtful articles, news, and volunteer experiences.</h2>
+            <p class="section-subhead">Latest stories</p>
+        </div>
+
+        {% if posts %}
+        <div class="blog-list">
+            {% for post in posts %}
+            <article class="blog-card">
+                {% if post.image %}
+                <div class="blog-card-image" style="background-image:url('{{ post.image.url }}')" aria-hidden="true"></div>
+                {% endif %}
+                <div class="blog-card-content">
+                    <div class="blog-card-top">
+                        <h2>{{ post.title }}</h2>
+                        <div class="blog-card-meta">
+                            <span>{{ post.author_name }}</span>
+                            <span>{{ post.published_at|date:'M d, Y' }}</span>
+                            {% if post.address %}
+                            <span>{{ post.address }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <p>{{ post.content|striptags|truncatewords:28 }}</p>
+                    <div class="blog-card-footer">
+                        <a href="{{ post.get_absolute_url }}" class="blog-card-cta">Read full blog <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">Previous</a>
+            {% endif %}
+            <span class="current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="page-link">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h3>No blog posts yet</h3>
+            <p>We are preparing stories for the community. Please check back soon.</p>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

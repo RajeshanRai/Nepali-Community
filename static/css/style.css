@@ -707,6 +707,72 @@ i {
         box-shadow: 2px 0 50px rgba(0, 0, 0, 0.2);
     }
 
+    /* Mobile nav sizing and responsiveness */
+    .nav-menu {
+        width: min(85vw, 340px);
+        max-width: 100%;
+        padding-right: 0.5rem;
+        padding-left: 0;
+    }
+
+    .nav-menu-items {
+        padding: 1rem 0.85rem 1.4rem;
+    }
+
+    .nav-item,
+    .main-navbar a,
+    .main-navbar .dropdown>a,
+    .main-navbar button {
+        font-size: 0.95rem;
+        padding: 0.95rem 1rem;
+    }
+
+    .nav-item span {
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    .main-navbar .dropdown-content a {
+        font-size: 0.95rem;
+        padding: 0.85rem 1rem;
+    }
+
+    @media (max-width: 520px) {
+        .nav-menu {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .nav-menu-header {
+            padding: 1rem 0.9rem;
+        }
+
+        .nav-menu-title h3 {
+            font-size: 1.05rem;
+        }
+
+        .nav-menu-title p {
+            font-size: 0.82rem;
+        }
+
+        .nav-item,
+        .main-navbar a,
+        .main-navbar .dropdown>a,
+        .main-navbar button {
+            padding: 0.9rem 0.95rem;
+            font-size: 0.92rem;
+        }
+
+        .main-navbar .dropdown-content a {
+            padding: 0.75rem 0.9rem;
+            font-size: 0.9rem;
+        }
+
+        .nav-menu-footer {
+            padding: 0.85rem 0.9rem;
+        }
+    }
+
     /* Sidebar Header */
     .nav-menu-header {
         background: #000000;

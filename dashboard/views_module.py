@@ -34,11 +34,12 @@ from partners.models import Partner
 from core.models import TeamMember
 from volunteers.models import VolunteerApplication, VolunteerOpportunity, VolunteerRequest
 from announcements.models import Announcement
+from blogs.models import BlogPost
 from dashboard.models import MemberModerationAction, AdminNotificationState
 from faqs.models import FAQ, FAQCategory
 from .forms import (
     ProgramForm, RequestEventForm, VolunteerOpportunityForm,
-    AnnouncementForm, FAQForm, DonationForm, ContactMessageForm, CommunityForm, PartnerForm, TeamMemberForm,
+    AnnouncementForm, BlogPostForm, FAQForm, DonationForm, ContactMessageForm, CommunityForm, PartnerForm, TeamMemberForm,
     AdminProfileForm, AdminPasswordForm,
 )
 from .utils import (
@@ -1407,6 +1408,73 @@ def announcement_delete(request, pk):
             return redirect('dashboard:announcements_list')
     
     return render(request, 'dashboard/announcements/confirm_delete.html', {'announcement': announcement})
+
+
+# ====== BLOG MANAGEMENT ======
+@user_passes_test(staff_required, login_url='login')
+def blog_posts_list(request):
+    posts = BlogPost.objects.order_by('-published_at')
+    search = request.GET.get('search', '').strip()
+
+    if search:
+        posts = posts.filter(
+            Q(title__icontains=search) |
+            Q(author_name__icontains=search) |
+            Q(address__icontains=search) |
+            Q(content__icontains=search)
+        )
+
+    paginator = Paginator(posts, DASHBOARD_PAGE_SIZE)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'dashboard/blogs/list.html', {
+        'posts': page_obj.object_list,
+        'page_obj': page_obj,
+        'search': search,
+    })
+
+
+@require_http_methods(['GET', 'POST'])
+@user_passes_test(staff_required, login_url='login')
+def blog_post_create(request):
+    if request.method == 'POST':
+        form = BlogPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.save()
+            messages.success(request, 'Blog post created successfully.')
+            return redirect('dashboard:blog_posts_list')
+    else:
+        form = BlogPostForm()
+    return render(request, 'dashboard/blogs/form.html', {'form': form, 'title': 'Create Blog Post'})
+
+
+@require_http_methods(['GET', 'POST'])
+@user_passes_test(staff_required, login_url='login')
+def blog_post_edit(request, pk):
+    post = get_object_or_404(BlogPost, pk=pk)
+    if request.method == 'POST':
+        form = BlogPostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Blog post updated successfully.')
+            return redirect('dashboard:blog_posts_list')
+    else:
+        form = BlogPostForm(instance=post)
+    return render(request, 'dashboard/blogs/form.html', {'form': form, 'post': post, 'title': 'Edit Blog Post'})
+
+
+@user_passes_test(staff_required, login_url='login')
+def blog_post_delete(request, pk):
+    post = get_object_or_404(BlogPost, pk=pk)
+    if request.method == 'POST':
+        title = post.title
+        post.delete()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'message': f'Blog post "{title}" deleted successfully.'})
+        messages.success(request, f'Blog post "{title}" deleted successfully.')
+        return redirect('dashboard:blog_posts_list')
+    return render(request, 'dashboard/blogs/confirm_delete.html', {'post': post})
 
 
 # ====== FAQ MANAGEMENT ======

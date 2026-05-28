@@ -83,6 +83,12 @@ urlpatterns = [
     path('announcements/create/', views.announcement_create, name='announcement_create'),
     path('announcements/<int:pk>/edit/', views.announcement_edit, name='announcement_edit'),
     path('announcements/<int:pk>/delete/', views.announcement_delete, name='announcement_delete'),
+
+    # Blogs
+    path('blogs/', views.blog_posts_list, name='blog_posts_list'),
+    path('blogs/create/', views.blog_post_create, name='blog_post_create'),
+    path('blogs/<int:pk>/edit/', views.blog_post_edit, name='blog_post_edit'),
+    path('blogs/<int:pk>/delete/', views.blog_post_delete, name='blog_post_delete'),
     
     # FAQs
     path('faqs/', views.faqs_list, name='faqs_list'),

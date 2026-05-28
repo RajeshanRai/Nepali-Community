@@ -27,11 +27,21 @@
 }
 
 .announcements-page .search-form {
-    gap: 0.65rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
 }
 
 .announcements-page .search-input-group {
     max-width: 420px;
+    flex: 1 1 320px;
+    min-width: 220px;
+}
+
+.announcements-page .search-form button {
+    white-space: nowrap;
 }
 
 .announcements-page .search-input-group input {
@@ -257,12 +267,19 @@
 
 @media (max-width: 900px) {
     .announcements-page .search-form {
+        display: grid;
+        gap: 0.85rem;
         align-items: stretch;
+        justify-content: stretch;
     }
 
     .announcements-page .search-input-group,
     .announcements-page .form-control-max-250 {
         max-width: 100%;
+    }
+
+    .announcements-page .search-form button {
+        width: 100%;
     }
 }
 

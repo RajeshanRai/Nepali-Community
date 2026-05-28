@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ post.title }} - Blog{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'blogs/css/blogs.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container blog-detail-page">
+    <a href="{% url 'blog_list' %}" class="detail-back-link">
+        <i class="fas fa-arrow-left"></i> Back to Blog
+    </a>
+
+    <article class="blog-detail-card">
+        <div class="blog-detail-hero">
+            {% if post.image %}
+            <div class="blog-detail-hero-image">
+                <img src="{{ post.image.url }}" alt="{{ post.title }}" />
+            </div>
+            {% endif %}
+
+            <div class="blog-detail-hero-copy">
+                <span class="blog-detail-kicker">Featured Story</span>
+                <h1 class="blog-detail-title">{{ post.title }}</h1>
+                <div class="blog-detail-meta">
+                    <span><i class="fas fa-user"></i> {{ post.author_name }}</span>
+                    <span><i class="fas fa-calendar-alt"></i> {{ post.published_at|date:'M d, Y' }}</span>
+                    {% if post.address %}
+                    <span><i class="fas fa-map-marker-alt"></i> {{ post.address }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="blog-detail-content">
+            {{ post.content|safe }}
+        </div>
+
+        {% if recommended_posts %}
+        <aside class="blog-recommended">
+            <h2>Blogs you might prefer</h2>
+            <ul>
+                {% for recommended in recommended_posts %}
+                <li>
+                    <a href="{{ recommended.get_absolute_url }}">{{ recommended.title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </aside>
+        {% endif %}
+    </article>
+</div>
+{% endblock %}

@@ -2,6 +2,7 @@ from django import forms
 from programs.models import Program, RequestEvent
 from volunteers.models import VolunteerOpportunity, VolunteerApplication
 from announcements.models import Announcement
+from blogs.models import BlogPost
 from faqs.models import FAQ, FAQCategory
 from communities.models import Community
 from users.models import CustomUser
@@ -87,6 +88,20 @@ class AnnouncementForm(forms.ModelForm):
             'is_pinned': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'show_on_homepage': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class BlogPostForm(forms.ModelForm):
+    class Meta:
+        model = BlogPost
+        fields = ['title', 'slug', 'author_name', 'address', 'image', 'content']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Blog title'}),
+            'slug': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'blog-slug-for-url'}),
+            'author_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Author name'}),
+            'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Location or affiliation'}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'content': forms.Textarea(attrs={'class': 'form-control d-none', 'rows': 12, 'placeholder': 'Blog body HTML content'}),
         }
 
 

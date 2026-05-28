@@ -1,0 +1,162 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}{% if post %}Edit Blog Post{% else %}Create Blog Post{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/pages/dynamic-form-pattern.css' %}">
+<style>
+.rich-editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: 1rem;
+}
+.rich-editor-toolbar button {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #111827;
+    padding: .65rem .95rem;
+    border-radius: .55rem;
+    cursor: pointer;
+    font-size: .95rem;
+}
+.rich-editor-toolbar button.active,
+.rich-editor-toolbar button:hover {
+    border-color: #3b82f6;
+    color: #1d4ed8;
+}
+.rich-editor {
+    min-height: 300px;
+    border: 1px solid #d1d5db;
+    border-radius: .85rem;
+    padding: 1rem;
+    background: #ffffff;
+    color: #111827;
+    overflow: auto;
+}
+.rich-editor:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+.rich-editor p {
+    margin: 0 0 1rem;
+}
+</style>
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard:blog_posts_list' %}">Blogs</a></li>
+<li class="breadcrumb-item active">{% if post %}Edit{% else %}Create{% endif %}</li>
+{% endblock %}
+
+{% block page_header %}
+<div class="page-header">
+    <div class="page-header-content">
+        <h1><i class="fas fa-newspaper"></i> {% if post %}Edit{% else %}Create{% endif %} Blog Post</h1>
+        <p>{% if post %}Update blog content and formatting{% else %}Write a new blog article for the community{% endif %}</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="dfp-layout">
+    <div class="content-card dfp-main-card">
+        <div class="content-card-body">
+            <form method="POST" enctype="multipart/form-data" class="dfp-form" id="blogForm">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-heading"></i> Blog Details</h3>
+                    <div class="dfp-grid two">
+                        <div class="dfp-field">
+                            <label for="{{ form.title.id_for_label }}" class="dfp-label required">Title</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}<div class="dfp-error">{{ form.title.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.slug.id_for_label }}" class="dfp-label required">Slug</label>
+                            {{ form.slug }}
+                            <small class="dfp-help">Used in the blog URL: /blog/{{ form.slug.value|default:'your-slug' }}</small>
+                            {% if form.slug.errors %}<div class="dfp-error">{{ form.slug.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="dfp-grid two">
+                        <div class="dfp-field">
+                            <label for="{{ form.author_name.id_for_label }}" class="dfp-label required">Author</label>
+                            {{ form.author_name }}
+                            {% if form.author_name.errors %}<div class="dfp-error">{{ form.author_name.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="dfp-field">
+                            <label for="{{ form.address.id_for_label }}" class="dfp-label">Address</label>
+                            {{ form.address }}
+                            {% if form.address.errors %}<div class="dfp-error">{{ form.address.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="dfp-field">
+                        <label for="{{ form.image.id_for_label }}" class="dfp-label">Cover Image</label>
+                        {{ form.image }}
+                        {% if form.image.errors %}<div class="dfp-error">{{ form.image.errors.0 }}</div>{% endif %}
+                    </div>
+                </section>
+
+                <section class="dfp-section">
+                    <h3 class="dfp-section-title"><i class="fas fa-paragraph"></i> Blog Content</h3>
+                    <div class="rich-editor-toolbar" role="toolbar" aria-label="Text formatting options">
+                        <button type="button" data-command="bold"><i class="fas fa-bold"></i> Bold</button>
+                        <button type="button" data-command="justifyLeft"><i class="fas fa-align-left"></i> Left</button>
+                        <button type="button" data-command="justifyCenter"><i class="fas fa-align-center"></i> Center</button>
+                        <button type="button" data-command="justifyRight"><i class="fas fa-align-right"></i> Right</button>
+                        <button type="button" data-command="justifyFull"><i class="fas fa-align-justify"></i> Justify</button>
+                    </div>
+                    {{ form.content }}
+                    <div id="blogEditor" class="rich-editor" contenteditable="true" aria-label="Blog editor">{{ form.content.value|default_if_none:''|safe }}</div>
+                    {% if form.content.errors %}<div class="dfp-error">{{ form.content.errors.0 }}</div>{% endif %}
+                </section>
+
+                <div class="dfp-actions">
+                    <a href="{% url 'dashboard:blog_posts_list' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {% if post %}Update{% else %}Publish{% endif %} Blog Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <aside class="content-card dfp-side-card">
+        <div class="content-card-body">
+            <h3><i class="fas fa-eye"></i> Author Notes</h3>
+            <p>Use the formatting toolbar to apply bold text and align paragraphs exactly as you want them to appear.</p>
+            <ul class="dfp-tips">
+                <li>Click text first, then choose Bold to emphasize headings or key points.</li>
+                <li>Use Justify for paragraphs to make the blog match print-style layout.</li>
+                <li>Keep each paragraph separated by pressing Enter once.</li>
+            </ul>
+        </div>
+    </aside>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const editor = document.getElementById('blogEditor');
+    const textarea = document.getElementById('{{ form.content.id_for_label }}');
+    const form = document.getElementById('blogForm');
+
+    document.querySelectorAll('.rich-editor-toolbar button').forEach(button => {
+        button.addEventListener('click', () => {
+            const command = button.dataset.command;
+            document.execCommand(command, false, null);
+            editor.focus();
+        });
+    });
+
+    form.addEventListener('submit', () => {
+        textarea.value = editor.innerHTML.trim();
+    });
+})();
+</script>
+{% endblock %}

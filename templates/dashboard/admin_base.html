@@ -199,6 +199,10 @@
                     <i class="fas fa-bullhorn"></i>
                     <span>Announcements</span>
                 </a>
+                <a href="{% url 'dashboard:blog_posts_list' %}" data-tooltip="Blogs" class="nav-item {% if 'blogs' in request.path %}active{% endif %}">
+                    <i class="fas fa-newspaper"></i>
+                    <span>Blogs</span>
+                </a>
                 <a href="{% url 'dashboard:faqs_list' %}" data-tooltip="FAQs" class="nav-item">
                     <i class="fas fa-question-circle"></i>
                     <span>FAQs</span>
